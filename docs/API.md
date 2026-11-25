@@ -1,4 +1,4 @@
-﻿# LAN API (for player apps)
+# LAN API (for player apps)
 
 The DM app serves plain JSON on `http://<dm-ip>:8420` (port configurable).
 Reads are open to anyone on the network. Writes require the campaign's join
@@ -8,9 +8,9 @@ code when one is set: header `X-Join-Code: 1234` or `?code=1234`.
 |--------|------|-------|
 | GET | `/` | human status page |
 | GET | `/api/info` | `{app, version, campaign, revision, join_code_required, characters, encounter_active, packs}` |
-| GET | `/api/rules` | skills, PB table, XP table, conditionsâ€¦ |
-| GET | `/api/content` | `{species: n, classes: n, â€¦}` |
-| GET | `/api/content/{kind}` | `[{id, name}]` â€” kind is a folder name (`spells`) |
+| GET | `/api/rules` | skills, PB table, XP table, conditions… |
+| GET | `/api/content` | `{species: n, classes: n, …}` |
+| GET | `/api/content/{kind}` | `[{id, name}]` — kind is a folder name (`spells`) |
 | GET | `/api/content/{kind}/{id}` | full entry, tagged with `"kind"` |
 | GET | `/api/characters` | `[{id, name, player, level, class_line}]` |
 | GET | `/api/characters/{id}` | the character's choices (same shape as the TOML) |
@@ -19,8 +19,8 @@ code when one is set: header `X-Join-Code: 1234` or `?code=1234`.
 | GET | `/api/characters/{id}/sheet` | every derived number: abilities, saves, skills, AC, HP, attacks, spellcasting, features, inventory, trace |
 | GET | `/api/characters/{id}/sheet.html` | printable sheet |
 | GET | `/api/encounter` | player-safe view: visible combatants, positions, conditions, current turn; monster HP only if the DM allows |
-| POST | `/api/roll` | `{"formula": "1d20+5"}` â†’ `{total, rolls}` |
-| GET | `/ws` | WebSocket; sends `{"type":"revision","revision":N}` whenever anything changes â€” then re-fetch what you need |
+| POST | `/api/roll` | `{"formula": "1d20+5"}` → `{total, rolls}` |
+| GET | `/ws` | WebSocket; sends `{"type":"revision","revision":N}` whenever anything changes — then re-fetch what you need |
 
 ## Player-safe views (use these in the player app)
 
@@ -36,7 +36,7 @@ not changed: a hidden ring still gives its +1.
 | GET | `/api/player/characters/{id}` |
 | GET | `/api/player/characters/{id}/sheet` |
 | GET | `/api/player/encounter` (alias of `/api/encounter`) |
-| PATCH | `/api/player/characters/{id}` â€” body is a `PlayerPatch` (any of `hp, death_saves, spells, conditions, exhaustion, inspiration, currency, inventory, notes, appearance, personality, ideals, bonds, flaws, backstory, player, custom`); needs the join code; returns the updated player view. Hidden items and DM notes are preserved server-side; an `inventory` list replaces only the visible items. |
+| PATCH | `/api/player/characters/{id}` — body is a `PlayerPatch` (any of `hp, death_saves, spells, conditions, exhaustion, inspiration, currency, inventory, notes, appearance, personality, ideals, bonds, flaws, backstory, player, custom`); needs the join code; returns the updated player view. Hidden items and DM notes are preserved server-side; an `inventory` list replaces only the visible items. |
 
 ## Who is at the table (devices)
 
@@ -71,8 +71,8 @@ assigned character is the player's own, which they may rebuild).
 
 | method | path | notes |
 |--------|------|-------|
-| GET | `/api/player/builder` | â†’ `{species, classes, subclasses, backgrounds, feats, items, rules, start_level}`: every non-hidden choice, item names (id â†’ name) and the rules tables, enough to build and preview a character offline. |
-| POST | `/api/player/abilities/roll` | body `{device_id}`. The server rolls 4d6-drop-lowest six times, stores the set on the device, writes it to the campaign log and returns the `Seat`. Calling again returns the same set until the DM clears it (â†» on the device's row). 403 while the game is live. |
+| GET | `/api/player/builder` | → `{species, classes, subclasses, backgrounds, feats, items, rules, start_level}`: every non-hidden choice, item names (id → name) and the rules tables, enough to build and preview a character offline. |
+| POST | `/api/player/abilities/roll` | body `{device_id}`. The server rolls 4d6-drop-lowest six times, stores the set on the device, writes it to the campaign log and returns the `Seat`. Calling again returns the same set until the DM clears it (↻ on the device's row). 403 while the game is live. |
 | POST | `/api/player/characters` | body `{device_id, character, gear}`; needs the join code and a registered device. 403 while the game is live, 409 if the DM assigned this device its character, 400 with a readable reason if a choice is not legal. Returns 201 and the new `Seat`; the character is assigned to the device. If the device already plays a character it made, that one is replaced. |
 
 The server keeps only what a player may choose: name, species, one class at
@@ -85,11 +85,10 @@ exactly the set the server rolled for that device. Modifiers, extra items,
 XP, HP overrides and DM notes in the upload are dropped.
 
 Starting gear comes from the class's and background's `starting_equipment`
-lines, in that order. In a line with an "or", " or " and commas separate the options ("A, B or C")
-and "+" or "and" join the things in one option; a line without "or" is a
-list you get all of; `gear[i]` picks the option
+lines, in that order. In a line, " or " separates the options and "+",
+"and" or commas separate the things in an option; `gear[i]` picks the option
 of line `i` (0 = first). Words that match an item id or name become that
-item ("20 arrows" â†’ 20 Ã— `arrow`), "10 gp" becomes money, and anything else
+item ("20 arrows" → 20 × `arrow`), "10 gp" becomes money, and anything else
 is kept as a free-text item for the DM to settle.
 
 `POST /api/characters` and `PUT /api/characters/{id}` (which take a whole
@@ -102,11 +101,11 @@ while it is empty.
 
 | method | path | body |
 |--------|------|------|
-| POST | `/api/dm/characters/{id}/inventory` | `{item, qty?, hidden?, custom?, name?, notes?, dm_notes?}` â†’ `{index}` |
+| POST | `/api/dm/characters/{id}/inventory` | `{item, qty?, hidden?, custom?, name?, notes?, dm_notes?}` → `{index}` |
 | PATCH | `/api/dm/characters/{id}/inventory/{index}` | any of `{hidden, qty, equipped, attuned, notes, dm_notes}` |
 | DELETE | `/api/dm/characters/{id}/inventory/{index}` | |
-| GET | `/api/dm/devices` | â†’ `[{id, name, character, online, last_seen}]` |
-| PUT | `/api/dm/devices/{id}` | `{character: "<id>"}` assigns, `{character: null}` unassigns â†’ `Seat` |
+| GET | `/api/dm/devices` | → `[{id, name, character, online, last_seen}]` |
+| PUT | `/api/dm/devices/{id}` | `{character: "<id>"}` assigns, `{character: null}` unassigns → `Seat` |
 | DELETE | `/api/dm/devices/{id}` | forget the device |
 
 All JSON mirrors the TOML files one to one (same field names), so a player

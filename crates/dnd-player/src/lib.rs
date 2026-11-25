@@ -4,6 +4,7 @@
 
 pub mod app;
 pub mod client;
+pub mod shot;
 pub mod store;
 pub mod theme;
 pub mod ui;

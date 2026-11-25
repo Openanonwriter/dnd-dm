@@ -23,6 +23,7 @@ pub fn builder_options(lib: &Library, start_level: u32) -> BuilderOptions {
         items: item_names(lib),
         rules: lib.rules.clone(),
         start_level: start_level.clamp(1, 20),
+        spells: lib.spells.values().filter(|s| !s.hidden).cloned().collect(),
     }
 }
 
@@ -50,6 +51,9 @@ pub fn library_from_options(o: &BuilderOptions) -> Library {
     }
     for f in &o.feats {
         lib.insert(Entry::Feat(f.clone()), None);
+    }
+    for s in &o.spells {
+        lib.insert(Entry::Spell(s.clone()), None);
     }
     lib
 }
@@ -369,6 +373,17 @@ pub fn prepare_player_character(lib: &Library, campaign: &Campaign, player: &str
     ch.backstory = clean_text(&up.backstory, TEXT_LIMIT);
     ch.notes = clean_text(&up.notes, TEXT_LIMIT);
     ch.hp.current = crate::sheet::derive(&ch, lib).hp_max;
+    // spells: the ones the class lets them learn, then what they prepared
+    crate::play::choose_spells(lib, &mut ch, &up.spells.known, false)?;
+    let sheet = crate::sheet::derive(&ch, lib);
+    let available = crate::play::spells_available(lib, &ch, &sheet);
+    let room: i32 = sheet.spellcasting.iter().filter_map(|b| b.prepared_max).sum();
+    for p in &up.spells.prepared {
+        let leveled = lib.spells.get(p).map(|s| s.level > 0).unwrap_or(false);
+        if leveled && available.contains(p) && !ch.spells.prepared.contains(p) && (ch.spells.prepared.len() as i32) < room {
+            ch.spells.prepared.push(p.clone());
+        }
+    }
     Ok(ch)
 }
 

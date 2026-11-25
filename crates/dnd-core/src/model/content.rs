@@ -125,6 +125,16 @@ pub struct Spellcasting {
     /// Which spell list ids this class may pick from (defaults to its own id).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub spell_lists: Vec<String>,
+    /// Spellbook casters (wizard): spells in the book at 1st level, and how
+    /// many more are added at each level after. 0 = no spellbook.
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub spellbook_start: u32,
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub spellbook_per_level: u32,
+}
+
+fn is_zero_u32(v: &u32) -> bool {
+    *v == 0
 }
 
 fn full() -> String {
@@ -392,6 +402,15 @@ pub struct Spell {
     pub save: String,
     #[serde(default)]
     pub attack: bool,
+    /// With `save`: a successful save halves the damage instead of avoiding it.
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub save_half: bool,
+    /// Extra damage or healing per slot level above the spell's own, e.g. "1d6".
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub upcast: String,
+    /// Healing formula; `mod` is the caster's spellcasting modifier.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub heal: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     /// Hidden from player apps (DM-only content).

@@ -50,6 +50,15 @@ pub struct SpellcastingBlock {
     pub cantrips_known: u32,
     pub spells_known: Option<u32>,
     pub progression: String,
+    /// How many spells of 1st level or higher the character may have chosen
+    /// (known casters and spellbooks). None = prepares from the whole class list.
+    #[serde(default)]
+    pub spell_limit: Option<u32>,
+    /// Highest spell level this class can cast now.
+    #[serde(default)]
+    pub max_spell_level: u32,
+    #[serde(default)]
+    pub ability_mod: i32,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
@@ -802,6 +811,14 @@ impl<'a> Engine<'a> {
                 None => continue,
             };
             let lvl = cl.level;
+            // caster level as if this were the only class: what it can learn
+            let own_level = match sc.progression.as_str() {
+                "full" => lvl,
+                "half" if lvl >= 2 => lvl.div_ceil(2),
+                "third" if lvl >= 3 => lvl.div_ceil(3),
+                _ => 0,
+            };
+            let mut max_spell_level = rules.full_caster_slots(own_level).iter().rposition(|n| *n > 0).map(|i| i as u32 + 1).unwrap_or(0);
             match sc.progression.as_str() {
                 "full" => caster_level += lvl,
                 "half" => {
@@ -818,7 +835,11 @@ impl<'a> Engine<'a> {
                         lvl / 3
                     }
                 }
-                "pact" => pact_level += lvl,
+                "pact" => {
+                    pact_level += lvl;
+                    let idx = (lvl.max(1) as usize - 1).min(rules.pact_slots.len().saturating_sub(1));
+                    max_spell_level = rules.pact_slots.get(idx).map(|p| p.1).unwrap_or(0);
+                }
                 _ => {}
             }
             let abil = norm(&sc.ability);
@@ -839,6 +860,13 @@ impl<'a> Engine<'a> {
             let idx = (lvl.max(1) - 1) as usize;
             let cantrips = sc.cantrips_known.get(idx).copied().unwrap_or(0);
             let known = sc.spells_known.get(idx).copied();
+            let spell_limit = if !sc.spells_known.is_empty() {
+                Some(known.unwrap_or(0))
+            } else if sc.spellbook_start > 0 {
+                Some(sc.spellbook_start + sc.spellbook_per_level * (lvl.max(1) - 1))
+            } else {
+                None
+            };
             self.sheet.spellcasting.push(SpellcastingBlock {
                 class: class.id.clone(),
                 class_name: class.name.clone(),
@@ -849,6 +877,9 @@ impl<'a> Engine<'a> {
                 cantrips_known: cantrips,
                 spells_known: known,
                 progression: sc.progression.clone(),
+                spell_limit,
+                max_spell_level,
+                ability_mod: amod,
             });
         }
         self.sheet.spell_slots = rules.full_caster_slots(caster_level);

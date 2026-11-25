@@ -153,6 +153,12 @@ fn router(world: SharedWorld) -> Router {
         .route("/api/player/map/move", post(player_map_move))
         .route("/api/player/map/door", post(player_map_door))
         .route("/api/player/abilities/roll", post(player_roll_abilities))
+        .route("/api/player/table", get(player_table))
+        .route("/api/player/spells", get(player_spell_list).post(player_spells_choose))
+        .route("/api/player/roll", post(player_table_roll))
+        .route("/api/player/attack", post(player_attack))
+        .route("/api/player/cast", post(player_cast))
+        .route("/api/player/do", post(player_do))
         .route("/api/player/characters", post(player_character_create))
         .route("/api/dm/devices", get(dm_devices))
         .route("/api/dm/devices/{id}", axum::routing::put(dm_device_assign).delete(dm_device_forget))
@@ -464,6 +470,7 @@ async fn player_character_patch(
     let Some(ch) = w.campaign.character_mut(&id) else { return err(StatusCode::NOT_FOUND, "no such character") };
     ch.apply_player_patch(patch);
     let view = ch.player_view();
+    w.sync_combatant_from_pc(&id);
     w.touch();
     Json(view).into_response()
 }
@@ -786,6 +793,113 @@ async fn player_map_door(State(st): State<AppState>, headers: HeaderMap, Query(q
 }
 
 /// Species, classes, backgrounds and rules tables for the app's character builder.
+// ------------------------------------------------------------------ playing
+
+/// The id of the character this device plays, after the usual checks.
+fn seated(w: &mut World, headers: &HeaderMap, q: &HashMap<String, String>, device_id: &str) -> Result<String, Response> {
+    if !authorized(w, headers, q) {
+        return Err(err(StatusCode::UNAUTHORIZED, "join code required"));
+    }
+    w.seen(device_id);
+    match w.campaign.device_character(device_id) {
+        Some(c) => Ok(c.id.clone()),
+        None => Err(err(StatusCode::FORBIDDEN, "the DM has not given you a character yet")),
+    }
+}
+
+fn played(r: Result<dnd_core::play::ActionResult, String>) -> Response {
+    match r {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => err(StatusCode::CONFLICT, e),
+    }
+}
+
+/// What has happened at the table lately (rolls, attacks, turns).
+async fn player_table(State(st): State<AppState>) -> Json<Vec<TableEntry>> {
+    let w = st.world.read().unwrap();
+    let t = &w.campaign.table;
+    Json(t[t.len().saturating_sub(60)..].to_vec())
+}
+
+/// Every spell players may read.
+async fn player_spell_list(State(st): State<AppState>) -> Json<Vec<Spell>> {
+    let w = st.world.read().unwrap();
+    Json(w.library.spells.values().filter(|s| !s.hidden).cloned().collect())
+}
+
+/// A player picks the spells their character knows.
+async fn player_spells_choose(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<SpellsReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    let id = match seated(&mut w, &headers, &q, &req.device_id) {
+        Ok(id) => id,
+        Err(r) => return r,
+    };
+    let w = &mut *w;
+    let live = w.campaign.settings.game_live;
+    let Some(ch) = w.campaign.characters.iter_mut().find(|c| c.id == id) else { return err(StatusCode::NOT_FOUND, "no such character") };
+    let before = ch.spells.known.len();
+    if let Err(e) = dnd_core::play::choose_spells(&w.library, ch, &req.known, live) {
+        return err(StatusCode::CONFLICT, e);
+    }
+    let view = ch.player_view();
+    let (name, now) = (ch.name.clone(), ch.spells.known.len());
+    if now != before {
+        w.campaign.log(format!("{name} now knows {now} spells (was {before})"));
+    }
+    w.touch();
+    Json(view).into_response()
+}
+
+async fn player_table_roll(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<TableRollReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    let id = match seated(&mut w, &headers, &q, &req.device_id) {
+        Ok(id) => id,
+        Err(r) => return r,
+    };
+    if req.formula.len() > 80 || req.label.len() > 60 {
+        return err(StatusCode::BAD_REQUEST, "that roll is too long");
+    }
+    let name = w.campaign.character(&id).map(|c| c.name.clone()).unwrap_or_default();
+    played(w.table_roll(&name, &req.formula, &req.label, req.mode))
+}
+
+async fn player_attack(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<AttackReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    let id = match seated(&mut w, &headers, &q, &req.device_id) {
+        Ok(id) => id,
+        Err(r) => return r,
+    };
+    played(w.pc_attack(&id, req.attack, &req.target, req.mode))
+}
+
+async fn player_cast(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<CastReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    let id = match seated(&mut w, &headers, &q, &req.device_id) {
+        Ok(id) => id,
+        Err(r) => return r,
+    };
+    played(w.pc_cast(&id, &req.spell, req.slot, &req.targets, req.mode))
+}
+
+/// End of turn, rests, hit dice, death saves.
+async fn player_do(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<DoReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    let id = match seated(&mut w, &headers, &q, &req.device_id) {
+        Ok(id) => id,
+        Err(r) => return r,
+    };
+    let done = |text: &str| Ok(dnd_core::play::ActionResult { text: text.to_string(), ..Default::default() });
+    let r = match req.action.as_str() {
+        "end_turn" => w.end_turn(&id).and_then(|_| done("turn ended")),
+        "short_rest" => w.rest(&id, false).and_then(|_| done("short rest")),
+        "long_rest" => w.rest(&id, true).and_then(|_| done("long rest")),
+        "hit_die" => w.spend_hit_die(&id, &req.arg),
+        "death_save" => w.death_save(&id),
+        _ => Err(format!("unknown action '{}'", req.action)),
+    };
+    played(r)
+}
+
 async fn player_builder(State(st): State<AppState>) -> Json<BuilderOptions> {
     let w = st.world.read().unwrap();
     Json(dnd_core::builder::builder_options(&w.library, w.campaign.settings.player_start_level))

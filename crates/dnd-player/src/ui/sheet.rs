@@ -30,8 +30,16 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 }
             });
         });
-        if !app.status.is_empty() && app.status_at.elapsed().as_secs() < 6 {
+        if !app.status.is_empty() && app.status_at.elapsed().as_secs() < 12 {
             ui.colored_label(if app.status_error { theme::BAD } else { theme::GOOD }, egui::RichText::new(&app.status).small());
+        }
+        if app.my_turn() && app.tab != Tab::Combat {
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new("▶ Your turn").strong().color(theme::ORANGE));
+                if ui.small_button("End turn").clicked() {
+                    app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
+                }
+            });
         }
     });
 
@@ -75,7 +83,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
-            Tab::Spells => spells_tab(app, ui),
+            Tab::Spells => crate::ui::spells::tab(app, ui),
             Tab::Items => items_tab(app, ui),
             Tab::Notes => notes_tab(app, ui),
             Tab::Party => {}
@@ -145,7 +153,6 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         for (name, b) in save_rolls {
             if ui.small_button(format!("🎲 {}", &name[..3])).clicked() {
                 app.roll(&format!("1d20 {}", signed(b)), &format!("{name} save"));
-                app.tab = Tab::Dice;
             }
         }
     });
@@ -159,7 +166,6 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.small_button(egui::RichText::new(bonus(sk.bonus)).strong()).clicked() || r.clicked() {
                     app.roll(&format!("1d20 {}", signed(sk.bonus)), &sk.name);
-                    app.tab = Tab::Dice;
                 }
                 if !sk.notes.is_empty() {
                     ui.label(theme::muted(sk.notes.join("; ")).small());
@@ -193,6 +199,7 @@ fn signed(b: i32) -> String {
 
 fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let hp_max = app.sheet.as_ref().map(|s| s.hp_max).unwrap_or(1);
+    let mut death_save = false;
     let Some(ch) = app.character.as_mut() else { return };
     theme::card_hi().show(ui, |ui| {
         ui.set_width(ui.available_width());
@@ -226,7 +233,7 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 });
             });
         });
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.label(theme::muted("Amount"));
             ui.add(egui::DragValue::new(&mut app.ui_state.damage_amount).range(0..=999));
             if ui.button("💥 Damage").clicked() {
@@ -239,25 +246,37 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 ch.hp.temp = ch.hp.temp.max(app.ui_state.damage_amount);
             }
         });
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing.x = 3.0;
             ui.label(theme::muted("Death saves"));
-            ui.label("✓");
+            ui.label(egui::RichText::new("pass").small().color(theme::GOOD));
             for i in 0..3 {
                 let mut on = ch.death_saves.successes > i;
                 if ui.checkbox(&mut on, "").changed() {
                     ch.death_saves.successes = if on { i + 1 } else { i };
                 }
             }
-            ui.label("✗");
+            ui.label(egui::RichText::new(" fail").small().color(theme::BAD));
             for i in 0..3 {
                 let mut on = ch.death_saves.failures > i;
                 if ui.checkbox(&mut on, "").changed() {
                     ch.death_saves.failures = if on { i + 1 } else { i };
                 }
             }
+        });
+        ui.horizontal_wrapped(|ui| {
             ui.checkbox(&mut ch.inspiration, "Inspiration");
         });
+        if ch.hp.current <= 0 && ch.death_saves.failures < 3 {
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new("You are down.").color(theme::BAD).strong());
+                death_save = ui.add(theme::primary("Roll death save")).clicked();
+            });
+        }
     });
+    if death_save {
+        app.act(Cmd::Do { action: "death_save".into(), arg: String::new() });
+    }
 }
 
 fn apply_damage(ch: &mut Character, amt: i32) {
@@ -273,28 +292,81 @@ fn apply_damage(ch: &mut Character, amt: i32) {
 fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let s = sheet(app);
     hp_block(app, ui);
-    section(ui, "Attacks");
-    let attacks = s.attacks.clone();
-    for a in attacks {
-        theme::card().show(ui, |ui| {
+    if app.my_turn() {
+        theme::card_hi().show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.label(egui::RichText::new(&a.name).strong().size(17.0));
-                    ui.label(theme::muted(format!("{} {} · {}{}", a.damage, a.damage_type, a.range, if a.notes.is_empty() { String::new() } else { format!(" · {}", a.notes.join("; ")) })).small());
-                });
+                ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.add(theme::primary(&format!("Hit {}", bonus(a.bonus)))).clicked() {
-                        app.roll(&format!("1d20 {}", signed(a.bonus)), &format!("{} attack", a.name));
-                        app.tab = Tab::Dice;
-                    }
-                    if ui.add(theme::big_button("Dmg")).clicked() {
-                        app.roll(&a.damage, &format!("{} damage", a.name));
-                        app.tab = Tab::Dice;
+                    if ui.add(theme::primary("End turn")).clicked() {
+                        app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
                     }
                 });
             });
         });
+    }
+    section(ui, "Attacks");
+    crate::ui::spells::mode_row(app, ui);
+    crate::ui::spells::target_row(app, ui);
+    let target = app.targets.first().cloned();
+    if target.is_none() && app.encounter.as_ref().map(|e| !e.combatants.is_empty()).unwrap_or(false) {
+        ui.label(theme::muted("Pick a target and the attack is rolled against it. Without one you just roll the dice.").small());
+    }
+    let attacks = s.attacks.clone();
+    for (i, a) in attacks.into_iter().enumerate() {
+        theme::card().show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.horizontal(|ui| {
+                ui.vertical(|ui| {
+                    ui.set_max_width((ui.available_width() - 150.0).max(120.0));
+                    ui.label(egui::RichText::new(&a.name).strong().size(17.0));
+                    ui.label(theme::muted(format!("{} to hit · {} {} · {}{}", bonus(a.bonus), a.damage, a.damage_type, a.range, if a.notes.is_empty() { String::new() } else { format!(" · {}", a.notes.join("; ")) })).small());
+                });
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if let Some(t) = &target {
+                        if ui.add(theme::primary("Attack")).clicked() {
+                            let mode = app.mode;
+                            app.act(Cmd::Attack { attack: i, target: t.clone(), mode });
+                        }
+                    } else {
+                        if ui.add(theme::primary(&format!("Hit {}", bonus(a.bonus)))).clicked() {
+                            app.roll(&format!("1d20 {}", signed(a.bonus)), &format!("{} attack", a.name));
+                        }
+                        if ui.add(theme::big_button("Dmg")).clicked() {
+                            app.roll(&a.damage, &format!("{} damage", a.name));
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // ---- features that run out
+    let limited: Vec<(String, u32, String)> = s.features.iter().filter_map(|f| f.uses.filter(|u| *u > 0).map(|u| (f.name.clone(), u as u32, f.recharge.replace('_', " ")))).collect();
+    if !limited.is_empty() {
+        section(ui, "Limited uses");
+        if let Some(ch) = app.character.as_mut() {
+            for (name, max, recharge) in &limited {
+                ui.horizontal(|ui| {
+                    let used = ch.uses.get(name).copied().unwrap_or(0).min(*max);
+                    for k in 0..*max {
+                        let spent = k < used;
+                        if ui.add(egui::Button::new(egui::RichText::new(if spent { "○" } else { "⏺" }).size(22.0).color(if spent { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
+                            let now = if spent { k } else { k + 1 };
+                            if now == 0 {
+                                ch.uses.remove(name);
+                            } else {
+                                ch.uses.insert(name.clone(), now);
+                            }
+                        }
+                    }
+                    ui.label(name);
+                    if !recharge.is_empty() {
+                        ui.label(theme::muted(format!("back after a {recharge}")).small());
+                    }
+                });
+            }
+        }
     }
 
     section(ui, "Conditions");
@@ -317,103 +389,35 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.label(theme::muted("Exhaustion"));
             ui.add(egui::DragValue::new(&mut ch.exhaustion).range(0..=6));
         });
-        section(ui, "Hit dice");
+    }
+
+    section(ui, "Rest");
+    let mut todo: Option<(&str, String)> = None;
+    let online = app.online;
+    if let Some(ch) = app.character.as_ref() {
         ui.horizontal_wrapped(|ui| {
             for (d, n) in &s.hit_dice {
-                let used = ch.hp.hit_dice_used.entry(d.clone()).or_insert(0);
-                ui.label(format!("{d}: {} of {n} left", n.saturating_sub(*used)));
-                if ui.add_enabled(*used < *n, egui::Button::new("Spend")).clicked() {
-                    *used += 1;
+                let used = ch.hp.hit_dice_used.get(d).copied().unwrap_or(0);
+                ui.label(format!("{d} hit dice: {} of {n}", n.saturating_sub(used)));
+                if ui.add_enabled(online && used < *n && ch.hp.current < s.hp_max, egui::Button::new(format!("Spend a {d}"))).on_hover_text("During a short rest: roll it, add Constitution, heal that much").clicked() {
+                    todo = Some(("hit_die", d.clone()));
                 }
             }
         });
         ui.horizontal(|ui| {
-            if ui.button("Short rest").clicked() {
-                // nothing automatic besides nothing; players spend dice above
+            if ui.add_enabled(online, egui::Button::new("☕ Short rest")).clicked() {
+                todo = Some(("short_rest", String::new()));
             }
-            if ui.button("Long rest").clicked() {
-                ch.hp.current = s.hp_max;
-                ch.hp.temp = 0;
-                ch.spells.slots_used = vec![0; 9];
-                ch.spells.pact_slots_used = 0;
-                ch.death_saves = Default::default();
-                let half: Vec<(String, u32)> = s.hit_dice.iter().map(|(d, n)| (d.clone(), (*n).div_ceil(2))).collect();
-                for (d, regain) in half {
-                    if let Some(u) = ch.hp.hit_dice_used.get_mut(&d) {
-                        *u = u.saturating_sub(regain);
-                    }
-                }
+            if ui.add_enabled(online, egui::Button::new("🌙 Long rest")).on_hover_text("Full hit points, all spell slots, half your hit dice").clicked() {
+                todo = Some(("long_rest", String::new()));
             }
         });
-    }
-}
-
-// ------------------------------------------------------------------ Spells
-
-fn spells_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
-    let s = sheet(app);
-    if s.spellcasting.is_empty() {
-        ui.label(theme::muted("No spellcasting on this character."));
-        return;
-    }
-    for sc in &s.spellcasting {
-        tiles_row(
-            ui,
-            &[
-                (&sc.class_name, sc.ability.to_uppercase(), "ability".into()),
-                ("Attack", bonus(sc.attack_bonus), String::new()),
-                ("Save DC", sc.save_dc.to_string(), String::new()),
-                ("Prepare", sc.prepared_max.map(|p| p.to_string()).unwrap_or("—".into()), String::new()),
-            ],
-        );
-    }
-    let Some(ch) = app.character.as_mut() else { return };
-    section(ui, "Spell slots (tap to spend / restore)");
-    ch.spells.slots_used.resize(9, 0);
-    for (i, n) in s.spell_slots.iter().enumerate() {
-        if *n == 0 {
-            continue;
+        if !online {
+            ui.label(theme::muted("Rests are taken with the DM: connect first.").small());
         }
-        ui.horizontal(|ui| {
-            ui.label(egui::RichText::new(format!("L{}", i + 1)).strong());
-            for k in 0..*n {
-                let used = k < ch.spells.slots_used[i];
-                let txt = if used { "○" } else { "⏺" };
-                if ui.add(egui::Button::new(egui::RichText::new(txt).size(22.0).color(if used { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
-                    ch.spells.slots_used[i] = if used { k } else { k + 1 };
-                }
-            }
-        });
     }
-    if let Some((n, l)) = s.pact_slots {
-        ui.horizontal(|ui| {
-            ui.label(egui::RichText::new(format!("Pact L{l}")).strong());
-            for k in 0..n {
-                let used = k < ch.spells.pact_slots_used;
-                if ui.add(egui::Button::new(egui::RichText::new(if used { "○" } else { "⏺" }).size(22.0).color(if used { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
-                    ch.spells.pact_slots_used = if used { k } else { k + 1 };
-                }
-            }
-        });
-    }
-    section(ui, "Spells");
-    ui.label(theme::muted("Known and prepared spells are managed on the DM's sheet; tap a spell to toggle prepared.").small());
-    let mut known = ch.spells.known.clone();
-    known.sort();
-    for id in known {
-        let prepared = ch.spells.prepared.contains(&id);
-        let label = id.replace('_', " ");
-        ui.horizontal(|ui| {
-            let mut p = prepared;
-            if ui.checkbox(&mut p, "").changed() {
-                if p {
-                    ch.spells.prepared.push(id.clone());
-                } else {
-                    ch.spells.prepared.retain(|x| x != &id);
-                }
-            }
-            ui.label(if prepared { egui::RichText::new(label).strong() } else { theme::muted(label) });
-        });
+    if let Some((action, arg)) = todo {
+        app.act(Cmd::Do { action: action.into(), arg });
     }
 }
 
@@ -538,10 +542,28 @@ fn dice_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             app.dice_log.clear();
         }
     });
-    section(ui, "Results");
-    for (i, l) in app.dice_log.iter().enumerate() {
-        let big = i == 0;
-        ui.label(egui::RichText::new(l).monospace().size(if big { 20.0 } else { 14.0 }).color(if big { theme::ORANGE } else { theme::TEXT }));
+    crate::ui::spells::mode_row(app, ui);
+    if let Some(l) = app.dice_log.first() {
+        section(ui, "Your last roll");
+        ui.label(egui::RichText::new(l).size(19.0).color(theme::ORANGE));
+    }
+    if !app.table.is_empty() {
+        section(ui, "At the table");
+        let me = app.character.as_ref().map(|c| c.name.clone()).unwrap_or_default();
+        for e in app.table.iter().rev().take(40) {
+            ui.horizontal_wrapped(|ui| {
+                ui.label(theme::muted(&e.time).small());
+                if !e.who.is_empty() {
+                    ui.label(egui::RichText::new(&e.who).strong().color(if e.who == me { theme::ORANGE } else { theme::PC_BLUE }));
+                }
+                ui.label(if e.kind == "turn" { theme::muted(&e.text) } else { egui::RichText::new(&e.text) });
+            });
+        }
+    } else if app.dice_log.len() > 1 {
+        section(ui, "Earlier");
+        for l in app.dice_log.iter().skip(1) {
+            ui.label(egui::RichText::new(l).monospace().size(14.0));
+        }
     }
 }
 

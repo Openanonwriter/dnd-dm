@@ -183,6 +183,21 @@ pub struct LogEntry {
     pub text: String,
 }
 
+/// One line of what everyone at the table sees happen: rolls, attacks,
+/// spells, whose turn it is. Never holds anything only the DM may know.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct TableEntry {
+    pub seq: u64,
+    pub time: String,
+    /// Who did it (a character or creature name; empty = the game itself).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub who: String,
+    pub text: String,
+    /// roll, attack, spell, turn, rest, info
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub kind: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct CampaignSettings {
     #[serde(default)]
@@ -214,6 +229,10 @@ pub struct CampaignSettings {
     /// How far a player may walk a token in one go, in feet (0 = their speed).
     #[serde(default)]
     pub player_move_limit: u32,
+    /// Attacks and spells players make from their app change the target's
+    /// hit points straight away (off = they only roll; the DM applies it).
+    #[serde(default = "yes")]
+    pub players_apply_damage: bool,
 }
 
 fn default_start_level() -> u32 {
@@ -237,6 +256,7 @@ impl Default for CampaignSettings {
             player_start_level: 1,
             players_move_tokens: true,
             player_move_limit: 0,
+            players_apply_damage: true,
         }
     }
 }
@@ -279,6 +299,9 @@ pub struct Campaign {
     pub map: MapState,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub log: Vec<LogEntry>,
+    /// What happened at the table, newest last (the last few hundred lines).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub table: Vec<TableEntry>,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub notes: String,
     /// In-game calendar / clock, free text.
@@ -303,6 +326,17 @@ impl Campaign {
     }
     pub fn log(&mut self, text: impl Into<String>) {
         self.log.push(LogEntry { time: chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string(), text: text.into() });
+    }
+    /// Tell the whole table something (also kept in the DM's log).
+    pub fn say(&mut self, who: &str, text: impl Into<String>, kind: &str) {
+        let text = text.into();
+        let seq = self.table.last().map(|e| e.seq + 1).unwrap_or(1);
+        self.log(if who.is_empty() { text.clone() } else { format!("{who}: {text}") });
+        self.table.push(TableEntry { seq, time: chrono::Local::now().format("%H:%M").to_string(), who: who.to_string(), text, kind: kind.to_string() });
+        if self.table.len() > 300 {
+            let cut = self.table.len() - 300;
+            self.table.drain(..cut);
+        }
     }
     pub fn character(&self, id: &str) -> Option<&super::Character> {
         self.characters.iter().find(|c| c.id == id)

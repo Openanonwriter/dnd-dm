@@ -122,3 +122,24 @@ See `docs/MAPS.md`. `GET /api/encounter` no longer carries the map's content
 | GET | `/api/player/map?device=<device_id>` | → `MapView`: what that device's character may know. `cells` (terrain rows, `?` = never seen), `seen` (`0` never, `1` remembered, `2` in view), `light` (`0` dark, `1` dim, `2` bright), `walls`, `lights`, `props`, `markers`, `tokens` (`mine` = this player may move it). Without a device, the whole party's view. |
 | POST | `/api/player/map/move` | body `{device_id, x, y}`; needs the join code. Walks the device's own character there. 409 with the reason when there is no way, it is too far or someone is standing there; 403 when it is not their turn. → `{feet, map}`. |
 | POST | `/api/player/map/door` | body `{device_id, x, y}` (a point in squares). Opens or closes the door nearest that point if the character is next to it and it is not locked. → `{feet: 0, map}`. |
+
+## Playing (rolls, attacks, spells, turns)
+
+Everything here needs the join code and a `device_id` that has a character.
+The dice are rolled on the server. `mode` is `normal`, `advantage` or
+`disadvantage`. Each call answers `{text, hit, total, damage}` and adds a
+line to the table feed; a refusal is 409 with the reason.
+
+| method | path | notes |
+|--------|------|-------|
+| GET | `/api/player/table` | → the last 60 `TableEntry` `{seq, time, who, text, kind}`: what everyone at the table has seen happen. `kind` is `roll`, `attack`, `spell`, `turn` or `rest`. |
+| GET | `/api/player/spells` | → every spell players may read. |
+| POST | `/api/player/spells` | body `{device_id, known: [ids]}`. Sets the spells the character knows, within what its class allows (see `docs/PLAYING.md`). While a game is live, spells can be added but not dropped. → the character. |
+| POST | `/api/player/roll` | body `{device_id, formula, label, mode}`. A roll the whole table sees. |
+| POST | `/api/player/attack` | body `{device_id, attack, target, mode}`; `attack` is an index into the sheet's `attacks`, `target` a combatant id. Rolled against the target's armor class; damage is applied unless the campaign setting `players_apply_damage` is off. |
+| POST | `/api/player/cast` | body `{device_id, spell, slot, targets: [ids], mode}`. `slot` 0 = cantrip or ritual. Spends the slot, then attack roll / saving throws / healing per target as the spell says. |
+| POST | `/api/player/do` | body `{device_id, action, arg}` with `action` = `end_turn`, `short_rest`, `long_rest`, `hit_die` (`arg` = `"d8"`) or `death_save`. |
+
+`PATCH /api/player/characters/{id}` can no longer change which spells are
+known (only `prepared`, `slots_used`), and now also takes `uses` (uses spent
+of limited features, by feature name).

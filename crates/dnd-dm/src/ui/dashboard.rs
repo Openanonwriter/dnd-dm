@@ -67,6 +67,8 @@ fn load_campaign(app: &mut DmApp, dir: &PathBuf, select_char: Option<String>) {
             {
                 let mut w = app.world.write().unwrap();
                 w.campaign = c;
+                // a session does not outlive the app: the DM starts it again
+                w.campaign.settings.game_live = false;
                 w.touch();
             }
             let rev = app.world.read().unwrap().revision;
@@ -161,6 +163,33 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
             let mut w = app.world.write().unwrap();
             w.campaign.settings.players_choose_character = choose;
             w.touch();
+        }
+        let (mut walk, mut hurt) = {
+            let w = app.world.read().unwrap();
+            (w.campaign.settings.players_move_tokens, w.campaign.settings.players_apply_damage)
+        };
+        if ui.checkbox(&mut walk, "Players move their own token").on_hover_text("On their turn in a fight, freely while exploring. Walls and doors are checked here.").changed() {
+            let mut w = app.world.write().unwrap();
+            w.campaign.settings.players_move_tokens = walk;
+            w.touch();
+        }
+        if ui
+            .checkbox(&mut hurt, "Players' attacks change hit points")
+            .on_hover_text("On: an attack or spell from a player's app is rolled here against the target and the damage or healing is applied. Off: it is only rolled and you apply it.")
+            .changed()
+        {
+            let mut w = app.world.write().unwrap();
+            w.campaign.settings.players_apply_damage = hurt;
+            w.touch();
+        }
+        for (label, long) in [("🌙 Long rest (party)", true), ("☕ Short rest (party)", false)] {
+            if ui.button(label).on_hover_text("Every character: hit points, spell slots and features come back as the rules say").clicked() {
+                let mut w = app.world.write().unwrap();
+                let ids: Vec<String> = w.campaign.characters.iter().map(|c| c.id.clone()).collect();
+                for id in ids {
+                    let _ = w.rest(&id, long);
+                }
+            }
         }
         if ui.button("✨ Auto-assign by name").on_hover_text("Give each unassigned device the character whose Player (or character) name matches the device's name").clicked() {
             let n = {

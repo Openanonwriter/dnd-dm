@@ -26,7 +26,14 @@ pub struct EncounterState {
     pub area_dir: usize,
     pub area_origin: String,
     pub show_stat_block: bool,
+    /// Who the selected combatant attacks, how, and what came of it.
+    pub target: String,
+    pub mode: usize,
+    pub last_result: String,
 }
+
+pub const MODES: [(&str, dnd_core::play::RollMode); 3] =
+    [("normal", dnd_core::play::RollMode::Normal), ("advantage", dnd_core::play::RollMode::Advantage), ("disadvantage", dnd_core::play::RollMode::Disadvantage)];
 
 pub const SHAPES: [&str; 4] = ["sphere", "cube", "cone", "line"];
 pub const DIRS: [(&str, (f64, f64)); 8] = [
@@ -180,6 +187,48 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                         ui.label("Notes");
                         ui.add(egui::TextEdit::multiline(&mut cm.notes).desired_rows(2).desired_width(f32::INFINITY));
                     }
+                    // ---- attack someone: rolled against their armor class, damage applied
+                    let targets: Vec<(String, String)> = w.campaign.encounter.combatants.iter().filter(|x| x.id != c.id).map(|x| (x.id.clone(), x.name.clone())).collect();
+                    let attacks: Vec<(usize, String)> = match &c.kind {
+                        CombatantKind::Creature { template } => w
+                            .library
+                            .creatures
+                            .get(template)
+                            .map(|cr| cr.actions.iter().enumerate().filter_map(|(i, a)| a.attack.as_ref().map(|k| (i, format!("{} {} · {}", a.name, bonus(k.to_hit), k.damage)))).collect())
+                            .unwrap_or_default(),
+                        CombatantKind::Pc { id } => w.sheet(id).map(|s| s.attacks.iter().enumerate().map(|(i, a)| (i, format!("{} {} · {}", a.name, bonus(a.bonus), a.damage))).collect()).unwrap_or_default(),
+                        CombatantKind::Custom => Vec::new(),
+                    };
+                    if !attacks.is_empty() {
+                        ui.add_space(4.0);
+                        ui.label(egui::RichText::new("Attack").strong());
+                        ui.horizontal(|ui| {
+                            id_combo(ui, "atk_target", &mut st.target, &targets, "— target —");
+                            egui::ComboBox::from_id_salt("atk_mode").width(90.0).selected_text(MODES[st.mode.min(2)].0).show_ui(ui, |ui| {
+                                for (i, m) in MODES.iter().enumerate() {
+                                    ui.selectable_value(&mut st.mode, i, m.0);
+                                }
+                            });
+                        });
+                        ui.horizontal_wrapped(|ui| {
+                            for (i, label) in &attacks {
+                                if ui.add_enabled(!st.target.is_empty(), egui::Button::new(format!("⚔ {label}"))).on_disabled_hover_text("Pick a target first").clicked() {
+                                    let mode = MODES[st.mode.min(2)].1;
+                                    let r = match &c.kind {
+                                        CombatantKind::Pc { id } => w.pc_attack(id, *i, &st.target, mode),
+                                        _ => w.creature_attack(&c.id, *i, &st.target, mode),
+                                    };
+                                    st.last_result = match r {
+                                        Ok(r) => r.text,
+                                        Err(e) => e,
+                                    };
+                                }
+                            }
+                        });
+                        if !st.last_result.is_empty() {
+                            ui.label(egui::RichText::new(&st.last_result).color(crate::ui::theme::ORANGE));
+                        }
+                    }
                     match &c.kind {
                         CombatantKind::Creature { template } => {
                             ui.checkbox(&mut st.show_stat_block, "Show stat block");
@@ -262,9 +311,26 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         });
     });
 
+    // ---------------------------------------------------------- what the table sees
+    egui::TopBottomPanel::bottom("table_feed").resizable(true).default_height(120.0).show_inside(ui, |ui| {
+        ui.label(egui::RichText::new("At the table (players see this)").weak().small());
+        egui::ScrollArea::vertical().stick_to_bottom(true).auto_shrink([false, false]).show(ui, |ui| {
+            let t = &w.campaign.table;
+            for e in &t[t.len().saturating_sub(40)..] {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(egui::RichText::new(&e.time).weak().small());
+                    if !e.who.is_empty() {
+                        ui.label(egui::RichText::new(&e.who).strong().color(crate::ui::theme::ORANGE));
+                    }
+                    ui.label(&e.text);
+                });
+            }
+        });
+    });
+
     // ---------------------------------------------------------- tracker
     egui::CentralPanel::default().show_inside(ui, |ui| {
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.label("Encounter");
             ui.add(egui::TextEdit::singleline(&mut w.campaign.encounter.name).desired_width(160.0).hint_text("name"));
             if ui.button("🎲 Roll initiative (all)").clicked() {
@@ -279,16 +345,16 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             ui.separator();
             if !w.campaign.encounter.active {
                 if ui.button("▶ Start").clicked() {
-                    w.campaign.encounter.start();
                     let name = w.campaign.encounter.name.clone();
                     w.campaign.log(format!("encounter '{name}' started"));
+                    w.start_encounter();
                 }
             } else {
                 if ui.button("◀ Prev").clicked() {
                     w.campaign.encounter.prev_turn();
                 }
                 if ui.button("Next ▶").clicked() {
-                    w.campaign.encounter.next_turn();
+                    w.next_turn();
                 }
                 ui.label(egui::RichText::new(format!("Round {} · {}", w.campaign.encounter.round, w.campaign.encounter.current().map(|c| c.name.clone()).unwrap_or_default())).strong());
                 if ui.button("⏹ End").clicked() {
@@ -376,20 +442,21 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 
     // sync PC hp back to character sheets
     if w.campaign.encounter != before {
-        let updates: Vec<(String, i32, i32)> = w
+        let updates: Vec<(String, i32, i32, Vec<String>)> = w
             .campaign
             .encounter
             .combatants
             .iter()
             .filter_map(|c| match &c.kind {
-                CombatantKind::Pc { id } => Some((id.clone(), c.hp, c.temp_hp)),
+                CombatantKind::Pc { id } => Some((id.clone(), c.hp, c.temp_hp, c.conditions.clone())),
                 _ => None,
             })
             .collect();
-        for (id, hp, temp) in updates {
+        for (id, hp, temp, conditions) in updates {
             if let Some(ch) = w.campaign.character_mut(&id) {
                 ch.hp.current = hp;
                 ch.hp.temp = temp;
+                ch.conditions = conditions;
             }
         }
         w.touch();

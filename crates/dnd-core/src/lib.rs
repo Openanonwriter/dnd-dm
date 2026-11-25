@@ -16,6 +16,7 @@ pub mod grid;
 pub mod library;
 pub mod mapgen;
 pub mod model;
+pub mod play;
 pub mod rng;
 pub mod save;
 pub mod sheet;

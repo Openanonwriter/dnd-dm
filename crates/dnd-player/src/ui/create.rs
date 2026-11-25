@@ -468,6 +468,9 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
         }
     }
 
+    // ------------------------------------------------------------ spells
+    let spells_open = crate::ui::spells::builder_section(ui, lib, &mut app.draft, &sheet, &mut app.ui_state.spell_open);
+
     // ------------------------------------------------------------ story
     theme::section(ui, "About (optional)");
     ui.label(theme::muted("Alignment"));
@@ -515,6 +518,9 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     if problems.is_empty() {
         if skills_short > 0 {
             ui.label(theme::muted(format!("You can still choose {skills_short} more skill(s).")));
+        }
+        if !spells_open.is_empty() {
+            ui.label(theme::muted(format!("Spells: you can still choose {}.", spells_open.join(", "))));
         }
         if improvements_open > 0 {
             ui.label(theme::muted(format!("{improvements_open} improvement(s) not chosen yet; the DM can add them later.")));

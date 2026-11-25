@@ -69,10 +69,13 @@ impl DmApp {
         let mut world = World::new(paths.content_dirs.clone());
         world.campaign.settings.port = paths.config.port;
         // reopen the most recent campaign, if any
-        if let Some((_, dir, _)) = dnd_core::save::list_campaigns(&paths.saves_dir).into_iter().next() {
+        // development aid: DND_DM_CAMPAIGN opens that campaign folder instead
+        let wanted = std::env::var("DND_DM_CAMPAIGN").ok().map(std::path::PathBuf::from).map(|d| (String::new(), d, String::new()));
+        if let Some((_, dir, _)) = wanted.or_else(|| dnd_core::save::list_campaigns(&paths.saves_dir).into_iter().next()) {
             if let Ok(c) = dnd_core::save::load_campaign(&dir) {
                 let port = world.campaign.settings.port;
                 world.campaign = c;
+                world.campaign.settings.game_live = false;
                 if world.campaign.settings.port == 0 {
                     world.campaign.settings.port = port;
                 }
@@ -102,10 +105,19 @@ impl DmApp {
             autosave: true,
             shot: crate::shot::Shot::from_env(),
         };
-        if std::env::var("DND_DM_VIEW").map(|v| v == "map").unwrap_or(false) {
-            app.view = View::Map;
+        if let Ok(v) = std::env::var("DND_DM_VIEW") {
+            app.view = match v.as_str() {
+                "map" => View::Map,
+                "encounter" => View::Encounter,
+                "characters" => View::Characters,
+                "content" => View::Content,
+                "campaign" => View::Campaign,
+                _ => View::Dashboard,
+            };
         }
-        if app.paths.config.autostart_server {
+        app.encounter.selected = std::env::var("DND_DM_SELECT").ok();
+        // a picture-taking run stays off the network
+        if app.paths.config.autostart_server && std::env::var("DND_DM_SHOT").is_err() {
             app.start_server();
         }
         app

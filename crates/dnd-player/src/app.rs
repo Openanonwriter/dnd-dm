@@ -98,6 +98,16 @@ pub struct PlayerApp {
     pub dice_formula: String,
     pub dice_log: Vec<String>,
     pub ui_state: ui::UiState,
+    /// What happened at the table lately, as the server tells it.
+    pub table: Vec<dnd_core::TableEntry>,
+    /// Normal, advantage or disadvantage for the next d20.
+    pub mode: dnd_core::play::RollMode,
+    /// Combatants picked as targets for attacks and spells.
+    pub targets: Vec<String>,
+    /// Development aid: save a picture of the window and exit.
+    pub shot: crate::shot::Shot,
+    /// Tab to open on once the sheet is there (development aid).
+    pub start_tab: Option<Tab>,
 }
 
 const EDIT_DEBOUNCE: Duration = Duration::from_millis(700);
@@ -148,6 +158,11 @@ impl PlayerApp {
             dice_formula: "1d20".into(),
             dice_log: Vec::new(),
             ui_state: Default::default(),
+            table: Vec::new(),
+            mode: Default::default(),
+            targets: Vec::new(),
+            shot: crate::shot::Shot::from_env(),
+            start_tab: std::env::var("DND_PLAYER_TAB").ok().and_then(|t| Tab::ALL.into_iter().find(|x| x.label().eq_ignore_ascii_case(&t))),
         };
         if let Some(o) = app.store.load_builder() {
             app.set_builder(o);
@@ -297,6 +312,8 @@ impl PlayerApp {
         d.flaws = c.flaws.clone();
         d.backstory = c.backstory.clone();
         d.notes = c.notes.clone();
+        d.spells.known = c.spells.known.clone();
+        d.spells.prepared = c.spells.prepared.clone();
         self.draft = d;
         self.screen = Screen::Create;
     }
@@ -434,6 +451,28 @@ impl PlayerApp {
                     let why = why.rsplit(": ").next().unwrap_or(&why).to_string();
                     self.map_ui.last_walk = format!("Not possible: {why}");
                 }
+                Evt::Table(t) => self.table = t,
+                Evt::Action(Ok(r)) => {
+                    self.dice_log.insert(0, r.text.clone());
+                    self.dice_log.truncate(30);
+                    self.set_status(r.text, false);
+                    self.mode = Default::default();
+                }
+                Evt::Action(Err(e)) => {
+                    // "HTTP 409: it is not your turn" -> the reason only
+                    let why = e.split_once(": ").map(|x| x.1.to_string()).unwrap_or(e);
+                    self.set_status(why, true);
+                }
+                Evt::SpellsChosen(c) => {
+                    if let Some(mine) = self.character.as_mut() {
+                        mine.spells.known = c.spells.known.clone();
+                        mine.spells.prepared.retain(|p| c.spells.prepared.contains(p));
+                    }
+                    if let Some(s) = self.synced.as_mut() {
+                        s.spells.known = c.spells.known.clone();
+                        s.spells.prepared.retain(|p| c.spells.prepared.contains(p));
+                    }
+                }
                 Evt::Patched(c) => {
                     self.synced = Some(c);
                     self.set_status("Saved to DM", false);
@@ -471,7 +510,7 @@ impl PlayerApp {
             return;
         }
         if force || self.last_edit.map(|t| t.elapsed() >= EDIT_DEBOUNCE).unwrap_or(false) {
-            let patch = PlayerPatch::from_character(c);
+            let patch = PlayerPatch::diff(s, c);
             let id = c.id.clone();
             if let Some(sheet) = &self.sheet {
                 self.store.cache_character(c, sheet);
@@ -486,7 +525,38 @@ impl PlayerApp {
         }
     }
 
+    /// Do something through the server (attack, cast, rest...). Edits still
+    /// waiting on this device go first so the two cannot cross.
+    pub fn act(&mut self, cmd: Cmd) {
+        if !self.online {
+            self.set_status("Not connected to the DM", true);
+            return;
+        }
+        self.flush_edits(true);
+        let _ = self.client.tx.send(cmd);
+    }
+
+    /// The id of our own token in the fight, if we are in it.
+    pub fn my_token(&self) -> Option<String> {
+        if let Some(t) = self.map.as_ref().and_then(|m| m.tokens.iter().find(|t| t.kind == "pc" && t.id == self.config.character_id)) {
+            return Some(t.id.clone());
+        }
+        self.encounter.as_ref().and_then(|e| e.combatants.iter().find(|c| c.is_pc && c.id == self.config.character_id)).map(|c| c.id.clone())
+    }
+
+    /// True while a fight is on and it is our character's turn.
+    pub fn my_turn(&self) -> bool {
+        let Some(me) = self.my_token() else { return false };
+        self.encounter.as_ref().map(|e| e.active && e.combatants.iter().any(|c| c.is_current && c.id == me)).unwrap_or(false)
+    }
+
     pub fn roll(&mut self, formula: &str, label: &str) {
+        // at the table the DM's machine rolls, so everyone sees the same dice
+        if self.online && self.character.is_some() && self.seat.as_ref().map(|s| s.character.is_some()).unwrap_or(false) {
+            let mode = self.mode;
+            self.act(Cmd::Roll { formula: formula.to_string(), label: label.to_string(), mode });
+            return;
+        }
         match expr::roll(formula, &Env::new(), &mut self.rng) {
             Ok(r) => {
                 let detail: Vec<String> = r.rolls.iter().map(|d| d.to_string()).collect();
@@ -531,6 +601,12 @@ impl eframe::App for PlayerApp {
             }
         }
 
+        if self.screen == Screen::Sheet && self.sheet.is_some() && self.online {
+            if let Some(t) = self.start_tab.take() {
+                self.tab = t;
+            }
+        }
+        self.shot.tick(ctx);
         match self.screen {
             Screen::Connect => ui::connect::show(self, ctx),
             Screen::Pick => ui::pick::show(self, ctx),

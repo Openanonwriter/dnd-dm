@@ -149,6 +149,8 @@ progression = "full"                      # full | half | third | pact
 prepared = "max(1, int_mod + class.wizard.level)"
 cantrips_known = [3,3,3,4,…]              # by class level
 spells_known = [ … ]                      # for "known" casters
+spellbook_start = 6                       # spellbook casters: spells at level 1…
+spellbook_per_level = 2                   # …and how many more each level
 ritual_casting = true
 spell_lists = ["wizard"]                  # extra class lists to draw from
 [[features]] …
@@ -156,6 +158,10 @@ spell_lists = ["wizard"]                  # extra class lists to draw from
 
 Slots come from `rules.toml` (`spell_slots`, `pact_slots`) using the usual
 multiclass caster-level maths.
+
+Which spells a player may choose follows from these: with `spells_known` the
+character knows that many; with `spellbook_start` it has a book of that size;
+with neither (cleric) it prepares straight from the whole class list.
 
 ## Subclasses
 
@@ -242,6 +248,9 @@ ritual = false
 classes = ["wizard", "sorcerer"]
 attack = false
 save = "dex"
+save_half = true          # a successful save halves the damage (default: none)
+upcast = "1d6"            # added per slot level above the spell's own
+heal = "1d8 + mod"        # healing instead of damage; `mod` = casting modifier
 damage = "8d6"
 damage_type = "fire"
 area = { shape = "sphere", size = 20, width = 5 }   # sphere cube cone line cylinder

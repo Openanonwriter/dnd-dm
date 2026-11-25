@@ -188,6 +188,9 @@ pub struct Character {
     /// Anything else a table wants to track.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub custom: BTreeMap<String, String>,
+    /// Uses spent of limited features, by feature name (cleared by rests).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub uses: BTreeMap<String, u32>,
 }
 
 impl Character {

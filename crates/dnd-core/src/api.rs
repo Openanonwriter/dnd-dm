@@ -192,6 +192,61 @@ pub struct BuilderOptions {
     /// Level that player-made characters start at.
     #[serde(default)]
     pub start_level: u32,
+    /// Spells players may see, for choosing a caster's spells.
+    #[serde(default)]
+    pub spells: Vec<Spell>,
+}
+
+/// A player asking for something to be rolled where the whole table sees it.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct TableRollReq {
+    pub device_id: String,
+    pub formula: String,
+    #[serde(default)]
+    pub label: String,
+    #[serde(default)]
+    pub mode: crate::play::RollMode,
+}
+
+/// A player attacking a combatant with one of the attacks on their sheet.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct AttackReq {
+    pub device_id: String,
+    /// Index into the sheet's attacks.
+    pub attack: usize,
+    pub target: String,
+    #[serde(default)]
+    pub mode: crate::play::RollMode,
+}
+
+/// A player casting a spell. `slot` 0 = cantrip, or a ritual without a slot.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct CastReq {
+    pub device_id: String,
+    pub spell: String,
+    #[serde(default)]
+    pub slot: u32,
+    #[serde(default)]
+    pub targets: Vec<String>,
+    #[serde(default)]
+    pub mode: crate::play::RollMode,
+}
+
+/// A player choosing which spells their character knows.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct SpellsReq {
+    pub device_id: String,
+    pub known: Vec<String>,
+}
+
+/// Small things a player does for their own character: `end_turn`,
+/// `short_rest`, `long_rest`, `hit_die` (with `arg` = "d8"), `death_save`.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct DoReq {
+    pub device_id: String,
+    pub action: String,
+    #[serde(default)]
+    pub arg: String,
 }
 
 /// One row of the DM's device list.
@@ -245,6 +300,9 @@ pub struct PlayerPatch {
     pub player: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub custom: Option<BTreeMap<String, String>>,
+    /// Uses spent of limited features.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub uses: Option<BTreeMap<String, u32>>,
 }
 
 impl PlayerPatch {
@@ -257,6 +315,7 @@ impl PlayerPatch {
             conditions: Some(c.conditions.clone()),
             exhaustion: Some(c.exhaustion),
             inspiration: Some(c.inspiration),
+            uses: Some(c.uses.clone()),
             currency: Some(c.currency.clone()),
             inventory: Some(c.inventory.iter().filter(|i| !i.hidden).cloned().collect()),
             notes: Some(c.notes.clone()),
@@ -272,6 +331,19 @@ impl PlayerPatch {
     }
 }
 
+impl PlayerPatch {
+    /// Only what the player changed between two copies of their character,
+    /// so a slow phone never writes back something the DM changed meanwhile.
+    pub fn diff(old: &Character, new: &Character) -> Self {
+        let was = Self::from_character(old);
+        let all = Self::from_character(new);
+        macro_rules! changed {
+            ($($f:ident),*) => { Self { $($f: if all.$f != was.$f { all.$f } else { None }),* } };
+        }
+        changed!(hp, death_saves, spells, conditions, exhaustion, inspiration, currency, inventory, notes, appearance, personality, ideals, bonds, flaws, backstory, player, custom, uses)
+    }
+}
+
 impl Character {
     /// Apply a player's changes, keeping everything DM-owned intact.
     pub fn apply_player_patch(&mut self, p: PlayerPatch) {
@@ -281,8 +353,13 @@ impl Character {
         if let Some(v) = p.death_saves {
             self.death_saves = v;
         }
-        if let Some(v) = p.spells {
+        if let Some(mut v) = p.spells {
+            // which spells a character knows is decided by `play::choose_spells`
+            v.known = std::mem::take(&mut self.spells.known);
             self.spells = v;
+        }
+        if let Some(v) = p.uses {
+            self.uses = v;
         }
         if let Some(v) = p.conditions {
             self.conditions = v;

@@ -14,8 +14,8 @@ pub struct MapUi {
     pub anim: Anim,
     /// Own token in hand: id and where it is held (top-left, in squares).
     pub held: Option<(String, (f32, f32))>,
-    /// Map we last centred on our own token for.
-    pub centred: String,
+    /// Map we last centred on our own token for (None = not yet).
+    pub centred: Option<String>,
     pub last_walk: String,
 }
 
@@ -53,8 +53,11 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
         return;
     };
     let view: MapView = view;
+    let my_turn = app.my_turn();
+    app.targets.retain(|t| view.tokens.iter().any(|k| &k.id == t));
+    let target = app.targets.first().cloned();
     let st = &mut app.map_ui;
-    let hint_h = 22.0;
+    let hint_h = if my_turn || target.is_some() { 48.0 } else { 22.0 };
     let size = egui::vec2(ui.available_width(), (ui.available_height() - hint_h).max(120.0));
     let (resp, painter) = ui.allocate_painter(size, egui::Sense::click_and_drag());
     let rect = resp.rect;
@@ -63,13 +66,17 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let me_pos = me.map(|t| (t.x as f32 + t.size as f32 / 2.0, t.y as f32 + t.size as f32 / 2.0));
 
     // first look at a map: stand the camera on our own token
-    if st.centred != view.id && rect.width() > 10.0 {
+    let map_key = format!("{}|{}|{}x{}", view.id, view.name, view.width, view.height);
+    if st.centred.as_deref() != Some(map_key.as_str()) && rect.width() > 10.0 {
         st.cam.fit(rect, view.width, view.height);
         if let Some((x, y)) = me_pos {
             st.cam.center = egui::vec2(x, y);
             st.cam.zoom = st.cam.zoom.max((rect.width() / 14.0).clamp(24.0, 64.0));
         }
-        st.centred = view.id.clone();
+        // wait for our own token before settling, so we start standing on it
+        if me_pos.is_some() || view.tokens.is_empty() {
+            st.centred = Some(map_key);
+        }
     }
     st.cam.zoom_input(ui, &resp);
     let cam = st.cam;
@@ -103,7 +110,15 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
     if resp.clicked() {
         if let Some((fx, fy)) = at {
             let door = view.walls.iter().any(|w| w.is_door() && dnd_core::model::point_seg_distance((fx, fy), (w.x1, w.y1), (w.x2, w.y2)) < 0.45);
-            if door {
+            let token = view.tokens.iter().find(|t| !t.mine && fx >= t.x as f32 && fy >= t.y as f32 && fx < (t.x + t.size as i32) as f32 && fy < (t.y + t.size as i32) as f32);
+            if let Some(t) = token {
+                // tap a creature (or a friend) to aim at it; tap again to let go
+                if app.targets.first() == Some(&t.id) {
+                    app.targets.clear();
+                } else {
+                    app.targets = vec![t.id.clone()];
+                }
+            } else if door {
                 let _ = app.client.tx.send(Cmd::MapDoor { x: fx, y: fy });
             } else if let Some(t) = me.filter(|t| t.mine) {
                 // tap a square to walk there
@@ -116,12 +131,14 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
     }
 
     let held = st.held.as_ref().map(|(id, at)| (id.as_str(), *at));
-    let opts = DrawOpts { grid: true, selected: None, held, highlight: &[], highlight_color: None, solid_fog: true };
+    let opts = DrawOpts { grid: true, selected: target.as_deref(), held, highlight: &[], highlight_color: None, solid_fog: true };
     dnd_mapview::draw(&painter, rect, &cam, &view, &mut st.anim, time, &opts);
 
     // "find me" button, top right of the map
     let b = egui::Rect::from_min_size(rect.right_top() + egui::vec2(-46.0, 8.0), egui::vec2(38.0, 38.0));
-    let find = ui.put(b, egui::Button::new(egui::RichText::new("◎").size(20.0)).fill(theme::CARD)).on_hover_text("Centre on my character");
+    // a child ui, so the button does not move where the next widgets go
+    let mut over = ui.new_child(egui::UiBuilder::new().max_rect(b));
+    let find = over.add_sized(b.size(), egui::Button::new(egui::RichText::new("◎").size(20.0)).fill(theme::CARD)).on_hover_text("Centre on my character");
     if find.clicked() {
         if let Some((x, y)) = me_pos {
             st.cam.center = egui::vec2(x, y);
@@ -136,11 +153,49 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
     } else if !st.last_walk.is_empty() {
         st.last_walk.clone()
     } else if can_walk {
-        "Drag your character or tap a square to walk. Tap a door beside you to open it.".to_string()
+        "Drag your character or tap a square to walk. Tap a door to open it, a creature to aim at it.".to_string()
     } else if view.encounter_active {
         "Wait for your turn to move.".to_string()
     } else {
         "The DM moves the tokens.".to_string()
     };
-    ui.label(theme::muted(format!("{} · {}", view.name, hint)).small());
+    if my_turn || target.is_some() {
+        // the action bar: what you can do to the creature you tapped
+        let attacks: Vec<(usize, String)> = app.sheet.as_ref().map(|s| s.attacks.iter().enumerate().map(|(i, a)| (i, a.name.clone())).collect()).unwrap_or_default();
+        let target_name = target.as_ref().and_then(|t| view.tokens.iter().find(|k| &k.id == t)).map(|t| t.name.clone());
+        let mut todo: Option<Cmd> = None;
+        let mut clear = false;
+        egui::ScrollArea::horizontal().id_salt("actions").show(ui, |ui| {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().button_padding = egui::vec2(10.0, 8.0);
+                if my_turn && ui.add(theme::primary("End turn")).clicked() {
+                    todo = Some(Cmd::Do { action: "end_turn".into(), arg: String::new() });
+                }
+                if let (Some(t), Some(name)) = (&target, &target_name) {
+                    ui.label(theme::accent(format!("◎ {name}")));
+                    for (i, a) in &attacks {
+                        if ui.button(format!("⚔ {a}")).clicked() {
+                            todo = Some(Cmd::Attack { attack: *i, target: t.clone(), mode: app.mode });
+                        }
+                    }
+                    if app.sheet.as_ref().map(|s| !s.spellcasting.is_empty()).unwrap_or(false) && ui.button("✨ Spell").clicked() {
+                        app.tab = crate::app::Tab::Spells;
+                    }
+                    if ui.button("✖").clicked() {
+                        clear = true;
+                    }
+                } else if my_turn {
+                    ui.label(theme::muted("Your turn. Tap a creature to aim at it.").small());
+                }
+            });
+        });
+        if clear {
+            app.targets.clear();
+        }
+        if let Some(cmd) = todo {
+            app.act(cmd);
+        }
+    } else {
+        ui.label(theme::muted(format!("{} · {}", view.name, hint)).small());
+    }
 }

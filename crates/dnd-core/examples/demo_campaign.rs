@@ -22,6 +22,20 @@ fn main() -> anyhow::Result<()> {
         let mut c = Character::new(id, name);
         c.species = "human".into();
         c.classes.push(ClassLevel { class: class.into(), level: 3, ..Default::default() });
+        let (abilities, gear): (&[(&str, i32)], &[&str]) = match class {
+            "wizard" => (&[("int", 16), ("dex", 14), ("con", 13)], &["quarterstaff", "dagger", "spellbook"]),
+            "fighter" => (&[("str", 16), ("con", 15), ("dex", 12)], &["longsword", "chain_mail", "shield", "light_crossbow"]),
+            _ => (&[("dex", 16), ("con", 13), ("int", 12)], &["rapier", "shortbow", "leather_armor", "thieves_tools"]),
+        };
+        for (k, v) in abilities {
+            c.base_abilities.set(k, *v);
+        }
+        c.inventory = gear.iter().map(|g| InventoryItem { item: g.to_string(), qty: 1, equipped: true, ..Default::default() }).collect();
+        if class == "wizard" {
+            c.spells.known = ["fire_bolt", "light", "mage_hand", "magic_missile", "shield", "mage_armor", "sleep", "burning_hands", "detect_magic", "scorching_ray", "misty_step", "web", "shatter"].iter().map(|s| s.to_string()).collect();
+            c.spells.prepared = ["magic_missile", "shield", "sleep", "burning_hands", "scorching_ray", "misty_step"].iter().map(|s| s.to_string()).collect();
+        }
+        c.hp.current = dnd_core::derive(&c, &w.library).hp_max;
         w.campaign.characters.push(c);
     }
 

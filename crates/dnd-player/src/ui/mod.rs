@@ -3,6 +3,7 @@ pub mod map;
 pub mod create;
 pub mod pick;
 pub mod sheet;
+pub mod spells;
 
 #[derive(Default)]
 pub struct UiState {
@@ -11,6 +12,8 @@ pub struct UiState {
     pub show_feature: Option<String>,
     pub notes_field: usize,
     pub hp_input: String,
+    /// Spell whose description is open.
+    pub spell_open: String,
 }
 
 pub fn bonus(v: i32) -> String {

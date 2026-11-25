@@ -3,6 +3,7 @@
 //! answers with [`Evt`]s. Everything is `http://` on the LAN, so no TLS.
 
 use dnd_core::api::*;
+use dnd_core::play::{ActionResult, RollMode};
 use dnd_core::{Character, Sheet};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream, UdpSocket};
 use std::sync::mpsc::{channel, Receiver, Sender};
@@ -29,6 +30,15 @@ pub enum Cmd {
     MapMove { x: i32, y: i32 },
     /// Open or close the door nearest this point.
     MapDoor { x: f32, y: f32 },
+    /// Roll where the whole table sees it.
+    Roll { formula: String, label: String, mode: RollMode },
+    /// Attack a combatant with attack number `attack` of our sheet.
+    Attack { attack: usize, target: String, mode: RollMode },
+    Cast { spell: String, slot: u32, targets: Vec<String>, mode: RollMode },
+    /// end_turn, short_rest, long_rest, hit_die (arg "d8"), death_save
+    Do { action: String, arg: String },
+    /// Set the spells our character knows.
+    ChooseSpells(Vec<String>),
     Refresh,
     Shutdown,
 }
@@ -56,6 +66,12 @@ pub enum Evt {
     /// The server said no to a move or a door, and why.
     MapRefused(String),
     Patched(Character),
+    /// How a roll, attack, spell or rest came out (or why it was refused).
+    Action(Result<ActionResult, String>),
+    /// What happened at the table lately.
+    Table(Vec<dnd_core::TableEntry>),
+    /// Our character after its spells were chosen.
+    SpellsChosen(Character),
     ScanResult(Vec<(String, String)>),
     Error(String),
     Busy(bool),
@@ -133,6 +149,18 @@ impl Worker {
             Err(e) => self.send(Evt::Error(format!("encounter: {e}"))),
         }
         self.load_map();
+        if let Ok(t) = self.get::<Vec<dnd_core::TableEntry>>("/api/player/table") {
+            self.send(Evt::Table(t));
+        }
+    }
+
+    /// Something our character does; afterwards fetch what it changed.
+    fn action(&mut self, path: &str, body: &impl serde::Serialize) {
+        let r = self.post::<ActionResult>(path, body).map_err(|e| format!("{e}"));
+        self.send(Evt::Action(r));
+        if let Some(id) = self.current.clone() {
+            self.load_character(&id);
+        }
     }
 
     fn load_map(&self) {
@@ -329,6 +357,19 @@ impl Client {
                         }
                         Cmd::MapMove { x, y } => w.map_action("/api/player/map/move", &MapMoveReq { device_id: w.device_id.clone(), x, y }),
                         Cmd::MapDoor { x, y } => w.map_action("/api/player/map/door", &MapDoorReq { device_id: w.device_id.clone(), x, y }),
+                        Cmd::Roll { formula, label, mode } => w.action("/api/player/roll", &TableRollReq { device_id: w.device_id.clone(), formula, label, mode }),
+                        Cmd::Attack { attack, target, mode } => w.action("/api/player/attack", &AttackReq { device_id: w.device_id.clone(), attack, target, mode }),
+                        Cmd::Cast { spell, slot, targets, mode } => w.action("/api/player/cast", &CastReq { device_id: w.device_id.clone(), spell, slot, targets, mode }),
+                        Cmd::Do { action, arg } => w.action("/api/player/do", &DoReq { device_id: w.device_id.clone(), action, arg }),
+                        Cmd::ChooseSpells(known) => match w.post::<Character>("/api/player/spells", &SpellsReq { device_id: w.device_id.clone(), known }) {
+                            Ok(c) => {
+                                w.send(Evt::SpellsChosen(c));
+                                if let Some(id) = w.current.clone() {
+                                    w.load_character(&id);
+                                }
+                            }
+                            Err(e) => w.send(Evt::Action(Err(format!("{e}")))),
+                        },
                         Cmd::Leave => w.current = None,
                         Cmd::Refresh => {
                             if !w.base.is_empty() && !w.device_id.is_empty() {

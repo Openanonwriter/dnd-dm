@@ -85,8 +85,9 @@ exactly the set the server rolled for that device. Modifiers, extra items,
 XP, HP overrides and DM notes in the upload are dropped.
 
 Starting gear comes from the class's and background's `starting_equipment`
-lines, in that order. In a line, " or " separates the options and "+",
-"and" or commas separate the things in an option; `gear[i]` picks the option
+lines, in that order. In a line with an "or", " or " and commas
+separate the options ("A, B or C") and "+" or "and" join the things in one
+option; a line without "or" is a list you get all of. `gear[i]` picks the option
 of line `i` (0 = first). Words that match an item id or name become that
 item ("20 arrows" → 20 × `arrow`), "10 gp" becomes money, and anything else
 is kept as a free-text item for the DM to settle.

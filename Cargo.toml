@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/dnd-core", "crates/dnd-server", "crates/dnd-dm", "crates/dnd-player"]
+members = ["crates/dnd-core", "crates/dnd-mapview", "crates/dnd-server", "crates/dnd-dm", "crates/dnd-player"]
 
 [workspace.package]
 version = "0.1.0"

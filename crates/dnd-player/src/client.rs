@@ -25,6 +25,10 @@ pub enum Cmd {
     LoadList,
     LoadCharacter(String),
     Patch { id: String, patch: PlayerPatch },
+    /// Walk our own token to a square.
+    MapMove { x: i32, y: i32 },
+    /// Open or close the door nearest this point.
+    MapDoor { x: f32, y: f32 },
     Refresh,
     Shutdown,
 }
@@ -45,6 +49,12 @@ pub enum Evt {
     Characters(Vec<CharListed>),
     Character { character: Character, sheet: Sheet },
     Encounter(PlayerEncounter),
+    /// The map as our character sees it.
+    Map(Box<dnd_core::view::MapView>),
+    /// We walked this many feet.
+    Walked(u32),
+    /// The server said no to a move or a door, and why.
+    MapRefused(String),
     Patched(Character),
     ScanResult(Vec<(String, String)>),
     Error(String),
@@ -121,6 +131,28 @@ impl Worker {
         match self.get::<PlayerEncounter>("/api/player/encounter") {
             Ok(enc) => self.send(Evt::Encounter(enc)),
             Err(e) => self.send(Evt::Error(format!("encounter: {e}"))),
+        }
+        self.load_map();
+    }
+
+    fn load_map(&self) {
+        if let Ok(m) = self.get::<dnd_core::view::MapView>(&format!("/api/player/map?device={}", self.device_id)) {
+            self.send(Evt::Map(Box::new(m)));
+        }
+    }
+
+    fn map_action(&self, path: &str, body: &impl serde::Serialize) {
+        match self.post::<MapMoved>(path, body) {
+            Ok(m) => {
+                self.send(Evt::Map(Box::new(m.map)));
+                if m.feet > 0 {
+                    self.send(Evt::Walked(m.feet));
+                }
+            }
+            Err(e) => {
+                self.send(Evt::MapRefused(format!("{e}")));
+                self.load_map();
+            }
         }
     }
 
@@ -295,6 +327,8 @@ impl Client {
                             }
                             w.send(Evt::Busy(false));
                         }
+                        Cmd::MapMove { x, y } => w.map_action("/api/player/map/move", &MapMoveReq { device_id: w.device_id.clone(), x, y }),
+                        Cmd::MapDoor { x, y } => w.map_action("/api/player/map/door", &MapDoorReq { device_id: w.device_id.clone(), x, y }),
                         Cmd::Leave => w.current = None,
                         Cmd::Refresh => {
                             if !w.base.is_empty() && !w.device_id.is_empty() {

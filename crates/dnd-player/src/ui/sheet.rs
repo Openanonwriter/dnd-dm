@@ -4,7 +4,6 @@ use crate::app::{PlayerApp, Screen, Tab};
 use crate::client::Cmd;
 use crate::theme::{self, section, tile};
 use crate::ui::bonus;
-use dnd_core::api::PlayerEncounter;
 use dnd_core::{Character, Sheet};
 
 pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
@@ -68,13 +67,18 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             });
             return;
         }
+        if app.tab == Tab::Party {
+            // the map pans and zooms by itself, so it does not sit in a scroll area
+            crate::ui::map::show(app, ui);
+            return;
+        }
         egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
             Tab::Spells => spells_tab(app, ui),
             Tab::Items => items_tab(app, ui),
             Tab::Notes => notes_tab(app, ui),
-            Tab::Party => party_tab(app, ui),
+            Tab::Party => {}
             Tab::Dice => dice_tab(app, ui),
             Tab::Settings => settings_tab(app, ui),
         });
@@ -500,98 +504,6 @@ fn theme_sub(source: &str, uses: Option<i64>, recharge: &str) -> String {
     }
     s.push(')');
     s
-}
-
-// ------------------------------------------------------------------ Party / encounter
-
-fn party_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
-    let Some(enc) = app.encounter.clone() else {
-        ui.label(theme::muted("No encounter data yet."));
-        return;
-    };
-    section(ui, if enc.active { "Initiative" } else { "Party" });
-    if enc.active {
-        ui.label(theme::accent(format!("Round {}", enc.round)));
-    }
-    for c in &enc.combatants {
-        let frame = if c.is_current { theme::card_hi() } else { theme::card() };
-        frame.show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new(format!("{:>2}", c.initiative)).monospace().color(theme::MUTED));
-                let name = egui::RichText::new(&c.name).strong().color(if c.is_pc { theme::PC_BLUE } else { theme::TEXT });
-                ui.label(name);
-                if c.is_current {
-                    ui.label(theme::accent("◀ now"));
-                }
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if let (Some(hp), Some(max)) = (c.hp, c.hp_max) {
-                        ui.label(theme::muted(format!("{hp}/{max}")));
-                    }
-                    if !c.conditions.is_empty() {
-                        ui.label(theme::muted(c.conditions.join(", ")).small());
-                    }
-                });
-            });
-        });
-    }
-    section(ui, "Map");
-    map_view(ui, &enc, app.config.character_id.as_str());
-}
-
-fn map_view(ui: &mut egui::Ui, enc: &PlayerEncounter, me: &str) {
-    let m = &enc.map;
-    let avail = ui.available_width().max(100.0);
-    let cell = (avail / m.width.max(1) as f32).clamp(6.0, 40.0);
-    let size = egui::vec2(m.width as f32 * cell + 1.0, m.height as f32 * cell + 1.0);
-    egui::ScrollArea::horizontal().show(ui, |ui| {
-        let (resp, p) = ui.allocate_painter(size, egui::Sense::hover());
-        let o = resp.rect.min;
-        p.rect_filled(resp.rect, 0.0, egui::Color32::from_rgb(40, 42, 46));
-        for (k, v) in &m.marks {
-            if let Some((x, y)) = k.split_once(',') {
-                if let (Ok(x), Ok(y)) = (x.parse::<i32>(), y.parse::<i32>()) {
-                    let r = egui::Rect::from_min_size(egui::pos2(o.x + x as f32 * cell, o.y + y as f32 * cell), egui::vec2(cell, cell));
-                    let col = match v.as_str() {
-                        "wall" => egui::Color32::from_rgb(90, 90, 100),
-                        "water" => egui::Color32::from_rgb(40, 80, 140),
-                        _ => egui::Color32::from_rgb(80, 65, 45),
-                    };
-                    p.rect_filled(r, 0.0, col);
-                }
-            }
-        }
-        let line = egui::Stroke::new(1.0, egui::Color32::from_gray(70));
-        for x in 0..=m.width {
-            let sx = o.x + x as f32 * cell;
-            p.line_segment([egui::pos2(sx, o.y), egui::pos2(sx, o.y + m.height as f32 * cell)], line);
-        }
-        for y in 0..=m.height {
-            let sy = o.y + y as f32 * cell;
-            p.line_segment([egui::pos2(o.x, sy), egui::pos2(o.x + m.width as f32 * cell, sy)], line);
-        }
-        for c in &enc.combatants {
-            let Some(pos) = c.pos else { continue };
-            let side = match c.size.to_lowercase().as_str() {
-                "large" => 2.0,
-                "huge" => 3.0,
-                "gargantuan" => 4.0,
-                _ => 1.0,
-            };
-            let r = egui::Rect::from_min_size(egui::pos2(o.x + pos.x as f32 * cell, o.y + pos.y as f32 * cell), egui::vec2(cell * side, cell * side));
-            let col = if c.is_pc { theme::PC_BLUE } else { egui::Color32::from_rgb(200, 70, 70) };
-            p.circle_filled(r.center(), r.width() * 0.45, col);
-            if c.id == me || c.name.to_lowercase() == me.replace('_', " ") {
-                p.circle_stroke(r.center(), r.width() * 0.5, egui::Stroke::new(2.0, theme::ORANGE));
-            }
-            if c.is_current {
-                p.circle_stroke(r.center(), r.width() * 0.55, egui::Stroke::new(2.0, egui::Color32::from_rgb(240, 200, 60)));
-            }
-            let initials: String = c.name.split_whitespace().filter_map(|s| s.chars().next()).take(2).collect();
-            p.text(r.center(), egui::Align2::CENTER_CENTER, initials, egui::FontId::proportional(cell * 0.5), egui::Color32::WHITE);
-        }
-    });
-    ui.label(theme::muted("The DM moves tokens; this view follows live.").small());
 }
 
 // ------------------------------------------------------------------ Dice

@@ -67,7 +67,7 @@ pub fn dungeon(name: &str, width: u32, height: u32, rng: &mut Rng) -> MapState {
         let (ax, ay) = rooms[i - 1].center();
         let (bx, by) = rooms[i].center();
         let horizontal_first = below(rng, 2) == 0;
-        let mut carve = |m: &mut MapState, x: i32, y: i32| m.set_tile(x, y, tile::FLOOR);
+        let carve = |m: &mut MapState, x: i32, y: i32| m.set_tile(x, y, tile::FLOOR);
         if horizontal_first {
             for x in ax.min(bx)..=ax.max(bx) {
                 carve(&mut m, x, ay);

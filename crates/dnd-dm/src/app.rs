@@ -160,6 +160,12 @@ impl DmApp {
     fn maybe_autosave(&mut self, force: bool) {
         let rev = self.world.read().unwrap().revision;
         if rev != self.seen_revision {
+            // whatever moved, the party remembers what it can now see
+            let mut w = self.world.write().unwrap();
+            if w.update_explored() {
+                w.touch();
+            }
+            drop(w);
             self.seen_revision = rev;
             self.last_change = Instant::now();
         }

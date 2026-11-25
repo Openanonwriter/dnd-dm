@@ -40,7 +40,7 @@ impl Tab {
             Tab::Spells => "✨",
             Tab::Items => "🎒",
             Tab::Notes => "📜",
-            Tab::Party => "👥",
+            Tab::Party => "🗺",
             Tab::Dice => "🎲",
             Tab::Settings => "⚙",
         }
@@ -52,7 +52,7 @@ impl Tab {
             Tab::Spells => "Spells",
             Tab::Items => "Items",
             Tab::Notes => "Notes",
-            Tab::Party => "Party",
+            Tab::Party => "Map",
             Tab::Dice => "Dice",
             Tab::Settings => "More",
         }
@@ -76,6 +76,8 @@ pub struct PlayerApp {
     pub sheet: Option<Sheet>,
     pub synced: Option<Character>,
     pub encounter: Option<PlayerEncounter>,
+    pub map: Option<dnd_core::view::MapView>,
+    pub map_ui: ui::map::MapUi,
     pub last_edit: Option<Instant>,
     pub last_poll: Instant,
     pub scan_results: Vec<(String, String)>,
@@ -137,6 +139,8 @@ impl PlayerApp {
             sheet: None,
             synced: None,
             encounter: None,
+            map: None,
+            map_ui: Default::default(),
             last_edit: None,
             last_poll: Instant::now(),
             scan_results: Vec::new(),
@@ -423,6 +427,13 @@ impl PlayerApp {
                     self.online = true;
                 }
                 Evt::Encounter(e) => self.encounter = Some(e),
+                Evt::Map(m) => self.map = Some(*m),
+                Evt::Walked(feet) => self.map_ui.last_walk = format!("You walked {feet} ft."),
+                Evt::MapRefused(why) => {
+                    // "409 Conflict: you cannot get there from here" -> the reason only
+                    let why = why.rsplit(": ").next().unwrap_or(&why).to_string();
+                    self.map_ui.last_walk = format!("Not possible: {why}");
+                }
                 Evt::Patched(c) => {
                     self.synced = Some(c);
                     self.set_status("Saved to DM", false);

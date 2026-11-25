@@ -16,6 +16,7 @@ use axum::{
     Json, Router,
 };
 use dnd_core::api::*;
+use dnd_core::view::Viewer;
 use dnd_core::{model::*, World};
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -148,6 +149,9 @@ fn router(world: SharedWorld) -> Router {
         .route("/api/player/register", post(player_register))
         .route("/api/player/claim", post(player_claim))
         .route("/api/player/builder", get(player_builder))
+        .route("/api/player/map", get(player_map))
+        .route("/api/player/map/move", post(player_map_move))
+        .route("/api/player/map/door", post(player_map_door))
         .route("/api/player/abilities/roll", post(player_roll_abilities))
         .route("/api/player/characters", post(player_character_create))
         .route("/api/dm/devices", get(dm_devices))
@@ -368,6 +372,10 @@ async fn encounter(State(st): State<AppState>) -> Json<PlayerEncounter> {
     let w = st.world.read().unwrap();
     let e = &w.campaign.encounter;
     let show_hp = w.campaign.settings.show_monster_hp_to_players;
+    // where things are comes from /api/player/map, which knows what each player can see
+    let in_view: Vec<String> = w.map_view(&Viewer::Party).tokens.into_iter().map(|t| t.id).collect();
+    let m = &w.campaign.map;
+    let map = MapState { id: m.id.clone(), name: m.name.clone(), width: m.width, height: m.height, feet_per_square: m.feet_per_square, ..Default::default() };
     let combatants = e
         .combatants
         .iter()
@@ -384,13 +392,13 @@ async fn encounter(State(st): State<AppState>) -> Json<PlayerEncounter> {
                 hp_max: if is_pc || show_hp { Some(c.hp_max) } else { None },
                 ac: if is_pc { Some(c.ac) } else { None },
                 size: c.size.clone(),
-                pos: c.pos,
+                pos: c.pos.filter(|_| in_view.contains(&c.id)),
                 conditions: c.conditions.clone(),
                 is_current: e.active && i == e.turn,
             }
         })
         .collect();
-    Json(PlayerEncounter { name: e.name.clone(), active: e.active, round: e.round, map: w.campaign.map.clone(), combatants })
+    Json(PlayerEncounter { name: e.name.clone(), active: e.active, round: e.round, map, combatants })
 }
 
 async fn roll(State(st): State<AppState>, Json(req): Json<RollReq>) -> Response {
@@ -676,6 +684,105 @@ async fn player_claim(
     w.seen(&req.device_id);
     w.touch();
     Json(seat_of(&w, &req.device_id)).into_response()
+}
+
+// ------------------------------------------------------------------ the map
+
+/// Who is looking: the device's character, or the whole party for a device
+/// without one (and for anyone who does not say).
+fn viewer_of(w: &World, device_id: Option<&str>) -> Viewer {
+    match device_id.and_then(|d| w.campaign.device_character(d)) {
+        Some(c) => Viewer::Character(c.id.clone()),
+        None => Viewer::Party,
+    }
+}
+
+/// The map as this player may see it: only explored squares, and tokens only
+/// where their character can see them right now.
+async fn player_map(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
+    let w = st.world.read().unwrap();
+    let dev = q.get("device").map(|s| s.as_str()).or_else(|| headers.get("x-device-id").and_then(|v| v.to_str().ok()));
+    Json(w.map_view(&viewer_of(&w, dev))).into_response()
+}
+
+/// The token of the character this device plays, if it is on the map.
+fn own_token(w: &World, device_id: &str) -> Result<(String, String), Response> {
+    let Some(ch) = w.campaign.device_character(device_id) else {
+        return Err(err(StatusCode::FORBIDDEN, "the DM has not given you a character yet"));
+    };
+    let token = w.campaign.encounter.combatants.iter().find(|c| matches!(&c.kind, CombatantKind::Pc { id } if id == &ch.id) && c.pos.is_some());
+    match token {
+        Some(t) => Ok((t.id.clone(), ch.id.clone())),
+        None => Err(err(StatusCode::CONFLICT, "the DM has not put you on the map yet")),
+    }
+}
+
+/// A player walks their own token. The way must be clear and within reach;
+/// in a fight it must be their turn.
+async fn player_map_move(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<MapMoveReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    if !authorized(&w, &headers, &q) {
+        return err(StatusCode::UNAUTHORIZED, "join code required");
+    }
+    let (token, ch) = match own_token(&w, &req.device_id) {
+        Ok(t) => t,
+        Err(r) => return r,
+    };
+    w.seen(&req.device_id);
+    if !w.campaign.settings.players_move_tokens {
+        return err(StatusCode::FORBIDDEN, "the DM moves the tokens in this game");
+    }
+    let enc = &w.campaign.encounter;
+    let in_fight = enc.active;
+    if in_fight && enc.current().map(|c| c.id != token).unwrap_or(true) {
+        return err(StatusCode::FORBIDDEN, "wait for your turn");
+    }
+    let speed = match w.campaign.settings.player_move_limit {
+        0 => w.sheet(&ch).map(|s| s.speed.max(5) as u32).unwrap_or(30),
+        n => n,
+    };
+    // in a fight: one move. Exploring: a good stretch at a time.
+    let squares = speed / w.campaign.map.feet_per_square.max(1) * if in_fight { 1 } else { 4 };
+    match w.move_token(&token, dnd_core::grid::Pos::new(req.x, req.y), true, squares.max(1)) {
+        Ok(feet) => Json(MapMoved { feet, map: w.map_view(&Viewer::Character(ch)) }).into_response(),
+        Err(e) => err(StatusCode::CONFLICT, e),
+    }
+}
+
+/// A player opens or closes a door their character is standing next to.
+async fn player_map_door(State(st): State<AppState>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>, Json(req): Json<MapDoorReq>) -> Response {
+    let mut w = st.world.write().unwrap();
+    if !authorized(&w, &headers, &q) {
+        return err(StatusCode::UNAUTHORIZED, "join code required");
+    }
+    let (token, ch) = match own_token(&w, &req.device_id) {
+        Ok(t) => t,
+        Err(r) => return r,
+    };
+    w.seen(&req.device_id);
+    if !w.campaign.settings.players_move_tokens {
+        return err(StatusCode::FORBIDDEN, "ask the DM to open it");
+    }
+    let Some(i) = w.campaign.map.door_near(req.x, req.y, 0.45) else { return err(StatusCode::NOT_FOUND, "no door there") };
+    let door = w.campaign.map.walls[i].clone();
+    if door.kind == WallKind::SecretDoor && !door.open {
+        return err(StatusCode::NOT_FOUND, "no door there");
+    }
+    let side = w.campaign.encounter.find(&token).map(|c| w.library.rules.size_squares(&c.size)).unwrap_or(1) as f32;
+    let at = w.campaign.encounter.find(&token).and_then(|c| c.pos).unwrap_or_default();
+    let (cx, cy) = (at.x as f32 + side / 2.0, at.y as f32 + side / 2.0);
+    let (mx, my) = door.mid();
+    if (cx - mx).abs().max((cy - my).abs()) > side / 2.0 + 0.6 {
+        return err(StatusCode::CONFLICT, "you are too far from that door");
+    }
+    match w.toggle_door(i, false) {
+        Ok(open) => {
+            let who = w.campaign.character(&ch).map(|c| c.name.clone()).unwrap_or_default();
+            w.campaign.log(format!("{who} {} a door", if open { "opens" } else { "closes" }));
+            Json(MapMoved { feet: 0, map: w.map_view(&Viewer::Character(ch)) }).into_response()
+        }
+        Err(e) => err(StatusCode::CONFLICT, e),
+    }
 }
 
 /// Species, classes, backgrounds and rules tables for the app's character builder.

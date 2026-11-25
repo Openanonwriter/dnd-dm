@@ -85,6 +85,29 @@ pub struct ErrorBody {
     pub error: String,
 }
 
+/// A player walking their own token to a square.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct MapMoveReq {
+    pub device_id: String,
+    pub x: i32,
+    pub y: i32,
+}
+
+/// A player opening or closing the door nearest to a point (in squares).
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct MapDoorReq {
+    pub device_id: String,
+    pub x: f32,
+    pub y: f32,
+}
+
+/// The map after a player's move, and how far they walked.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct MapMoved {
+    pub feet: u32,
+    pub map: crate::view::MapView,
+}
+
 /// A player app introducing itself (also its heartbeat).
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct RegisterReq {

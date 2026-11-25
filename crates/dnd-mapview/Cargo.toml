@@ -1,0 +1,10 @@
+[package]
+name = "dnd-mapview"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Draws a dnd-core MapView with egui: terrain, walls, light, fog and animated tokens"
+
+[dependencies]
+dnd-core = { path = "../dnd-core" }
+egui.workspace = true

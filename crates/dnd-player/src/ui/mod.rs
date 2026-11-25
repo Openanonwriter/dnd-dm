@@ -1,4 +1,5 @@
 pub mod connect;
+pub mod map;
 pub mod create;
 pub mod pick;
 pub mod sheet;

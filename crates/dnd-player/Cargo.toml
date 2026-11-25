@@ -17,6 +17,7 @@ path = "src/main.rs"
 
 [dependencies]
 dnd-core = { path = "../dnd-core" }
+dnd-mapview = { path = "../dnd-mapview" }
 serde.workspace = true
 serde_json.workspace = true
 toml.workspace = true

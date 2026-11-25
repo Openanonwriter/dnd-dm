@@ -1032,6 +1032,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dnd-core",
+ "dnd-mapview",
  "dnd-server",
  "eframe",
  "egui",
@@ -1043,12 +1044,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "dnd-mapview"
+version = "0.1.0"
+dependencies = [
+ "dnd-core",
+ "egui",
+]
+
+[[package]]
 name = "dnd-player"
 version = "0.1.0"
 dependencies = [
  "android_logger",
  "anyhow",
  "dnd-core",
+ "dnd-mapview",
  "dnd-server",
  "eframe",
  "egui",

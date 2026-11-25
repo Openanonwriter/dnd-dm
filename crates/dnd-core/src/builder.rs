@@ -172,7 +172,8 @@ fn resolve_item(text: &str, items: &BTreeMap<String, String>) -> Option<String> 
 }
 
 fn gear_item(text: &str, items: &BTreeMap<String, String>) -> GearItem {
-    let text = text.trim();
+    let text = text.trim().trim_matches(',').trim();
+    let text = text.strip_prefix("and ").unwrap_or(text).trim();
     let (first, rest) = text.split_once(' ').unwrap_or((text, ""));
     let words = [("a", 1), ("an", 1), ("one", 1), ("two", 2), ("three", 3), ("four", 4), ("five", 5), ("six", 6), ("ten", 10), ("twenty", 20)];
     let qty = first.parse::<u32>().ok().or_else(|| words.iter().find(|(w, _)| *w == first.to_lowercase()).map(|(_, n)| *n));
@@ -199,12 +200,18 @@ fn gear_item(text: &str, items: &BTreeMap<String, String>) -> GearItem {
 /// name a library item (by id or name) become that item, anything else is
 /// kept as a free-text item for the DM to settle.
 pub fn gear_options(line: &str, items: &BTreeMap<String, String>) -> Vec<GearOption> {
-    let options = split_all(vec![line.replace(", or ", " or ")], " or ");
+    // "A, B or C" is a three-way choice; without an "or" the commas list things you get together
+    let choice = line.contains(" or ");
+    let mut options = vec![line.replace(", or ", " or ")];
+    if choice {
+        options = split_all(split_all(options, " or "), ", ");
+    }
+    let seps: &[&str] = if choice { &[" + ", " and "] } else { &[" + ", " and ", ", "] };
     options
         .into_iter()
         .map(|label| {
             let mut parts = vec![label.clone()];
-            for sep in [" + ", " and ", ", "] {
+            for sep in seps {
                 parts = split_all(parts, sep);
             }
             GearOption { items: parts.iter().map(|p| gear_item(p, items)).collect(), label }
@@ -511,6 +518,13 @@ mod tests {
         assert_eq!(opts[0].items.len(), 2);
         assert_eq!((opts[0].items[1].item.as_deref(), opts[0].items[1].qty), (Some("arrow"), 20));
         assert_eq!((opts[1].items[0].item.as_deref(), opts[1].items[0].qty), (Some("dagger"), 2));
+
+        // "A, B or C" offers three things; a plain comma list gives them all
+        let three = gear_options("rapier, shortsword or dagger", &names);
+        assert_eq!(three.iter().map(|o| o.items.len()).collect::<Vec<_>>(), vec![1, 1, 1]);
+        let all = gear_options("rapier, two daggers, and thieves' tools", &names);
+        assert_eq!(all.len(), 1);
+        assert_eq!(all[0].items.iter().map(|g| g.item.as_deref()).collect::<Vec<_>>(), vec![Some("rapier"), Some("dagger"), Some("thieves_tools")]);
 
         // rapier / two daggers / pack + tools / money
         let gear = [0usize, 1, 0, 0];

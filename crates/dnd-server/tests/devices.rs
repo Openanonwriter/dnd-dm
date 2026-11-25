@@ -43,6 +43,11 @@ fn register_assign_and_guard() {
     assert_eq!(status(ureq::post(&format!("{base}/api/player/claim")).send_json(&claim)), 403);
     let patch = |ch: &str| status(ureq::request("PATCH", &format!("{base}/api/player/characters/{ch}")).set("X-Device-Id", "device-sam-0001").send_json(ureq::json!({ "notes": "hi" })));
     assert_eq!(patch("thia"), 403);
+    // leaving the device id off is no way around it, and DM-only data stays with the DM
+    assert_eq!(status(ureq::request("PATCH", &format!("{base}/api/player/characters/thia")).send_json(ureq::json!({ "notes": "hi" }))), 403);
+    world.write().unwrap().campaign.character_mut("thia").unwrap().dm_notes = "secretly a dragon".into();
+    let seen: serde_json::Value = ureq::get(&format!("{base}/api/characters/thia")).call().unwrap().into_json().unwrap();
+    assert!(seen.get("dm_notes").is_none(), "{seen}");
 
     // the DM assigns; the next check-in tells the phone
     let rev = {

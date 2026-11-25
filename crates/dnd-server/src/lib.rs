@@ -247,18 +247,27 @@ async fn content_counts(State(st): State<AppState>) -> Json<HashMap<String, usiz
     Json(Kind::ALL.iter().map(|k| (k.folder().to_string(), w.library.count(*k))).collect())
 }
 
-async fn content_list(State(st): State<AppState>, Path(kind): Path<String>) -> Response {
+async fn content_list(State(st): State<AppState>, Path(kind): Path<String>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
     let Some(k) = parse_kind(&kind) else { return err(StatusCode::NOT_FOUND, "unknown kind") };
     let w = st.world.read().unwrap();
-    Json(w.library.list(k).into_iter().map(|(id, name)| Listed { id, name }).collect::<Vec<_>>()).into_response()
+    let dm = dm_authorized(&w, &headers, &q);
+    let list: Vec<Listed> = w
+        .library
+        .list(k)
+        .into_iter()
+        .filter(|(id, _)| dm || w.library.get(k, id).map(|e| !e.hidden()).unwrap_or(false))
+        .map(|(id, name)| Listed { id, name })
+        .collect();
+    Json(list).into_response()
 }
 
-async fn content_get(State(st): State<AppState>, Path((kind, id)): Path<(String, String)>) -> Response {
+async fn content_get(State(st): State<AppState>, Path((kind, id)): Path<(String, String)>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
     let Some(k) = parse_kind(&kind) else { return err(StatusCode::NOT_FOUND, "unknown kind") };
     let w = st.world.read().unwrap();
+    let dm = dm_authorized(&w, &headers, &q);
     match w.library.get(k, &id) {
-        Some(e) => Json(e).into_response(),
-        None => err(StatusCode::NOT_FOUND, "no such entry"),
+        Some(e) if dm || !e.hidden() => Json(e).into_response(),
+        _ => err(StatusCode::NOT_FOUND, "no such entry"),
     }
 }
 
@@ -276,10 +285,11 @@ async fn characters(State(st): State<AppState>) -> Json<Vec<CharListed>> {
     )
 }
 
-async fn character_get(State(st): State<AppState>, Path(id): Path<String>) -> Response {
+async fn character_get(State(st): State<AppState>, Path(id): Path<String>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
     let w = st.world.read().unwrap();
+    let dm = dm_authorized(&w, &headers, &q);
     match w.campaign.character(&id) {
-        Some(c) => Json(c.clone()).into_response(),
+        Some(c) => Json(if dm { c.clone() } else { c.player_view() }).into_response(),
         None => err(StatusCode::NOT_FOUND, "no such character"),
     }
 }
@@ -336,18 +346,20 @@ async fn character_create(
     (StatusCode::CREATED, Json(Listed { id, name })).into_response()
 }
 
-async fn sheet_get(State(st): State<AppState>, Path(id): Path<String>) -> Response {
+async fn sheet_get(State(st): State<AppState>, Path(id): Path<String>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
     let w = st.world.read().unwrap();
+    let dm = dm_authorized(&w, &headers, &q);
     match w.sheet(&id) {
-        Some(s) => Json(s).into_response(),
+        Some(s) => Json(if dm { s } else { s.player_view() }).into_response(),
         None => err(StatusCode::NOT_FOUND, "no such character"),
     }
 }
 
-async fn sheet_html(State(st): State<AppState>, Path(id): Path<String>) -> Response {
+async fn sheet_html(State(st): State<AppState>, Path(id): Path<String>, headers: HeaderMap, Query(q): Query<HashMap<String, String>>) -> Response {
     let w = st.world.read().unwrap();
+    let dm = dm_authorized(&w, &headers, &q);
     match w.sheet(&id) {
-        Some(s) => Html(dnd_core::export::character_sheet_html(&s, &w.library)).into_response(),
+        Some(s) => Html(dnd_core::export::character_sheet_html(&if dm { s } else { s.player_view() }, &w.library)).into_response(),
         None => err(StatusCode::NOT_FOUND, "no such character"),
     }
 }
@@ -433,12 +445,13 @@ async fn player_character_patch(
         return err(StatusCode::UNAUTHORIZED, "join code required");
     }
     // a registered device may only edit its own character, unless the DM lets players pick
-    if let Some(dev) = headers.get("x-device-id").and_then(|v| v.to_str().ok()) {
-        w.seen(dev);
-        let own = w.campaign.device_character(dev).map(|c| c.id == id).unwrap_or(false);
-        if !own && !w.campaign.settings.players_choose_character {
-            return err(StatusCode::FORBIDDEN, "the DM has not assigned this character to your device");
-        }
+    let dev = headers.get("x-device-id").and_then(|v| v.to_str().ok()).map(|s| s.to_string());
+    if let Some(d) = &dev {
+        w.seen(d);
+    }
+    let own = dev.as_deref().and_then(|d| w.campaign.device_character(d)).map(|c| c.id == id).unwrap_or(false);
+    if !own && !w.campaign.settings.players_choose_character {
+        return err(StatusCode::FORBIDDEN, "the DM has not assigned this character to your device");
     }
     let Some(ch) = w.campaign.character_mut(&id) else { return err(StatusCode::NOT_FOUND, "no such character") };
     ch.apply_player_patch(patch);
@@ -705,10 +718,16 @@ async fn player_character_create(
         gear: &req.gear,
         replacing: replacing.as_deref(),
     };
-    let ch = match dnd_core::builder::prepare_player_character(&w.library, &w.campaign, &player, &req.character, &cx) {
+    let mut ch = match dnd_core::builder::prepare_player_character(&w.library, &w.campaign, &player, &req.character, &cx) {
         Ok(ch) => ch,
         Err(e) => return err(StatusCode::BAD_REQUEST, e),
     };
+    // a rebuild keeps what the DM put on the old character
+    if let Some(old) = replacing.as_deref().and_then(|id| w.campaign.character(id)) {
+        ch.dm_notes = old.dm_notes.clone();
+        ch.modifiers = old.modifiers.clone();
+        ch.inventory.extend(old.inventory.iter().filter(|i| i.hidden || !i.dm_notes.is_empty()).cloned());
+    }
     let (id, name) = (ch.id.clone(), ch.name.clone());
     if let Some(old) = &replacing {
         w.campaign.characters.retain(|c| c.id != *old);

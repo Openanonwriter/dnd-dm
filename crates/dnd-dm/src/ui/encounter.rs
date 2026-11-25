@@ -322,7 +322,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 for (i, c) in w.campaign.encounter.combatants.iter_mut().enumerate() {
                     let is_turn = active && i == turn;
                     let is_sel = st.selected.as_deref() == Some(c.id.as_str());
-                    let marker = if is_turn { "▶" } else if is_sel { "●" } else { "" };
+                    let marker = if is_turn { "▶" } else if is_sel { "⏺" } else { "" };
                     if ui.selectable_label(is_sel, marker).clicked() {
                         select = Some(c.id.clone());
                     }

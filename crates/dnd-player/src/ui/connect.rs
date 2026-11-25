@@ -8,7 +8,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             ui.add_space(24.0);
             ui.vertical_centered(|ui| {
-                ui.label(egui::RichText::new("⬢").color(theme::ORANGE).size(48.0));
+                ui.label(egui::RichText::new("⬣").color(theme::ORANGE).size(48.0));
                 ui.heading(theme::accent("dnd-player"));
                 ui.label(theme::muted("Your character sheet, live from the DM's table."));
             });

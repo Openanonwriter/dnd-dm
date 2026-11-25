@@ -454,7 +454,7 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         heading(ui, "Saving throws");
         for sv in &s.saves {
             ui.horizontal(|ui| {
-                ui.label(if sv.proficient { "●" } else { "○" });
+                ui.label(if sv.proficient { "⏺" } else { "○" });
                 ui.label(format!("{:<13}", sv.name));
                 ui.label(egui::RichText::new(bonus(sv.bonus)).strong());
                 if !sv.notes.is_empty() {
@@ -525,7 +525,7 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         heading(ui, "Skills");
         for sk in &s.skills {
             ui.horizontal(|ui| {
-                ui.label(if sk.expertise { "★" } else if sk.proficient { "●" } else { "○" });
+                ui.label(if sk.expertise { "★" } else if sk.proficient { "⏺" } else { "○" });
                 ui.label(format!("{} ({})", sk.name, sk.ability.to_uppercase()));
                 ui.label(egui::RichText::new(bonus(sk.bonus)).strong());
                 if !sk.notes.is_empty() {

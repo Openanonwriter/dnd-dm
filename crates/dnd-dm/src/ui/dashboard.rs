@@ -123,7 +123,7 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
                 if live {
-                    ui.label(egui::RichText::new("● Game in progress").color(theme::GOOD).strong().size(15.0));
+                    ui.label(egui::RichText::new("⏺ Game in progress").color(theme::GOOD).strong().size(15.0));
                     ui.label(theme::muted("Players can't make new characters now. Give anyone without one a character below.").small());
                 } else {
                     ui.label(egui::RichText::new("○ Between sessions").strong().size(15.0));
@@ -193,7 +193,7 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
         let frame = if waiting { theme::card_hi() } else { theme::card() };
         frame.show(ui, |ui| {
             ui.horizontal(|ui| {
-                let (dot, col, tip) = if r.online { ("●", theme::GOOD, "connected".to_string()) } else { ("○", theme::MUTED, format!("offline · last seen {}", r.last_seen)) };
+                let (dot, col, tip) = if r.online { ("⏺", theme::GOOD, "connected".to_string()) } else { ("○", theme::MUTED, format!("offline · last seen {}", r.last_seen)) };
                 ui.label(egui::RichText::new(dot).color(col)).on_hover_text(tip);
                 ui.vertical(|ui| {
                     ui.label(egui::RichText::new(&r.name).strong().size(15.0));

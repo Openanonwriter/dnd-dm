@@ -20,13 +20,13 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 ui.label(theme::muted(sub).small());
             });
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                let dot = if app.online { ("●", theme::GOOD, "connected") } else { ("○", theme::MUTED, "offline (cached)") };
+                let dot = if app.online { ("⏺", theme::GOOD, "connected") } else { ("○", theme::MUTED, "offline (cached)") };
                 ui.label(egui::RichText::new(dot.0).color(dot.1)).on_hover_text(dot.2);
                 if app.busy {
                     ui.spinner();
                 }
                 if app.last_edit.is_some() {
-                    ui.label(theme::accent("●").small());
+                    ui.label(theme::accent("⏺").small());
                 }
             });
         });
@@ -128,7 +128,7 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     egui::Grid::new("saves").num_columns(3).spacing([12.0, 6.0]).show(ui, |ui| {
         for (i, sv) in s.saves.iter().enumerate() {
             ui.horizontal(|ui| {
-                ui.label(if sv.proficient { theme::accent("●") } else { theme::muted("○") });
+                ui.label(if sv.proficient { theme::accent("⏺") } else { theme::muted("○") });
                 ui.label(&sv.name[..3].to_uppercase());
                 ui.label(egui::RichText::new(bonus(sv.bonus)).strong());
                 if !sv.notes.is_empty() {
@@ -154,7 +154,7 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let skills: Vec<_> = s.skills.clone();
     for sk in skills {
         ui.horizontal(|ui| {
-            ui.label(if sk.expertise { theme::accent("★") } else if sk.proficient { theme::accent("●") } else { theme::muted("○") });
+            ui.label(if sk.expertise { theme::accent("★") } else if sk.proficient { theme::accent("⏺") } else { theme::muted("○") });
             let r = ui.add(egui::Label::new(format!("{}  {}", sk.name, theme_dim(&sk.ability))).sense(egui::Sense::click()));
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.small_button(egui::RichText::new(bonus(sk.bonus)).strong()).clicked() || r.clicked() {
@@ -378,7 +378,7 @@ fn spells_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.label(egui::RichText::new(format!("L{}", i + 1)).strong());
             for k in 0..*n {
                 let used = k < ch.spells.slots_used[i];
-                let txt = if used { "○" } else { "●" };
+                let txt = if used { "○" } else { "⏺" };
                 if ui.add(egui::Button::new(egui::RichText::new(txt).size(22.0).color(if used { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
                     ch.spells.slots_used[i] = if used { k } else { k + 1 };
                 }
@@ -390,7 +390,7 @@ fn spells_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.label(egui::RichText::new(format!("Pact L{l}")).strong());
             for k in 0..n {
                 let used = k < ch.spells.pact_slots_used;
-                if ui.add(egui::Button::new(egui::RichText::new(if used { "○" } else { "●" }).size(22.0).color(if used { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
+                if ui.add(egui::Button::new(egui::RichText::new(if used { "○" } else { "⏺" }).size(22.0).color(if used { theme::MUTED } else { theme::ORANGE })).frame(false)).clicked() {
                     ch.spells.pact_slots_used = if used { k } else { k + 1 };
                 }
             }

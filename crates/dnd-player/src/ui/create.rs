@@ -43,7 +43,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             }
             ui.heading(theme::accent("Make your character"));
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                let dot = if app.online { ("●", theme::GOOD) } else { ("○", theme::MUTED) };
+                let dot = if app.online { ("⏺", theme::GOOD) } else { ("○", theme::MUTED) };
                 ui.label(egui::RichText::new(dot.0).color(dot.1));
             });
         });

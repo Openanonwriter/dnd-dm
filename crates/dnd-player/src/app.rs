@@ -35,7 +35,7 @@ impl Tab {
     pub const ALL: [Tab; 8] = [Tab::Stats, Tab::Combat, Tab::Spells, Tab::Items, Tab::Notes, Tab::Party, Tab::Dice, Tab::Settings];
     pub fn icon(self) -> &'static str {
         match self {
-            Tab::Stats => "🧙",
+            Tab::Stats => "👤",
             Tab::Combat => "⚔",
             Tab::Spells => "✨",
             Tab::Items => "🎒",

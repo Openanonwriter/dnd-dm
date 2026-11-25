@@ -32,12 +32,12 @@ pub enum Tool {
 impl Tool {
     const ALL: [(Tool, &'static str, &'static str); 11] = [
         (Tool::Select, "✋ Move", "Drag tokens. Click a door to open or close it; right-click to lock it. Right-click a token, prop or note to hide it from players."),
-        (Tool::Paint, "🖌 Terrain", "Paint squares with the chosen terrain. Solid rock is a wall: it blocks sight and movement by itself."),
+        (Tool::Paint, "✏ Terrain", "Paint squares with the chosen terrain. Solid rock is a wall: it blocks sight and movement by itself."),
         (Tool::Room, "⬛ Room", "Drag a rectangle to fill it with the chosen terrain. Dig rooms and corridors out of rock."),
-        (Tool::Wall, "╱ Wall", "Drag from one point to another to draw a thin wall (snaps to half squares)."),
+        (Tool::Wall, "◼ Wall", "Drag from one point to another to draw a thin wall (snaps to half squares)."),
         (Tool::Door, "🚪 Door", "Click the edge between two squares to put a door, secret door or window there. Click again to remove it."),
         (Tool::Light, "🔥 Light", "Click to place a torch or lamp. With Move, click a light to switch it on or off."),
-        (Tool::Prop, "🪑 Prop", "Click to place furniture and scenery."),
+        (Tool::Prop, "💺 Prop", "Click to place furniture and scenery."),
         (Tool::Note, "📌 Note", "Click a square to pin a note on it."),
         (Tool::Fog, "☁ Fog", "Drag to reveal squares to the players (or hide them again)."),
         (Tool::Erase, "✖ Erase", "Click a wall, door, light, prop or note to remove it."),
@@ -161,7 +161,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 /// Left: every map of the campaign, grouped by chapter.
 fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut Option<(String, bool)>) {
     let st = &mut app.map;
-    egui::SidePanel::left("map_shelf").resizable(true).default_width(210.0).show_inside(ui, |ui| {
+    egui::SidePanel::left("map_shelf").resizable(false).exact_width(214.0).show_inside(ui, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
             theme::section(ui, "Maps");
             let mut rows: Vec<(String, String, String, bool)> = vec![(w.campaign.map.chapter.clone(), w.campaign.map.id.clone(), w.campaign.map.name.clone(), true)];
@@ -281,7 +281,7 @@ fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut O
 fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: bool) {
     let st = &mut app.map;
     let selected = &mut app.encounter.selected;
-    egui::SidePanel::right("map_tokens").resizable(true).default_width(220.0).show_inside(ui, |ui| {
+    egui::SidePanel::right("map_tokens").resizable(false).exact_width(224.0).show_inside(ui, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
             theme::section(ui, if preparing { "Waiting on this map" } else { "On the table" });
             if preparing {
@@ -296,7 +296,7 @@ fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: boo
                         CombatantKind::Creature { .. } => theme::BAD,
                         CombatantKind::Custom => theme::MUTED,
                     };
-                    ui.colored_label(col, "●");
+                    ui.colored_label(col, "⏺");
                     let label = if c.pos.is_some() { c.name.clone() } else { format!("{} (not placed)", c.name) };
                     if ui.selectable_label(sel, label).on_hover_text("Select, then click a square to put it there").clicked() {
                         *selected = if sel { None } else { Some(c.id.clone()) };
@@ -419,10 +419,10 @@ fn toolbar(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui) {
             }
         }
         ui.separator();
-        if ui.add_enabled(!st.undo.is_empty(), egui::Button::new("↶ Undo")).on_hover_text("Ctrl+Z").clicked() {
+        if ui.add_enabled(!st.undo.is_empty(), egui::Button::new("↩ Undo")).on_hover_text("Ctrl+Z").clicked() {
             undo(st, map);
         }
-        if ui.add_enabled(!st.redo.is_empty(), egui::Button::new("↷ Redo")).clicked() {
+        if ui.add_enabled(!st.redo.is_empty(), egui::Button::new("↪ Redo")).clicked() {
             if let Some(m) = st.redo.pop() {
                 st.undo.push(std::mem::replace(map, m));
             }

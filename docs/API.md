@@ -111,3 +111,14 @@ while it is empty.
 
 All JSON mirrors the TOML files one to one (same field names), so a player
 app can cache a character as TOML or JSON interchangeably.
+
+## The map
+
+See `docs/MAPS.md`. `GET /api/encounter` no longer carries the map's content
+(only its name and size), and a creature the party cannot see has no `pos`.
+
+| method | path | notes |
+|--------|------|-------|
+| GET | `/api/player/map?device=<device_id>` | → `MapView`: what that device's character may know. `cells` (terrain rows, `?` = never seen), `seen` (`0` never, `1` remembered, `2` in view), `light` (`0` dark, `1` dim, `2` bright), `walls`, `lights`, `props`, `markers`, `tokens` (`mine` = this player may move it). Without a device, the whole party's view. |
+| POST | `/api/player/map/move` | body `{device_id, x, y}`; needs the join code. Walks the device's own character there. 409 with the reason when there is no way, it is too far or someone is standing there; 403 when it is not their turn. → `{feet, map}`. |
+| POST | `/api/player/map/door` | body `{device_id, x, y}` (a point in squares). Opens or closes the door nearest that point if the character is next to it and it is not locked. → `{feet: 0, map}`. |

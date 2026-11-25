@@ -1,8 +1,9 @@
 # Battle maps & fog of war — research and proposal
 
-Status: **proposal, not built.** Nothing here is implemented beyond the
-plain grid map that exists today. Approve, change or reject before any map
-work starts.
+Status: **phases 1 to 3 are built** (several maps, terrain, walls, doors,
+lights, darkness, manual and vision fog, per-player views, walking). See
+`docs/MAPS.md`. Still open from this proposal: image backgrounds and
+`.dd2vtt` import, map markers per player, elevation.
 
 ## What the good VTTs do
 

@@ -201,7 +201,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                         to_select = Some(id.clone());
                     }
                     if is_hb {
-                        ui.label(theme::accent("●").small()).on_hover_text("homebrew");
+                        ui.label(theme::accent("⏺").small()).on_hover_text("homebrew");
                     }
                 });
             }
@@ -328,7 +328,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         } else if !app.content.info.is_empty() {
             ui.label(theme::muted(&app.content.info).small());
         } else if app.content.last_edit.is_some() {
-            ui.label(theme::accent("● unsaved edits…").small());
+            ui.label(theme::accent("⏺ unsaved edits…").small());
         }
         ui.separator();
 

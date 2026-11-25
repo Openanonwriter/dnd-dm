@@ -353,29 +353,55 @@ pub fn draw(painter: &Painter, rect: Rect, cam: &Camera, view: &MapView, anim: &
         p.text(c, egui::Align2::CENTER_CENTER, "START", egui::FontId::proportional((s * 0.2).max(8.0)), Color32::from_rgb(90, 220, 140));
     }
 
-    // ---- warm glow around lights (before the darkness, so it tints the floor)
-    let mut glow = Mesh::default();
+    // ---- warm light on the floor. Worked out square by square from what is
+    // actually lit, so it stops at walls, then blended at the corners.
     let fps = view.feet_per_square.max(1) as f32;
-    let mut glow_at = |c: Pos2, radius: f32, col: Color32, seed: f32| {
-        let flicker = 0.85 + 0.15 * ((time as f32 * 7.0 + seed).sin() * (time as f32 * 3.1 + seed * 2.0).cos());
-        let i = glow.vertices.len() as u32;
-        glow.colored_vertex(c, alpha(col, 0.26 * flicker));
-        let n = 28;
-        for k in 0..=n {
-            let a = k as f32 / n as f32 * std::f32::consts::TAU;
-            glow.colored_vertex(c + vec2(a.cos(), a.sin()) * radius * flicker.sqrt(), alpha(col, 0.0));
-        }
-        for k in 0..n {
-            glow.add_triangle(i, i + 1 + k, i + 2 + k);
+    let (gx0, gy0) = (x0 - 1, y0 - 1);
+    let (gw, gh) = ((x1 - x0 + 3).max(1) as usize, (y1 - y0 + 3).max(1) as usize);
+    let mut warm = vec![0f32; gw * gh];
+    let night = view.darkness.clamp(0.2, 1.0);
+    let mut shine = |cx: f32, cy: f32, radius: f32, seed: f32| {
+        let flicker = 0.86 + 0.14 * ((time as f32 * 7.0 + seed).sin() * (time as f32 * 3.1 + seed * 2.0).cos());
+        let r = radius.ceil() as i32 + 1;
+        for y in (cy as i32 - r).max(gy0)..=(cy as i32 + r).min(gy0 + gh as i32 - 1) {
+            for x in (cx as i32 - r).max(gx0)..=(cx as i32 + r).min(gx0 + gw as i32 - 1) {
+                let t = view.tile(x, y);
+                if t == tile::ROCK || t == tile::UNKNOWN || view.light_at(x, y) == 0 || view.seen_at(x, y) != 2 {
+                    continue;
+                }
+                let d = ((x as f32 + 0.5 - cx).powi(2) + (y as f32 + 0.5 - cy).powi(2)).sqrt();
+                if d < radius {
+                    warm[(y - gy0) as usize * gw + (x - gx0) as usize] += (1.0 - d / radius).powf(1.4) * flicker * night;
+                }
+            }
         }
     };
     for l in view.lights.iter().filter(|l| l.on) {
-        glow_at(cam.to_screen(rect, l.x, l.y), l.bright.max(5) as f32 / fps * s * 1.25, hex(&l.color), l.x * 3.1 + l.y);
+        shine(l.x, l.y, l.dim.max(l.bright).max(5) as f32 / fps, l.x * 3.1 + l.y);
     }
     for t in view.tokens.iter().filter(|t| t.light > 0) {
         let c = anim.tokens.get(&t.id).map(|a| a.shown(time)).unwrap_or((t.x as f32, t.y as f32));
         let half = t.size as f32 / 2.0;
-        glow_at(cam.to_screen(rect, c.0 + half, c.1 + half), t.light as f32 / fps * s * 1.25, Color32::from_rgb(255, 170, 70), t.x as f32);
+        shine(c.0 + half, c.1 + half, t.light as f32 * 2.0 / fps, t.x as f32);
+    }
+    let warm_at = |x: i32, y: i32| -> f32 {
+        if x < gx0 || y < gy0 || x >= gx0 + gw as i32 || y >= gy0 + gh as i32 {
+            0.0
+        } else {
+            warm[(y - gy0) as usize * gw + (x - gx0) as usize]
+        }
+    };
+    let mut glow = Mesh::default();
+    let ember = |x: i32, y: i32| alpha(Color32::from_rgb(255, 168, 72), ((warm_at(x - 1, y - 1) + warm_at(x, y - 1) + warm_at(x - 1, y) + warm_at(x, y)) / 4.0 * 0.26).min(0.32));
+    for y in y0..=y1 {
+        for x in x0..=x1 {
+            let cols = [ember(x, y), ember(x + 1, y), ember(x + 1, y + 1), ember(x, y + 1)];
+            if cols.iter().all(|c| c.a() == 0) {
+                continue;
+            }
+            let r = cell(x, y);
+            gradient_quad(&mut glow, [r.left_top(), r.right_top(), r.right_bottom(), r.left_bottom()], cols);
+        }
     }
     p.add(Shape::mesh(glow));
     for l in &view.lights {
@@ -383,17 +409,20 @@ pub fn draw(painter: &Painter, rect: Rect, cam: &Camera, view: &MapView, anim: &
     }
 
     // ---- darkness and fog, blended at the corners of the squares so edges are soft
-    let fog_strength = if view.dm && !opts.solid_fog { 0.55 } else { 1.0 };
+    let fog_strength = if view.dm && !opts.solid_fog { 0.45 } else { 1.0 };
     let cover = |x: i32, y: i32| -> f32 {
         let (x, y) = (x.clamp(0, view.width as i32 - 1), y.clamp(0, view.height as i32 - 1));
         match view.seen_at(x, y) {
             0 => 1.0 * fog_strength,
             1 => 0.62 * fog_strength,
-            _ => match view.light_at(x, y) {
-                2 => 0.0,
-                1 => 0.26,
-                _ => 0.5,
-            },
+            _ => {
+                fog_strength.max(0.6)
+                    * match view.light_at(x, y) {
+                        2 => 0.0,
+                        1 => 0.26,
+                        _ => 0.5,
+                    }
+            }
         }
     };
     let mut fog = Mesh::default();

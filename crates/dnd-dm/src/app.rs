@@ -23,7 +23,7 @@ impl View {
         match self {
             View::Dashboard => "🏠  Dashboard",
             View::Content => "📚  Content",
-            View::Characters => "🧙  Characters",
+            View::Characters => "👤  Characters",
             View::Encounter => "⚔  Encounter",
             View::Map => "🗺  Map",
             View::Campaign => "💾  Campaign",
@@ -58,6 +58,7 @@ pub struct DmApp {
     pub saved_revision: u64,
     pub last_change: Instant,
     pub autosave: bool,
+    pub shot: crate::shot::Shot,
 }
 
 pub const AUTOSAVE_DELAY: Duration = Duration::from_millis(1200);
@@ -99,7 +100,11 @@ impl DmApp {
             saved_revision: rev,
             last_change: Instant::now(),
             autosave: true,
+            shot: crate::shot::Shot::from_env(),
         };
+        if std::env::var("DND_DM_VIEW").map(|v| v == "map").unwrap_or(false) {
+            app.view = View::Map;
+        }
         if app.paths.config.autostart_server {
             app.start_server();
         }
@@ -186,7 +191,7 @@ impl DmApp {
     fn top_bar(&mut self, ctx: &egui::Context) {
         egui::TopBottomPanel::top("top").frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin::symmetric(10, 6))).show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("⬢ dnd-dm").color(theme::ORANGE).strong().size(18.0));
+                ui.label(egui::RichText::new("⬣ dnd-dm").color(theme::ORANGE).strong().size(18.0));
                 ui.separator();
                 let (name, rev, pcs) = {
                     let w = self.world.read().unwrap();
@@ -196,14 +201,14 @@ impl DmApp {
                 ui.label(theme::muted(format!("{pcs} PCs")));
                 let unsaved = rev != self.saved_revision;
                 if unsaved {
-                    ui.label(egui::RichText::new("● saving…").color(theme::ORANGE).small());
+                    ui.label(egui::RichText::new("⏺ saving…").color(theme::ORANGE).small());
                 } else {
-                    ui.label(egui::RichText::new("● saved").color(theme::GOOD).small());
+                    ui.label(egui::RichText::new("⏺ saved").color(theme::GOOD).small());
                 }
                 ui.separator();
                 match &self.server {
                     Some(h) => {
-                        ui.colored_label(theme::GOOD, format!("● server :{}", h.addr.port()));
+                        ui.colored_label(theme::GOOD, format!("⏺ server :{}", h.addr.port()));
                         if ui.small_button("stop").clicked() {
                             self.stop_server();
                         }
@@ -286,6 +291,7 @@ impl DmApp {
 impl eframe::App for DmApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.request_repaint_after(Duration::from_millis(400));
+        self.shot.tick(ctx);
         self.maybe_autosave(false);
         self.top_bar(ctx);
         self.nav(ctx);

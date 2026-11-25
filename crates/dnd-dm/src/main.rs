@@ -2,6 +2,7 @@
 
 mod app;
 mod paths;
+mod shot;
 mod ui;
 
 fn main() -> eframe::Result {

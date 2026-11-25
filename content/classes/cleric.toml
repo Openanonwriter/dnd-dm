@@ -1,0 +1,40 @@
+id = "cleric"
+name = "Cleric"
+hit_die = 8
+primary_abilities = ["wis"]
+saving_throws = ["wis", "cha"]
+armor_proficiencies = ["light", "medium", "shields"]
+weapon_proficiencies = ["simple"]
+subclass_level = 1
+subclass_label = "Divine Domain"
+starting_equipment = ["mace or warhammer", "scale_mail, leather_armor or chain_mail", "light_crossbow + 20 bolts or simple weapon", "priest's pack or explorer's pack", "shield, holy symbol"]
+description = "A priestly champion who wields divine magic in service of a higher power."
+
+[skill_choices]
+count = 2
+from = ["history", "insight", "medicine", "persuasion", "religion"]
+
+[spellcasting]
+ability = "wis"
+progression = "full"
+prepared = "max(1, wis_mod + class.cleric.level)"
+cantrips_known = [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+ritual_casting = true
+focus = "holy symbol"
+
+[[features]]
+name = "Channel Divinity: Turn Undead"
+level = 2
+description = "Action: each undead within 30 ft that can see or hear you must make a Wisdom save or be turned for 1 minute."
+uses = "if(class.cleric.level >= 18, 3, if(class.cleric.level >= 6, 2, 1))"
+recharge = "short_rest"
+
+[[features]]
+name = "Destroy Undead"
+level = 5
+description = "Undead of CR 1/2 or lower that you turn are destroyed instead. (CR rises at 8th, 11th, 14th, 17th.)"
+
+[[features]]
+name = "Divine Intervention"
+level = 10
+description = "Implore your deity's aid: roll d100; success if you roll your cleric level or lower."

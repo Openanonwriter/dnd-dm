@@ -1,0 +1,50 @@
+id = "fighter"
+name = "Fighter"
+hit_die = 10
+primary_abilities = ["str", "dex"]
+saving_throws = ["str", "con"]
+armor_proficiencies = ["light", "medium", "heavy", "shields"]
+weapon_proficiencies = ["simple", "martial"]
+subclass_level = 3
+subclass_label = "Martial Archetype"
+asi_levels = [4, 6, 8, 12, 14, 16, 19]
+starting_equipment = ["chain_mail or leather_armor + longbow + 20 arrows", "martial weapon and shield, or two martial weapons", "light_crossbow + 20 bolts, or two handaxes", "dungeoneer's pack or explorer's pack"]
+description = "A master of martial combat, skilled with a variety of weapons and armor."
+
+[skill_choices]
+count = 2
+from = ["acrobatics", "animal_handling", "athletics", "history", "insight", "intimidation", "perception", "survival"]
+
+# Fighting styles are modelled as separate features; keep the one you chose and
+# delete the rest when you copy this file, or add the modifier on the character.
+[[features]]
+name = "Fighting Style: Defense"
+level = 1
+description = "While you are wearing armor, you gain a +1 bonus to AC. (Pick ONE fighting style — edit this file or override on the character's Modifiers tab.)"
+modifiers = [{ target = "ac", op = "add", value = "1", condition = "armored" }]
+
+[[features]]
+name = "Second Wind"
+level = 1
+description = "Bonus action: regain hit points equal to 1d10 + your fighter level."
+uses = "1"
+recharge = "short_rest"
+
+[[features]]
+name = "Action Surge"
+level = 2
+description = "Take one additional action on your turn."
+uses = "if(class.fighter.level >= 17, 2, 1)"
+recharge = "short_rest"
+
+[[features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn. (Three times at 11th, four at 20th.)"
+
+[[features]]
+name = "Indomitable"
+level = 9
+description = "Reroll a saving throw that you fail. You must use the new roll."
+uses = "if(class.fighter.level >= 17, 3, if(class.fighter.level >= 13, 2, 1))"
+recharge = "long_rest"

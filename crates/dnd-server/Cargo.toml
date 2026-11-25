@@ -1,0 +1,20 @@
+[package]
+name = "dnd-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "LAN HTTP + WebSocket server exposing the dnd-dm world to player apps"
+
+[dependencies]
+dnd-core = { path = "../dnd-core" }
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+axum.workspace = true
+futures-util.workspace = true
+tower-http.workspace = true
+local-ip-address.workspace = true
+
+[dev-dependencies]
+ureq = { version = "2", default-features = false, features = ["json"] }

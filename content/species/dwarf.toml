@@ -1,0 +1,42 @@
+id = "dwarf"
+name = "Dwarf (Hill)"
+size = "Medium"
+speed = 25
+darkvision = 60
+languages = ["Common", "Dwarvish"]
+description = "Bold and hardy, known as skilled warriors, miners and workers of stone and metal."
+
+[[modifiers]]
+target = "ability.con"
+value = "2"
+[[modifiers]]
+target = "ability.wis"
+value = "1"
+
+[[traits]]
+name = "Dwarven Resilience"
+description = "Advantage on saving throws against poison, and resistance to poison damage."
+modifiers = [{ target = "save.con", op = "advantage", note = "vs. poison" }]
+
+[[traits]]
+name = "Dwarven Combat Training"
+description = "Proficiency with the battleaxe, handaxe, light hammer and warhammer."
+modifiers = [
+  { target = "proficiency.weapon.battleaxe", op = "grant" },
+  { target = "proficiency.weapon.handaxe", op = "grant" },
+  { target = "proficiency.weapon.light_hammer", op = "grant" },
+  { target = "proficiency.weapon.warhammer", op = "grant" },
+]
+
+[[traits]]
+name = "Stonecunning"
+description = "History checks about the origin of stonework count as proficient with double proficiency bonus."
+
+[[traits]]
+name = "Dwarven Toughness"
+description = "Your hit point maximum increases by 1, and by 1 every time you gain a level."
+modifiers = [{ target = "hp.max", op = "add", value = "level" }]
+
+[[traits]]
+name = "Speed"
+description = "Your speed is not reduced by wearing heavy armor."

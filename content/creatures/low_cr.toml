@@ -1,0 +1,216 @@
+# Several creatures in one file.
+
+[[creatures]]
+id = "wolf"
+name = "Wolf"
+size = "Medium"
+kind = "beast"
+alignment = "unaligned"
+ac = 13
+ac_note = "natural armor"
+hp = 11
+hp_formula = "2d8 + 2"
+cr = "1/4"
+xp = 50
+senses = ["passive Perception 13"]
+speed = { walk = 40 }
+abilities = { str = 12, dex = 15, con = 12, int = 3, wis = 12, cha = 6 }
+skills = { perception = 3, stealth = 4 }
+traits = [
+  { name = "Keen Hearing and Smell", description = "Advantage on Wisdom (Perception) checks that rely on hearing or smell." },
+  { name = "Pack Tactics", description = "Advantage on attack rolls against a creature if at least one of the wolf's allies is within 5 feet of it and not incapacitated." },
+]
+actions = [
+  { name = "Bite", description = "Melee Weapon Attack. If the target is a creature, it must succeed on a DC 11 Strength saving throw or be knocked prone.", attack = { to_hit = 4, reach = "reach 5 ft., one target", damage = "2d4 + 2", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "bandit"
+name = "Bandit"
+size = "Medium"
+kind = "humanoid (any race)"
+alignment = "any non-lawful"
+ac = 12
+ac_note = "leather armor"
+hp = 11
+hp_formula = "2d8 + 2"
+cr = "1/8"
+xp = 25
+senses = ["passive Perception 10"]
+languages = ["any one language (usually Common)"]
+speed = { walk = 30 }
+abilities = { str = 11, dex = 12, con = 12, int = 10, wis = 10, cha = 10 }
+actions = [
+  { name = "Scimitar", description = "Melee Weapon Attack.", attack = { to_hit = 3, reach = "reach 5 ft., one target", damage = "1d6 + 1", damage_type = "slashing" } },
+  { name = "Light Crossbow", description = "Ranged Weapon Attack.", attack = { to_hit = 3, reach = "range 80/320 ft., one target", damage = "1d8 + 1", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "skeleton"
+name = "Skeleton"
+size = "Medium"
+kind = "undead"
+alignment = "lawful evil"
+ac = 13
+ac_note = "armor scraps"
+hp = 13
+hp_formula = "2d8 + 4"
+cr = "1/4"
+xp = 50
+senses = ["darkvision 60 ft.", "passive Perception 9"]
+languages = ["understands all languages it knew in life but can't speak"]
+damage_vulnerabilities = ["bludgeoning"]
+damage_immunities = ["poison"]
+condition_immunities = ["exhaustion", "poisoned"]
+speed = { walk = 30 }
+abilities = { str = 10, dex = 14, con = 15, int = 6, wis = 8, cha = 5 }
+actions = [
+  { name = "Shortsword", description = "Melee Weapon Attack.", attack = { to_hit = 4, reach = "reach 5 ft., one target", damage = "1d6 + 2", damage_type = "piercing" } },
+  { name = "Shortbow", description = "Ranged Weapon Attack.", attack = { to_hit = 4, reach = "range 80/320 ft., one target", damage = "1d6 + 2", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "zombie"
+name = "Zombie"
+size = "Medium"
+kind = "undead"
+alignment = "neutral evil"
+ac = 8
+hp = 22
+hp_formula = "3d8 + 9"
+cr = "1/4"
+xp = 50
+senses = ["darkvision 60 ft.", "passive Perception 8"]
+languages = ["understands the languages it knew in life but can't speak"]
+damage_immunities = ["poison"]
+condition_immunities = ["poisoned"]
+speed = { walk = 20 }
+abilities = { str = 13, dex = 6, con = 16, int = 3, wis = 6, cha = 5 }
+saves = { wis = 0 }
+traits = [
+  { name = "Undead Fortitude", description = "If damage reduces the zombie to 0 hit points, it makes a Constitution saving throw with a DC of 5 + the damage taken, unless the damage is radiant or from a critical hit. On a success, the zombie drops to 1 hit point instead." },
+]
+actions = [
+  { name = "Slam", description = "Melee Weapon Attack.", attack = { to_hit = 3, reach = "reach 5 ft., one target", damage = "1d6 + 1", damage_type = "bludgeoning" } },
+]
+
+[[creatures]]
+id = "orc"
+name = "Orc"
+size = "Medium"
+kind = "humanoid (orc)"
+alignment = "chaotic evil"
+ac = 13
+ac_note = "hide armor"
+hp = 15
+hp_formula = "2d8 + 6"
+cr = "1/2"
+xp = 100
+senses = ["darkvision 60 ft.", "passive Perception 10"]
+languages = ["Common", "Orc"]
+speed = { walk = 30 }
+abilities = { str = 16, dex = 12, con = 16, int = 7, wis = 11, cha = 10 }
+skills = { intimidation = 2 }
+traits = [
+  { name = "Aggressive", description = "As a bonus action, the orc can move up to its speed toward a hostile creature that it can see." },
+]
+actions = [
+  { name = "Greataxe", description = "Melee Weapon Attack.", attack = { to_hit = 5, reach = "reach 5 ft., one target", damage = "1d12 + 3", damage_type = "slashing" } },
+  { name = "Javelin", description = "Melee or Ranged Weapon Attack.", attack = { to_hit = 5, reach = "reach 5 ft. or range 30/120 ft., one target", damage = "1d6 + 3", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "hobgoblin"
+name = "Hobgoblin"
+size = "Medium"
+kind = "humanoid (goblinoid)"
+alignment = "lawful evil"
+ac = 18
+ac_note = "chain mail, shield"
+hp = 11
+hp_formula = "2d8 + 2"
+cr = "1/2"
+xp = 100
+senses = ["darkvision 60 ft.", "passive Perception 10"]
+languages = ["Common", "Goblin"]
+speed = { walk = 30 }
+abilities = { str = 13, dex = 12, con = 12, int = 10, wis = 10, cha = 9 }
+traits = [
+  { name = "Martial Advantage", description = "Once per turn, the hobgoblin can deal an extra 2d6 damage to a creature it hits with a weapon attack if that creature is within 5 feet of an ally of the hobgoblin that isn't incapacitated." },
+]
+actions = [
+  { name = "Longsword", description = "Melee Weapon Attack (1d10 + 1 if used with two hands).", attack = { to_hit = 3, reach = "reach 5 ft., one target", damage = "1d8 + 1", damage_type = "slashing" } },
+  { name = "Longbow", description = "Ranged Weapon Attack.", attack = { to_hit = 3, reach = "range 150/600 ft., one target", damage = "1d8 + 1", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "giant_spider"
+name = "Giant Spider"
+size = "Large"
+kind = "beast"
+alignment = "unaligned"
+ac = 14
+ac_note = "natural armor"
+hp = 26
+hp_formula = "4d10 + 4"
+cr = "1"
+xp = 200
+senses = ["blindsight 10 ft.", "darkvision 60 ft.", "passive Perception 10"]
+speed = { walk = 30, climb = 30 }
+abilities = { str = 14, dex = 16, con = 12, int = 2, wis = 11, cha = 4 }
+skills = { stealth = 7 }
+traits = [
+  { name = "Spider Climb", description = "Can climb difficult surfaces, including upside down on ceilings, without an ability check." },
+  { name = "Web Sense", description = "While in contact with a web, knows the exact location of any other creature in contact with the same web." },
+  { name = "Web Walker", description = "Ignores movement restrictions caused by webbing." },
+]
+actions = [
+  { name = "Bite", description = "Melee Weapon Attack. The target must make a DC 11 Constitution saving throw, taking 2d8 poison damage on a failure or half on a success. If the poison reduces the target to 0 hit points, it is stable but poisoned and paralyzed for 1 hour.", attack = { to_hit = 5, reach = "reach 5 ft., one creature", damage = "1d8 + 3", damage_type = "piercing" } },
+  { name = "Web", description = "Ranged Weapon Attack, recharge 5–6. On a hit the target is restrained by webbing (DC 12 Strength check to escape; the web has AC 10, 5 hp, vulnerability to fire).", attack = { to_hit = 5, reach = "range 30/60 ft., one creature", damage = "0", damage_type = "" } },
+]
+
+[[creatures]]
+id = "ogre"
+name = "Ogre"
+size = "Large"
+kind = "giant"
+alignment = "chaotic evil"
+ac = 11
+ac_note = "hide armor"
+hp = 59
+hp_formula = "7d10 + 21"
+cr = "2"
+xp = 450
+senses = ["darkvision 60 ft.", "passive Perception 8"]
+languages = ["Common", "Giant"]
+speed = { walk = 40 }
+abilities = { str = 19, dex = 8, con = 16, int = 5, wis = 7, cha = 7 }
+actions = [
+  { name = "Greatclub", description = "Melee Weapon Attack.", attack = { to_hit = 6, reach = "reach 5 ft., one target", damage = "2d8 + 4", damage_type = "bludgeoning" } },
+  { name = "Javelin", description = "Melee or Ranged Weapon Attack.", attack = { to_hit = 6, reach = "reach 5 ft. or range 30/120 ft., one target", damage = "2d6 + 4", damage_type = "piercing" } },
+]
+
+[[creatures]]
+id = "owlbear"
+name = "Owlbear"
+size = "Large"
+kind = "monstrosity"
+alignment = "unaligned"
+ac = 13
+ac_note = "natural armor"
+hp = 59
+hp_formula = "7d10 + 21"
+cr = "3"
+xp = 700
+senses = ["darkvision 60 ft.", "passive Perception 13"]
+speed = { walk = 40 }
+abilities = { str = 20, dex = 12, con = 17, int = 3, wis = 12, cha = 7 }
+skills = { perception = 3 }
+traits = [
+  { name = "Keen Sight and Smell", description = "Advantage on Wisdom (Perception) checks that rely on sight or smell." },
+]
+actions = [
+  { name = "Multiattack", description = "The owlbear makes two attacks: one with its beak and one with its claws." },
+  { name = "Beak", description = "Melee Weapon Attack.", attack = { to_hit = 7, reach = "reach 5 ft., one creature", damage = "1d10 + 5", damage_type = "piercing" } },
+  { name = "Claws", description = "Melee Weapon Attack.", attack = { to_hit = 7, reach = "reach 5 ft., one target", damage = "2d8 + 5", damage_type = "slashing" } },
+]

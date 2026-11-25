@@ -1,0 +1,13 @@
+id = "skilled"
+name = "Skilled"
+description = "You gain proficiency in any combination of three skills or tools. Edit the targets below to match your picks."
+
+[[modifiers]]
+target = "proficiency.skill.perception"
+op = "grant"
+[[modifiers]]
+target = "proficiency.skill.survival"
+op = "grant"
+[[modifiers]]
+target = "proficiency.tool.herbalism_kit"
+op = "grant"

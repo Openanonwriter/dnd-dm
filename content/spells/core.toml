@@ -1,0 +1,260 @@
+# A starter spell list. One [[spells]] block per spell; `classes` lists the
+# class ids whose spell list includes it. `area` drives the map tools.
+
+[[spells]]
+id = "fire_bolt"
+name = "Fire Bolt"
+level = 0
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["wizard"]
+attack = true
+damage = "1d10"
+damage_type = "fire"
+description = "Hurl a mote of fire. Make a ranged spell attack; on a hit the target takes 1d10 fire damage. A flammable object hit by it ignites if it isn't being worn or carried."
+higher_levels = "Damage increases by 1d10 at 5th level (2d10), 11th (3d10) and 17th (4d10)."
+
+[[spells]]
+id = "mage_hand"
+name = "Mage Hand"
+level = 0
+school = "conjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "1 minute"
+classes = ["wizard"]
+description = "A spectral floating hand appears at a point you choose. You can use it to manipulate an object, open an unlocked door or container, stow or retrieve an item, or pour out a vial. It can't attack or carry more than 10 pounds."
+
+[[spells]]
+id = "sacred_flame"
+name = "Sacred Flame"
+level = 0
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric"]
+save = "dex"
+damage = "1d8"
+damage_type = "radiant"
+description = "Flame-like radiance descends on a creature you can see. It must succeed on a Dexterity saving throw or take 1d8 radiant damage; it gains no benefit from cover."
+higher_levels = "Damage increases by 1d8 at 5th, 11th and 17th level."
+
+[[spells]]
+id = "guidance"
+name = "Guidance"
+level = 0
+school = "divination"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric"]
+description = "Touch one willing creature. Once before the spell ends, it can roll a d4 and add the number to one ability check of its choice."
+
+[[spells]]
+id = "magic_missile"
+name = "Magic Missile"
+level = 1
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["wizard"]
+damage = "3 * (1d4 + 1)"
+damage_type = "force"
+description = "Create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range and deals 1d4 + 1 force damage. The darts strike simultaneously and can be directed at one or several targets."
+higher_levels = "One additional dart per slot level above 1st."
+
+[[spells]]
+id = "shield"
+name = "Shield"
+level = 1
+school = "abjuration"
+casting_time = "1 reaction, when you are hit by an attack or targeted by magic missile"
+range = "Self"
+components = "V, S"
+duration = "1 round"
+classes = ["wizard"]
+description = "An invisible barrier protects you. Until the start of your next turn you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile."
+
+[[spells]]
+id = "burning_hands"
+name = "Burning Hands"
+level = 1
+school = "evocation"
+casting_time = "1 action"
+range = "Self (15-foot cone)"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["wizard"]
+save = "dex"
+damage = "3d6"
+damage_type = "fire"
+area = { shape = "cone", size = 15 }
+description = "A thin sheet of flames shoots from your fingertips. Each creature in a 15-foot cone makes a Dexterity saving throw, taking 3d6 fire damage on a failure or half on a success. Unattended flammable objects ignite."
+higher_levels = "+1d6 per slot level above 1st."
+
+[[spells]]
+id = "thunderwave"
+name = "Thunderwave"
+level = 1
+school = "evocation"
+casting_time = "1 action"
+range = "Self (15-foot cube)"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["wizard"]
+save = "con"
+damage = "2d8"
+damage_type = "thunder"
+area = { shape = "cube", size = 15 }
+description = "A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you makes a Constitution saving throw; on a failure it takes 2d8 thunder damage and is pushed 10 feet away, on a success half damage and no push. The boom is audible out to 300 feet."
+higher_levels = "+1d8 per slot level above 1st."
+
+[[spells]]
+id = "cure_wounds"
+name = "Cure Wounds"
+level = 1
+school = "evocation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric"]
+damage = "1d8 + wis_mod"
+damage_type = "healing"
+description = "A creature you touch regains hit points equal to 1d8 + your spellcasting ability modifier. No effect on undead or constructs."
+higher_levels = "+1d8 per slot level above 1st."
+
+[[spells]]
+id = "healing_word"
+name = "Healing Word"
+level = 1
+school = "evocation"
+casting_time = "1 bonus action"
+range = "60 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["cleric"]
+damage = "1d4 + wis_mod"
+damage_type = "healing"
+description = "A creature of your choice that you can see regains hit points equal to 1d4 + your spellcasting ability modifier."
+higher_levels = "+1d4 per slot level above 1st."
+
+[[spells]]
+id = "bless"
+name = "Bless"
+level = 1
+school = "enchantment"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric"]
+description = "Bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, it can roll a d4 and add the number rolled."
+higher_levels = "One additional target per slot level above 1st."
+
+[[spells]]
+id = "guiding_bolt"
+name = "Guiding Bolt"
+level = 1
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "1 round"
+classes = ["cleric"]
+attack = true
+damage = "4d6"
+damage_type = "radiant"
+description = "A flash of light streaks toward a creature. Make a ranged spell attack; on a hit the target takes 4d6 radiant damage and the next attack roll against it before the end of your next turn has advantage."
+higher_levels = "+1d6 per slot level above 1st."
+
+[[spells]]
+id = "misty_step"
+name = "Misty Step"
+level = 2
+school = "conjuration"
+casting_time = "1 bonus action"
+range = "Self"
+components = "V"
+duration = "Instantaneous"
+classes = ["wizard"]
+description = "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space you can see."
+
+[[spells]]
+id = "spiritual_weapon"
+name = "Spiritual Weapon"
+level = 2
+school = "evocation"
+casting_time = "1 bonus action"
+range = "60 feet"
+components = "V, S"
+duration = "1 minute"
+classes = ["cleric"]
+attack = true
+damage = "1d8 + wis_mod"
+damage_type = "force"
+description = "Create a floating spectral weapon. When you cast it and as a bonus action on later turns, move it up to 20 feet and make a melee spell attack against a creature within 5 feet of it, dealing 1d8 + your spellcasting modifier force damage."
+higher_levels = "+1d8 for every two slot levels above 2nd."
+
+[[spells]]
+id = "fireball"
+name = "Fireball"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M"
+duration = "Instantaneous"
+classes = ["wizard"]
+save = "dex"
+damage = "8d6"
+damage_type = "fire"
+area = { shape = "sphere", size = 20 }
+description = "A bright streak flashes to a point you choose and blossoms into an explosion of flame. Each creature in a 20-foot-radius sphere makes a Dexterity saving throw, taking 8d6 fire damage on a failure or half on a success. The fire spreads around corners and ignites unattended flammable objects."
+higher_levels = "+1d6 per slot level above 3rd."
+
+[[spells]]
+id = "lightning_bolt"
+name = "Lightning Bolt"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "Self (100-foot line)"
+components = "V, S, M"
+duration = "Instantaneous"
+classes = ["wizard"]
+save = "dex"
+damage = "8d6"
+damage_type = "lightning"
+area = { shape = "line", size = 100, width = 5 }
+description = "A stroke of lightning forming a line 100 feet long and 5 feet wide blasts out from you. Each creature in the line makes a Dexterity saving throw, taking 8d6 lightning damage on a failure or half on a success."
+higher_levels = "+1d6 per slot level above 3rd."
+
+[[spells]]
+id = "spirit_guardians"
+name = "Spirit Guardians"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "Self (15-foot radius)"
+components = "V, S, M"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["cleric"]
+save = "wis"
+damage = "3d8"
+damage_type = "radiant"
+area = { shape = "sphere", size = 15 }
+description = "Spirits surround you to a radius of 15 feet. Creatures of your choice in the area have their speed halved, and when a creature enters the area for the first time on a turn or starts its turn there it makes a Wisdom saving throw, taking 3d8 radiant (or necrotic) damage on a failure or half on a success."
+higher_levels = "+1d8 per slot level above 3rd."

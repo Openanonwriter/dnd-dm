@@ -1,0 +1,40 @@
+id = "wizard"
+name = "Wizard"
+hit_die = 6
+primary_abilities = ["int"]
+saving_throws = ["int", "wis"]
+armor_proficiencies = []
+weapon_proficiencies = ["dagger", "dart", "sling", "quarterstaff", "light_crossbow"]
+subclass_level = 2
+subclass_label = "Arcane Tradition"
+starting_equipment = ["quarterstaff or dagger", "component pouch or arcane focus", "scholar's pack or explorer's pack", "spellbook"]
+description = "A scholarly magic-user capable of manipulating the structures of reality."
+
+[skill_choices]
+count = 2
+from = ["arcana", "history", "insight", "investigation", "medicine", "religion"]
+
+[spellcasting]
+ability = "int"
+progression = "full"
+prepared = "max(1, int_mod + class.wizard.level)"
+cantrips_known = [3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+ritual_casting = true
+focus = "arcane focus"
+
+[[features]]
+name = "Spellbook"
+level = 1
+description = "Your spellbook holds six 1st-level wizard spells to start; add two per level and copy found spells (50 gp and 2 hours per spell level)."
+
+[[features]]
+name = "Arcane Recovery"
+level = 1
+description = "Once per day after a short rest, recover expended spell slots with a combined level up to half your wizard level (rounded up), none above 5th."
+uses = "1"
+recharge = "long_rest"
+
+[[features]]
+name = "Spell Mastery"
+level = 18
+description = "Choose one 1st-level and one 2nd-level wizard spell; cast them at their lowest level without expending a slot."

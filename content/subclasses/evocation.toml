@@ -1,0 +1,24 @@
+id = "evocation"
+name = "School of Evocation"
+class = "wizard"
+description = "Channel potent magic to create explosive, elemental effects."
+
+[[features]]
+name = "Evocation Savant"
+level = 2
+description = "Copying an evocation spell into your spellbook costs half the usual gold and time."
+
+[[features]]
+name = "Sculpt Spells"
+level = 2
+description = "When you cast an evocation spell, choose 1 + spell level creatures; they automatically succeed on their saves and take no damage if they would normally take half."
+
+[[features]]
+name = "Potent Cantrip"
+level = 6
+description = "A creature that succeeds on a save against your cantrip still takes half damage."
+
+[[features]]
+name = "Empowered Evocation"
+level = 10
+description = "Add your Intelligence modifier to one damage roll of any wizard evocation spell."

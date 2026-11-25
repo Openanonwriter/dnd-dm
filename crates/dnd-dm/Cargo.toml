@@ -1,0 +1,23 @@
+[package]
+name = "dnd-dm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Dungeon Master desktop app (Windows first) for D&D 5e and homebrew"
+default-run = "dnd-dm"
+
+[[bin]]
+name = "dnd-dm"
+path = "src/main.rs"
+
+[dependencies]
+dnd-core = { path = "../dnd-core" }
+dnd-server = { path = "../dnd-server" }
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+eframe.workspace = true
+egui.workspace = true
+open.workspace = true

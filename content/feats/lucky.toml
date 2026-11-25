@@ -1,0 +1,3 @@
+id = "lucky"
+name = "Lucky"
+description = "You have 3 luck points. Spend one to roll an additional d20 on an attack roll, ability check or saving throw and choose which to use, or to force an attacker to reroll. Regain all luck points on a long rest."

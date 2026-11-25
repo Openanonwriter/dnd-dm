@@ -1,0 +1,10 @@
+id = "acolyte"
+name = "Acolyte"
+skill_proficiencies = ["insight", "religion"]
+language_choices = 2
+starting_equipment = ["holy symbol", "prayer book", "5 sticks of incense", "vestments", "common clothes", "15 gp"]
+description = "You have spent your life in the service of a temple, acting as an intermediary between the holy and the mortal."
+
+[feature]
+name = "Shelter of the Faithful"
+description = "You and your companions can receive free healing and care at a temple of your faith, and you can call on priests for (non-dangerous) assistance."

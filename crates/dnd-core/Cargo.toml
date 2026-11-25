@@ -1,0 +1,14 @@
+[package]
+name = "dnd-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Rules engine, data model and human-editable content loader for the dnd-dm tabletop suite"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+chrono.workspace = true

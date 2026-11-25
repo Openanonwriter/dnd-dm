@@ -1,0 +1,42 @@
+id = "elf"
+name = "Elf (High)"
+size = "Medium"
+speed = 30
+darkvision = 60
+languages = ["Common", "Elvish"]
+description = "Graceful and long-lived. High elves are quick, keen-eyed and know a wizard cantrip."
+
+[[modifiers]]
+target = "ability.dex"
+value = "2"
+[[modifiers]]
+target = "ability.int"
+value = "1"
+
+[[traits]]
+name = "Keen Senses"
+description = "You have proficiency in the Perception skill."
+modifiers = [{ target = "proficiency.skill.perception", op = "grant" }]
+
+[[traits]]
+name = "Fey Ancestry"
+description = "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being charmed" }]
+
+[[traits]]
+name = "Trance"
+description = "You don't need to sleep. You meditate deeply for 4 hours a day and gain the benefit of a long rest."
+
+[[traits]]
+name = "Elf Weapon Training"
+description = "Proficiency with the longsword, shortsword, shortbow and longbow."
+modifiers = [
+  { target = "proficiency.weapon.longsword", op = "grant" },
+  { target = "proficiency.weapon.shortsword", op = "grant" },
+  { target = "proficiency.weapon.shortbow", op = "grant" },
+  { target = "proficiency.weapon.longbow", op = "grant" },
+]
+
+[[traits]]
+name = "Cantrip"
+description = "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it."

@@ -1,0 +1,25 @@
+id = "human"
+name = "Human"
+size = "Medium"
+speed = 30
+languages = ["Common"]
+description = "Adaptable and ambitious. Humans gain +1 to every ability score and one extra language of their choice."
+
+[[modifiers]]
+target = "ability.str"
+value = "1"
+[[modifiers]]
+target = "ability.dex"
+value = "1"
+[[modifiers]]
+target = "ability.con"
+value = "1"
+[[modifiers]]
+target = "ability.int"
+value = "1"
+[[modifiers]]
+target = "ability.wis"
+value = "1"
+[[modifiers]]
+target = "ability.cha"
+value = "1"

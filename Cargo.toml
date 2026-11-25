@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = ["crates/dnd-core", "crates/dnd-server", "crates/dnd-dm", "crates/dnd-player"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/your-name/dnd-dm"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+anyhow = "1"
+thiserror = "2"
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws"] }
+futures-util = "0.3"
+tower-http = { version = "0.6", features = ["cors"] }
+local-ip-address = "0.6"
+eframe = "0.31"
+egui = "0.31"
+open = "5"

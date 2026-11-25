@@ -1,0 +1,42 @@
+id = "goblin"
+name = "Goblin"
+size = "Small"
+kind = "humanoid (goblinoid)"
+alignment = "neutral evil"
+ac = 15
+ac_note = "leather armor, shield"
+hp = 7
+hp_formula = "2d6"
+cr = "1/4"
+xp = 50
+senses = ["darkvision 60 ft.", "passive Perception 9"]
+languages = ["Common", "Goblin"]
+description = "Small, black-hearted humanoids that lair in despoiled dungeons and caves."
+
+[speed]
+walk = 30
+
+[abilities]
+str = 8
+dex = 14
+con = 10
+int = 10
+wis = 8
+cha = 8
+
+[skills]
+stealth = 6
+
+[[traits]]
+name = "Nimble Escape"
+description = "The goblin can take the Disengage or Hide action as a bonus action on each of its turns."
+
+[[actions]]
+name = "Scimitar"
+description = "Melee Weapon Attack."
+attack = { to_hit = 4, reach = "reach 5 ft., one target", damage = "1d6 + 2", damage_type = "slashing" }
+
+[[actions]]
+name = "Shortbow"
+description = "Ranged Weapon Attack."
+attack = { to_hit = 4, reach = "range 80/320 ft., one target", damage = "1d6 + 2", damage_type = "piercing" }

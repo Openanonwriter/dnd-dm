@@ -1,0 +1,7 @@
+id = "potion_of_healing"
+name = "Potion of Healing"
+kind = "consumable"
+cost = "50 gp"
+weight = 0.5
+rarity = "common"
+description = "Drink (action) to regain 2d4 + 2 hit points. The red liquid glimmers when agitated."

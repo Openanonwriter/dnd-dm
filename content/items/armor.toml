@@ -1,0 +1,103 @@
+[[items]]
+id = "padded_armor"
+name = "Padded Armor"
+kind = "armor"
+cost = "5 gp"
+weight = 8.0
+armor = { base_ac = 11, category = "light", stealth_disadvantage = true }
+
+[[items]]
+id = "leather_armor"
+name = "Leather Armor"
+kind = "armor"
+cost = "10 gp"
+weight = 10.0
+armor = { base_ac = 11, category = "light" }
+
+[[items]]
+id = "studded_leather"
+name = "Studded Leather Armor"
+kind = "armor"
+cost = "45 gp"
+weight = 13.0
+armor = { base_ac = 12, category = "light" }
+
+[[items]]
+id = "hide_armor"
+name = "Hide Armor"
+kind = "armor"
+cost = "10 gp"
+weight = 12.0
+armor = { base_ac = 12, category = "medium", dex_cap = 2 }
+
+[[items]]
+id = "chain_shirt"
+name = "Chain Shirt"
+kind = "armor"
+cost = "50 gp"
+weight = 20.0
+armor = { base_ac = 13, category = "medium", dex_cap = 2 }
+
+[[items]]
+id = "scale_mail"
+name = "Scale Mail"
+kind = "armor"
+cost = "50 gp"
+weight = 45.0
+armor = { base_ac = 14, category = "medium", dex_cap = 2, stealth_disadvantage = true }
+
+[[items]]
+id = "breastplate"
+name = "Breastplate"
+kind = "armor"
+cost = "400 gp"
+weight = 20.0
+armor = { base_ac = 14, category = "medium", dex_cap = 2 }
+
+[[items]]
+id = "half_plate"
+name = "Half Plate"
+kind = "armor"
+cost = "750 gp"
+weight = 40.0
+armor = { base_ac = 15, category = "medium", dex_cap = 2, stealth_disadvantage = true }
+
+[[items]]
+id = "ring_mail"
+name = "Ring Mail"
+kind = "armor"
+cost = "30 gp"
+weight = 40.0
+armor = { base_ac = 14, category = "heavy", dex_cap = 0, stealth_disadvantage = true }
+
+[[items]]
+id = "chain_mail"
+name = "Chain Mail"
+kind = "armor"
+cost = "75 gp"
+weight = 55.0
+armor = { base_ac = 16, category = "heavy", dex_cap = 0, strength_requirement = 13, stealth_disadvantage = true }
+
+[[items]]
+id = "splint"
+name = "Splint"
+kind = "armor"
+cost = "200 gp"
+weight = 60.0
+armor = { base_ac = 17, category = "heavy", dex_cap = 0, strength_requirement = 15, stealth_disadvantage = true }
+
+[[items]]
+id = "plate"
+name = "Plate"
+kind = "armor"
+cost = "1500 gp"
+weight = 65.0
+armor = { base_ac = 18, category = "heavy", dex_cap = 0, strength_requirement = 15, stealth_disadvantage = true }
+
+[[items]]
+id = "shield"
+name = "Shield"
+kind = "shield"
+cost = "10 gp"
+weight = 6.0
+armor = { base_ac = 2, category = "shield" }

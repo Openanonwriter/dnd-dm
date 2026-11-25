@@ -1,0 +1,10 @@
+id = "soldier"
+name = "Soldier"
+skill_proficiencies = ["athletics", "intimidation"]
+tool_proficiencies = ["gaming set", "vehicles (land)"]
+starting_equipment = ["insignia of rank", "trophy from a fallen enemy", "gaming set", "common clothes", "10 gp"]
+description = "War has been your life for as long as you care to remember."
+
+[feature]
+name = "Military Rank"
+description = "Soldiers loyal to your former organization still recognize your authority and can be relied upon for simple favours and access."

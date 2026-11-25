@@ -1,0 +1,30 @@
+id = "life_domain"
+name = "Life Domain"
+class = "cleric"
+description = "The Life domain focuses on the vibrant positive energy that sustains all life."
+
+[[features]]
+name = "Bonus Proficiency"
+level = 1
+description = "You gain proficiency with heavy armor."
+modifiers = [{ target = "proficiency.armor.heavy", op = "grant" }]
+
+[[features]]
+name = "Disciple of Life"
+level = 1
+description = "Healing spells of 1st level or higher restore additional hit points equal to 2 + the spell's level."
+
+[[features]]
+name = "Channel Divinity: Preserve Life"
+level = 2
+description = "Action: restore hit points equal to five times your cleric level, divided among creatures within 30 ft (none above half its maximum)."
+
+[[features]]
+name = "Blessed Healer"
+level = 6
+description = "When you cast a healing spell of 1st level or higher on another creature, you regain 2 + the spell's level hit points."
+
+[[features]]
+name = "Divine Strike"
+level = 8
+description = "Once per turn, a weapon hit deals an extra 1d8 radiant damage (2d8 at 14th level)."

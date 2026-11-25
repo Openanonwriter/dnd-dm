@@ -1,0 +1,63 @@
+# Magic items show how modifiers apply only while equipped (and attuned).
+
+[[items]]
+id = "longsword_plus_1"
+name = "Longsword +1"
+kind = "weapon"
+weight = 3.0
+rarity = "uncommon"
+description = "You have a +1 bonus to attack and damage rolls made with this magic weapon."
+weapon = { damage = "1d8", damage_type = "slashing", category = "martial", kind = "melee", properties = ["versatile"], versatile = "1d10", bonus = 1 }
+
+[[items]]
+id = "ring_of_protection"
+name = "Ring of Protection"
+kind = "wondrous"
+weight = 0.0
+rarity = "rare"
+requires_attunement = true
+description = "You gain a +1 bonus to AC and saving throws while wearing this ring."
+modifiers = [
+  { target = "ac", op = "add", value = "1" },
+  { target = "save.all", op = "add", value = "1" },
+]
+
+[[items]]
+id = "cloak_of_elvenkind"
+name = "Cloak of Elvenkind"
+kind = "wondrous"
+weight = 1.0
+rarity = "uncommon"
+requires_attunement = true
+description = "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide."
+modifiers = [{ target = "skill.stealth", op = "advantage", note = "to hide, hood up" }]
+
+[[items]]
+id = "boots_of_striding"
+name = "Boots of Striding and Springing"
+kind = "wondrous"
+weight = 1.0
+rarity = "uncommon"
+requires_attunement = true
+description = "Your walking speed becomes 30 feet unless it is higher, and your speed isn't reduced by armor or heavy load. You can jump three times the normal distance."
+modifiers = [{ target = "speed", op = "max", value = "30" }]
+
+[[items]]
+id = "gauntlets_of_ogre_power"
+name = "Gauntlets of Ogre Power"
+kind = "wondrous"
+weight = 1.0
+rarity = "uncommon"
+requires_attunement = true
+description = "Your Strength score is 19 while you wear these gauntlets, unless it is already higher."
+modifiers = [{ target = "ability.str", op = "max", value = "19" }]
+
+[[items]]
+id = "amulet_of_health"
+name = "Amulet of Health"
+kind = "wondrous"
+weight = 1.0
+rarity = "rare"
+requires_attunement = true
+description = "Your Constitution score is 19 while you wear this amulet, unless it is already higher."
+modifiers = [{ target = "ability.con", op = "max", value = "19" }]

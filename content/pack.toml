@@ -1,0 +1,4 @@
+name = "Base (SRD 5.1 sample)"
+author = "dnd-dm"
+license = "Game mechanics derived from the System Reference Document 5.1, Creative Commons Attribution 4.0 (Wizards of the Coast). Descriptions paraphrased."
+description = "A small starter set covering every content kind. Copy any file into homebrew/ and change it; files there override these by id."

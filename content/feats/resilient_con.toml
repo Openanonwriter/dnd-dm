@@ -1,0 +1,12 @@
+id = "resilient_con"
+name = "Resilient (Constitution)"
+description = "Increase your Constitution by 1 and gain proficiency in Constitution saving throws. (Copy this file to make the Dex/Wis/etc. versions.)"
+
+[[modifiers]]
+target = "ability.con"
+op = "add"
+value = "1"
+
+[[modifiers]]
+target = "proficiency.save.con"
+op = "grant"

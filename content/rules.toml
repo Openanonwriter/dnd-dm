@@ -1,0 +1,102 @@
+# Table-driven rules. Delete any key to fall back to the built-in 5e default.
+# Index 0 of a per-level list is character level 1.
+
+# How HP is gained after level 1: "fixed" (average, rounded up) or "roll"
+# (uses hp_rolls on the character's class entry when present).
+hp_mode = "fixed"
+
+# Grid: chebyshev (every square 5 ft, the 5e default), alternating (5-10-5), euclidean.
+distance_rule = "chebyshev"
+feet_per_square = 5
+
+proficiency_bonus = [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6]
+xp_thresholds = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000]
+standard_array = [15, 14, 13, 12, 10, 8]
+
+[point_buy]
+budget = 27
+min = 8
+max = 15
+[point_buy.costs]
+8 = 0
+9 = 1
+10 = 2
+11 = 3
+12 = 4
+13 = 5
+14 = 7
+15 = 9
+
+# Add or rename skills freely; characters reference them by key.
+[[skills]]
+key = "acrobatics"
+name = "Acrobatics"
+ability = "dex"
+[[skills]]
+key = "animal_handling"
+name = "Animal Handling"
+ability = "wis"
+[[skills]]
+key = "arcana"
+name = "Arcana"
+ability = "int"
+[[skills]]
+key = "athletics"
+name = "Athletics"
+ability = "str"
+[[skills]]
+key = "deception"
+name = "Deception"
+ability = "cha"
+[[skills]]
+key = "history"
+name = "History"
+ability = "int"
+[[skills]]
+key = "insight"
+name = "Insight"
+ability = "wis"
+[[skills]]
+key = "intimidation"
+name = "Intimidation"
+ability = "cha"
+[[skills]]
+key = "investigation"
+name = "Investigation"
+ability = "int"
+[[skills]]
+key = "medicine"
+name = "Medicine"
+ability = "wis"
+[[skills]]
+key = "nature"
+name = "Nature"
+ability = "int"
+[[skills]]
+key = "perception"
+name = "Perception"
+ability = "wis"
+[[skills]]
+key = "performance"
+name = "Performance"
+ability = "cha"
+[[skills]]
+key = "persuasion"
+name = "Persuasion"
+ability = "cha"
+[[skills]]
+key = "religion"
+name = "Religion"
+ability = "int"
+[[skills]]
+key = "sleight_of_hand"
+name = "Sleight of Hand"
+ability = "dex"
+[[skills]]
+key = "stealth"
+name = "Stealth"
+ability = "dex"
+[[skills]]
+key = "survival"
+name = "Survival"
+ability = "wis"

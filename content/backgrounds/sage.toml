@@ -1,0 +1,10 @@
+id = "sage"
+name = "Sage"
+skill_proficiencies = ["arcana", "history"]
+language_choices = 2
+starting_equipment = ["bottle of black ink", "quill", "small knife", "letter from a dead colleague", "common clothes", "10 gp"]
+description = "You spent years learning the lore of the multiverse."
+
+[feature]
+name = "Researcher"
+description = "When you fail to recall a piece of lore, you often know where and from whom it can be obtained."

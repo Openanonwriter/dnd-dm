@@ -1,0 +1,24 @@
+id = "champion"
+name = "Champion"
+class = "fighter"
+description = "The archetypal Champion focuses on raw physical power honed to deadly perfection."
+
+[[features]]
+name = "Improved Critical"
+level = 3
+description = "Your weapon attacks score a critical hit on a roll of 19 or 20."
+
+[[features]]
+name = "Remarkable Athlete"
+level = 7
+description = "Add half your proficiency bonus (rounded up) to Str, Dex and Con checks you aren't proficient in; running long jump distance increases by Str modifier feet."
+
+[[features]]
+name = "Additional Fighting Style"
+level = 10
+description = "Choose a second Fighting Style option."
+
+[[features]]
+name = "Superior Critical"
+level = 15
+description = "Critical hit on 18–20."

@@ -1,0 +1,8 @@
+content_dirs = [
+    "content",
+    "homebrew",
+]
+saves_dir = "saves"
+exports_dir = "exports"
+port = 8420
+autostart_server = true

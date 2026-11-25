@@ -1,0 +1,23 @@
+id = "dragonborn"
+name = "Dragonborn"
+size = "Medium"
+speed = 30
+languages = ["Common", "Draconic"]
+description = "Proud draconic humanoids with a breath weapon and resistance to their ancestry's damage type."
+
+[[modifiers]]
+target = "ability.str"
+value = "2"
+[[modifiers]]
+target = "ability.cha"
+value = "1"
+
+[[traits]]
+name = "Breath Weapon"
+description = "Action: exhale destructive energy in a 15-ft cone (or 5 by 30-ft line, depending on ancestry). Each creature in the area makes a saving throw (DC 8 + Con mod + proficiency bonus), taking 2d6 damage on a failure (3d6 at 6th level, 4d6 at 11th, 5d6 at 16th) or half on a success."
+uses = "1"
+recharge = "short_rest"
+
+[[traits]]
+name = "Damage Resistance"
+description = "You have resistance to the damage type associated with your draconic ancestry."

@@ -1,0 +1,10 @@
+id = "criminal"
+name = "Criminal"
+skill_proficiencies = ["deception", "stealth"]
+tool_proficiencies = ["gaming set", "thieves' tools"]
+starting_equipment = ["crowbar", "dark common clothes with hood", "15 gp"]
+description = "You are an experienced criminal with a history of breaking the law."
+
+[feature]
+name = "Criminal Contact"
+description = "You have a reliable contact who acts as your liaison to a network of other criminals."

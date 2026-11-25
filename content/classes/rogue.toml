@@ -1,0 +1,52 @@
+id = "rogue"
+name = "Rogue"
+hit_die = 8
+primary_abilities = ["dex"]
+saving_throws = ["dex", "int"]
+armor_proficiencies = ["light"]
+weapon_proficiencies = ["simple", "hand_crossbow", "longsword", "rapier", "shortsword"]
+tool_proficiencies = ["thieves' tools"]
+subclass_level = 3
+subclass_label = "Roguish Archetype"
+asi_levels = [4, 8, 10, 12, 16, 19]
+starting_equipment = ["rapier or shortsword", "shortbow + 20 arrows or shortsword", "burglar's pack", "leather_armor, two daggers, thieves' tools"]
+description = "A scoundrel who uses stealth and trickery to overcome obstacles and enemies."
+
+[skill_choices]
+count = 4
+from = ["acrobatics", "athletics", "deception", "insight", "intimidation", "investigation", "perception", "performance", "persuasion", "sleight_of_hand", "stealth"]
+
+[[features]]
+name = "Expertise"
+level = 1
+description = "Choose two skill proficiencies (or one plus thieves' tools): your proficiency bonus is doubled for them. Two more at 6th level. Tick them on the Build tab."
+
+[[features]]
+name = "Sneak Attack"
+level = 1
+description = "Once per turn, deal extra damage to one creature you hit with a finesse or ranged weapon if you have advantage, or if another enemy of the target is within 5 ft of it. Extra damage: 1d6 per two rogue levels (rounded up)."
+
+[[features]]
+name = "Thieves' Cant"
+level = 1
+description = "You know the secret rogue dialect of hidden messages and signs."
+
+[[features]]
+name = "Cunning Action"
+level = 2
+description = "Bonus action: Dash, Disengage or Hide."
+
+[[features]]
+name = "Uncanny Dodge"
+level = 5
+description = "Reaction: halve the damage of an attack from an attacker you can see."
+
+[[features]]
+name = "Evasion"
+level = 7
+description = "On a successful Dex save for half damage you take none; on a failure, half."
+
+[[features]]
+name = "Reliable Talent"
+level = 11
+description = "Treat any d20 roll of 9 or lower as a 10 on ability checks with proficiency."

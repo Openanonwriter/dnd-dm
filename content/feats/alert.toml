@@ -1,0 +1,8 @@
+id = "alert"
+name = "Alert"
+description = "Always on the lookout for danger: +5 to initiative, you can't be surprised while conscious, and unseen attackers don't gain advantage against you."
+
+[[modifiers]]
+target = "initiative"
+op = "add"
+value = "5"

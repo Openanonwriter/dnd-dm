@@ -1,0 +1,41 @@
+[package]
+name = "dnd-player"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Player character sheet app (Android + desktop) that connects to a dnd-dm server over Wi-Fi"
+default-run = "dnd-player-desktop"
+
+[lib]
+name = "dnd_player"
+crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "dnd-player-desktop"
+path = "src/main.rs"
+
+[dependencies]
+dnd-core = { path = "../dnd-core" }
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+anyhow.workspace = true
+log = "0.4"
+egui.workspace = true
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
+ureq = { version = "2", default-features = false, features = ["gzip", "json"] }
+tungstenite = { version = "0.24", default-features = false, features = ["handshake"] }
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "accesskit", "x11", "wayland"] }
+open.workspace = true
+env_logger = "0.11"
+
+[target.'cfg(target_os = "android")'.dependencies]
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "android-native-activity"] }
+winit = { version = "0.30", features = ["android-native-activity"] }
+android_logger = "0.14"
+
+[dev-dependencies]
+dnd-server = { path = "../dnd-server" }

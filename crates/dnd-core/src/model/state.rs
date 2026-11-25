@@ -1,7 +1,7 @@
 //! Saved game state: a campaign with its encounter, map and log.
 //! Characters are saved as separate files next to it (see `save`).
 
-use super::DistanceRule;
+use super::{DistanceRule, MapState};
 use crate::grid::Pos;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -52,11 +52,20 @@ pub struct Combatant {
     /// Concentration spell name, if any.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub concentrating_on: String,
+    /// Carries a light: bright radius in feet (dim reaches twice as far).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub light: u32,
+    /// Sees this far in the dark, in feet.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub darkvision: u32,
     /// Remaining legendary actions / uses, keyed by feature name.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub uses: BTreeMap<String, u32>,
 }
 
+fn is_zero(v: &u32) -> bool {
+    *v == 0
+}
 fn medium() -> String {
     "Medium".into()
 }
@@ -168,44 +177,6 @@ impl Encounter {
     }
 }
 
-/// Battle map description. Image is optional; the grid alone is enough for
-/// distance and area math.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct MapState {
-    #[serde(default)]
-    pub name: String,
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub image: String,
-    #[serde(default = "thirty")]
-    pub width: u32,
-    #[serde(default = "twenty")]
-    pub height: u32,
-    #[serde(default = "five")]
-    pub feet_per_square: u32,
-    /// Terrain / walls / notes the DM wants to remember, free text.
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub notes: String,
-    /// Marked squares (difficult terrain, walls, hazards) keyed by "x,y".
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub marks: BTreeMap<String, String>,
-}
-
-fn thirty() -> u32 {
-    30
-}
-fn twenty() -> u32 {
-    20
-}
-fn five() -> u32 {
-    5
-}
-
-impl Default for MapState {
-    fn default() -> Self {
-        Self { name: "Battle map".into(), image: String::new(), width: 30, height: 20, feet_per_square: 5, notes: String::new(), marks: BTreeMap::new() }
-    }
-}
-
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct LogEntry {
     pub time: String,
@@ -237,6 +208,12 @@ pub struct CampaignSettings {
     /// Level that player-made characters start at.
     #[serde(default = "default_start_level")]
     pub player_start_level: u32,
+    /// Players may walk their own token on the map (on their turn, in a fight).
+    #[serde(default = "yes")]
+    pub players_move_tokens: bool,
+    /// How far a player may walk a token in one go, in feet (0 = their speed).
+    #[serde(default)]
+    pub player_move_limit: u32,
 }
 
 fn default_start_level() -> u32 {
@@ -258,6 +235,8 @@ impl Default for CampaignSettings {
             players_choose_character: false,
             game_live: false,
             player_start_level: 1,
+            players_move_tokens: true,
+            player_move_limit: 0,
         }
     }
 }
@@ -308,6 +287,10 @@ pub struct Campaign {
     /// Player devices that have joined, and which character each one plays.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub devices: Vec<Device>,
+    /// The other maps of the campaign (the one in play is `map`). Each is a
+    /// file in `maps/`.
+    #[serde(skip)]
+    pub maps: Vec<MapState>,
     /// Characters live in their own files; kept here in memory.
     #[serde(skip)]
     pub characters: Vec<super::Character>,
@@ -399,6 +382,81 @@ impl Campaign {
             self.assign_device(d, Some(c));
         }
         pairs.len()
+    }
+
+    /// An id no other map uses, made from the name.
+    pub fn unique_map_id(&self, name: &str) -> String {
+        let base = super::Character::slug(name);
+        let base = if base.is_empty() { "map".to_string() } else { base };
+        let taken = |id: &str| self.map.id == id || self.maps.iter().any(|m| m.id == id);
+        if !taken(&base) {
+            return base;
+        }
+        (2..).map(|n| format!("{base}_{n}")).find(|id| !taken(id)).unwrap()
+    }
+
+    /// Put a new map on the shelf. Returns its id.
+    pub fn add_map(&mut self, mut map: MapState) -> String {
+        map.normalize();
+        if self.map.id.is_empty() {
+            self.map.id = self.unique_map_id(&self.map.name.clone());
+        }
+        map.id = self.unique_map_id(&map.name);
+        let id = map.id.clone();
+        self.maps.push(map);
+        id
+    }
+
+    /// Move the game to another map. The creatures on the current map stay
+    /// behind with it, the ones prepared on the new map come out, and the
+    /// player characters arrive at its starting point.
+    pub fn switch_map(&mut self, id: &str, size_squares: impl Fn(&str) -> u32) -> bool {
+        let Some(i) = self.maps.iter().position(|m| m.id == id) else { return false };
+        if self.map.id.is_empty() {
+            self.map.id = self.unique_map_id(&self.map.name.clone());
+        }
+        self.encounter.end();
+        let (pcs, others): (Vec<Combatant>, Vec<Combatant>) = std::mem::take(&mut self.encounter.combatants).into_iter().partition(|c| matches!(c.kind, CombatantKind::Pc { .. }));
+        self.map.parked = others;
+        std::mem::swap(&mut self.map, &mut self.maps[i]);
+        self.encounter.combatants = pcs;
+        self.encounter.combatants.append(&mut self.map.parked);
+        for c in self.encounter.combatants.iter_mut().filter(|c| matches!(c.kind, CombatantKind::Pc { .. })) {
+            c.pos = None;
+        }
+        self.place_party(size_squares);
+        let name = self.map.name.clone();
+        self.log(format!("the party moves to '{name}'"));
+        true
+    }
+
+    /// Stand every player character without a position near the map's
+    /// starting point (or its middle), on open squares.
+    pub fn place_party(&mut self, size_squares: impl Fn(&str) -> u32) {
+        let start = self.map.start.unwrap_or(Pos::new(self.map.width as i32 / 2, self.map.height as i32 / 2));
+        let mut taken: Vec<Pos> = self.encounter.combatants.iter().filter_map(|c| c.pos).collect();
+        let mut spots = Vec::new();
+        for r in 0..(self.map.width.max(self.map.height) as i32) {
+            for dy in -r..=r {
+                for dx in -r..=r {
+                    if dx.abs().max(dy.abs()) == r {
+                        spots.push(Pos::new(start.x + dx, start.y + dy));
+                    }
+                }
+            }
+        }
+        for c in self.encounter.combatants.iter_mut().filter(|c| c.pos.is_none() && matches!(c.kind, CombatantKind::Pc { .. })) {
+            let side = size_squares(&c.size).max(1) as i32;
+            let free = spots.iter().find(|p| {
+                !taken.contains(p) && (0..side).all(|dy| (0..side).all(|dx| !self.map.solid(p.x + dx, p.y + dy)))
+                    // reachable from the start without crossing rock: same open area
+                    && crate::vision::find_path(&self.map, start, **p, 1, 12).is_some()
+            });
+            if let Some(p) = free.or(spots.first()) {
+                c.pos = Some(*p);
+                taken.push(*p);
+            }
+        }
     }
 
     pub fn forget_device(&mut self, device_id: &str) -> bool {

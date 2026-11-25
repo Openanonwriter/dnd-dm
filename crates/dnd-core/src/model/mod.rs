@@ -3,12 +3,14 @@
 
 pub mod character;
 pub mod content;
+pub mod map;
 pub mod modifier;
 pub mod rules;
 pub mod state;
 
 pub use character::*;
 pub use content::*;
+pub use map::*;
 pub use modifier::*;
 pub use rules::*;
 pub use state::*;

@@ -14,10 +14,13 @@ pub mod export;
 pub mod expr;
 pub mod grid;
 pub mod library;
+pub mod mapgen;
 pub mod model;
 pub mod rng;
 pub mod save;
 pub mod sheet;
+pub mod view;
+pub mod vision;
 
 pub use library::Library;
 pub use model::*;
@@ -106,6 +109,7 @@ impl World {
             ac: s.ac,
             size: s.size.clone(),
             initiative: 0,
+            darkvision: s.darkvision.max(0) as u32,
             ..Default::default()
         })
     }

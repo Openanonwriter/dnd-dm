@@ -440,26 +440,31 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         }
     });
 
-    // sync PC hp back to character sheets
     if w.campaign.encounter != before {
-        let updates: Vec<(String, i32, i32, Vec<String>)> = w
-            .campaign
-            .encounter
-            .combatants
-            .iter()
-            .filter_map(|c| match &c.kind {
-                CombatantKind::Pc { id } => Some((id.clone(), c.hp, c.temp_hp, c.conditions.clone())),
-                _ => None,
-            })
-            .collect();
-        for (id, hp, temp, conditions) in updates {
-            if let Some(ch) = w.campaign.character_mut(&id) {
-                ch.hp.current = hp;
-                ch.hp.temp = temp;
-                ch.conditions = conditions;
-            }
-        }
+        sync_pcs(w);
         w.touch();
+    }
+}
+
+/// Copies each player character's hit points and conditions from its
+/// combatant back to its character sheet.
+pub fn sync_pcs(w: &mut World) {
+    let updates: Vec<(String, i32, i32, Vec<String>)> = w
+        .campaign
+        .encounter
+        .combatants
+        .iter()
+        .filter_map(|c| match &c.kind {
+            CombatantKind::Pc { id } => Some((id.clone(), c.hp, c.temp_hp, c.conditions.clone())),
+            _ => None,
+        })
+        .collect();
+    for (id, hp, temp, conditions) in updates {
+        if let Some(ch) = w.campaign.character_mut(&id) {
+            ch.hp.current = hp;
+            ch.hp.temp = temp;
+            ch.conditions = conditions;
+        }
     }
 }
 

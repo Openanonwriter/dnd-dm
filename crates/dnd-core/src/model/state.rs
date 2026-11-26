@@ -82,9 +82,23 @@ fn yes() -> bool {
     true
 }
 
+/// The condition that marks a combatant as dead rather than only down.
+pub const DEAD: &str = "dead";
+
 impl Combatant {
     pub fn is_down(&self) -> bool {
         self.hp <= 0
+    }
+    /// Marked dead by the DM (kept as the `dead` condition, so it saves and
+    /// reaches the players with the other conditions).
+    pub fn is_dead(&self) -> bool {
+        self.conditions.iter().any(|c| c == DEAD)
+    }
+    pub fn set_dead(&mut self, dead: bool) {
+        self.conditions.retain(|c| c != DEAD);
+        if dead {
+            self.conditions.push(DEAD.into());
+        }
     }
     /// Apply damage, soaking temp HP first. Returns actual HP lost.
     pub fn damage(&mut self, amount: i32) -> i32 {

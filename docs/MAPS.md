@@ -72,6 +72,27 @@ water, `^` rubble, `%` lava. Water, rubble and snow cost double movement.
 Props: chest, barrel, crate, table, chair, bed, bookshelf, pillar, statue,
 altar, stairs, campfire, tree, bush, boulder, well, trap, rug, bones, portal.
 
+## The Map tab
+
+Everything sits to the right of the map. Against the canvas is the tool
+strip: Move, Paint, Room, Wall, Door, Light, Prop, Note, Fog, Erase and
+Start, then Undo and Redo, then the view switches (Players, Grid, Fit).
+Beside it, top to bottom: the options of the tool in hand, who is on the
+table, and the map's name, size, fog and darkness.
+
+## Health and conditions on the map
+
+Click a token (or its name under *On the table*) to select it. Its panel
+sets hit points directly, takes an amount to **Hurt** or **Heal**, marks it
+**Dead** (or not dead after all) and switches conditions on and off.
+
+On the map a token shows a health ring, and under its name `bloodied` at
+half hit points or less, `DOWN` at 0, `DEAD` when marked dead (drawn grey
+with a heavy cross), and its conditions. Players see the same labels for
+tokens they can see; `bloodied` only where they are allowed to know the hit
+points. Dead is kept as the condition `dead`, so it saves with the campaign.
+Changes to a player character are copied to its character sheet.
+
 ## Fog of war
 
 - **Off**: players see the whole map.

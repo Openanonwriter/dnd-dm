@@ -32,7 +32,7 @@ pub enum Tool {
 impl Tool {
     const ALL: [(Tool, &'static str, &'static str); 11] = [
         (Tool::Select, "✋ Move", "Drag tokens. Click a door to open or close it; right-click to lock it. Right-click a token, prop or note to hide it from players."),
-        (Tool::Paint, "✏ Terrain", "Paint squares with the chosen terrain. Solid rock is a wall: it blocks sight and movement by itself."),
+        (Tool::Paint, "✏ Paint", "Paint squares with the chosen terrain. Solid rock is a wall: it blocks sight and movement by itself."),
         (Tool::Room, "⬛ Room", "Drag a rectangle to fill it with the chosen terrain. Dig rooms and corridors out of rock."),
         (Tool::Wall, "◼ Wall", "Drag from one point to another to draw a thin wall (snaps to half squares)."),
         (Tool::Door, "🚪 Door", "Click the edge between two squares to put a door, secret door or window there. Click again to remove it."),
@@ -137,12 +137,18 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         swap_shelf(w, i);
     }
     let before = (w.campaign.map.clone(), w.campaign.encounter.combatants.clone());
-    token_panel(app, w, ui, shelf_index.is_some());
+    // everything sits to the right of the map: settings and tokens on the
+    // outside, the tool strip against the canvas
+    side_panel(app, w, ui, shelf_index.is_some());
+    tool_strip(app, w, ui);
     egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL)).show_inside(ui, |ui| {
-        toolbar(app, w, ui);
         canvas(app, w, ui, &mut status);
     });
     if (&w.campaign.map, &w.campaign.encounter.combatants) != (&before.0, &before.1) {
+        if shelf_index.is_none() && w.campaign.encounter.combatants != before.1 {
+            // hit points and conditions set here belong on the character sheets too
+            crate::ui::encounter::sync_pcs(w);
+        }
         w.update_explored();
         w.touch();
     }
@@ -277,19 +283,263 @@ fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut O
     });
 }
 
-/// Right: who is on this map, and adding creatures to it.
-fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: bool) {
+/// One square button of the tool strip: a symbol with its name under it.
+fn strip_button(ui: &mut egui::Ui, icon: &str, name: &str, on: bool, enabled: bool) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(egui::vec2(50.0, 40.0), if enabled { egui::Sense::click() } else { egui::Sense::hover() });
+    let fill = if on {
+        theme::ORANGE
+    } else if enabled && resp.hovered() {
+        theme::CARD_HI
+    } else {
+        theme::CARD
+    };
+    let fg = if on {
+        egui::Color32::BLACK
+    } else if enabled {
+        theme::TEXT
+    } else {
+        theme::MUTED.gamma_multiply(0.5)
+    };
+    ui.painter().rect_filled(rect, 5.0, fill);
+    ui.painter().text(rect.center_top() + egui::vec2(0.0, 4.0), egui::Align2::CENTER_TOP, icon, egui::FontId::proportional(17.0), fg);
+    ui.painter().text(rect.center_bottom() - egui::vec2(0.0, 3.0), egui::Align2::CENTER_BOTTOM, name, egui::FontId::proportional(9.5), fg);
+    resp
+}
+
+/// The tool strip down the right edge of the map: every tool, then undo and
+/// the view switches.
+fn tool_strip(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui) {
     let st = &mut app.map;
-    let selected = &mut app.encounter.selected;
-    egui::SidePanel::right("map_tokens").resizable(false).exact_width(224.0).show_inside(ui, |ui| {
+    let map = &mut w.campaign.map;
+    egui::SidePanel::right("map_tools").resizable(false).exact_width(54.0).frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin::symmetric(4, 6))).show_inside(ui, |ui| {
+        egui::ScrollArea::vertical().scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
+            ui.spacing_mut().item_spacing.y = 3.0;
+            for (t, label, tip) in Tool::ALL {
+                let (icon, name) = label.split_once(' ').unwrap_or(("", label));
+                if strip_button(ui, icon, name, st.tool == t, true).on_hover_text(tip).clicked() {
+                    st.tool = t;
+                }
+            }
+            ui.separator();
+            if strip_button(ui, "↩", "Undo", false, !st.undo.is_empty()).on_hover_text("Ctrl+Z").clicked() {
+                undo(st, map);
+            }
+            if strip_button(ui, "↪", "Redo", false, !st.redo.is_empty()).clicked() {
+                if let Some(m) = st.redo.pop() {
+                    st.undo.push(std::mem::replace(map, m));
+                }
+            }
+            ui.separator();
+            if strip_button(ui, "👁", "Players", st.player_view, true).on_hover_text("Show exactly what the players can see right now").clicked() {
+                st.player_view = !st.player_view;
+            }
+            if strip_button(ui, "#", "Grid", !st.no_grid, true).on_hover_text("Show or hide the grid").clicked() {
+                st.no_grid = !st.no_grid;
+            }
+            if strip_button(ui, "⛶", "Fit", false, true).on_hover_text("Show the whole map").clicked() {
+                st.cam = Camera::default();
+            }
+        });
+    });
+}
+
+/// Options for the tool in hand.
+fn tool_options(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
+    let (label, tip) = Tool::ALL.iter().find(|(t, _, _)| *t == st.tool).map(|t| (t.1, t.2)).unwrap_or(("", ""));
+    theme::section(ui, label.split_once(' ').map(|l| l.1).unwrap_or(label));
+    ui.label(theme::muted(tip).small());
+    ui.add_space(2.0);
+    match st.tool {
+        Tool::Paint | Tool::Room => {
+            ui.horizontal_wrapped(|ui| {
+                for (c, name) in tile::ALL {
+                    let sel = st.tile == c;
+                    let text = egui::RichText::new(name).color(if sel { egui::Color32::BLACK } else { theme::TEXT }).small();
+                    if ui.add(egui::Button::new(text).fill(if sel { theme::ORANGE } else { theme::CARD })).clicked() {
+                        st.tile = c;
+                    }
+                }
+            });
+            if st.tool == Tool::Paint {
+                ui.add(egui::Slider::new(&mut st.brush, 1..=6).text("brush"));
+            }
+        }
+        Tool::Door => {
+            ui.horizontal_wrapped(|ui| {
+                for (i, (_, name)) in DOOR_KINDS.iter().enumerate() {
+                    ui.selectable_value(&mut st.door_kind, i, *name);
+                }
+            });
+        }
+        Tool::Light => {
+            ui.horizontal(|ui| {
+                ui.label("Bright light");
+                ui.add(egui::DragValue::new(&mut st.light_bright).range(5..=120).suffix(" ft"));
+            });
+            ui.label(theme::muted("Dim light reaches twice as far.").small());
+        }
+        Tool::Prop => {
+            ui.horizontal(|ui| {
+                egui::ComboBox::from_id_salt("propkind").selected_text(st.prop.clone()).show_ui(ui, |ui| {
+                    for k in PROP_KINDS {
+                        ui.selectable_value(&mut st.prop, k.to_string(), k);
+                    }
+                });
+                if ui.button("⟳ Turn").clicked() {
+                    st.prop_rot = (st.prop_rot + 1) % 4;
+                }
+            });
+            ui.checkbox(&mut st.prop_hidden, "Hidden from players").on_hover_text("A trap or hidden loot: only you see it until you right-click it");
+        }
+        Tool::Note => {
+            ui.add(egui::TextEdit::singleline(&mut st.note).desired_width(f32::INFINITY).hint_text("what to remember here"));
+            ui.checkbox(&mut st.note_public, "Players can read it");
+        }
+        Tool::Fog => {
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut st.fog_hide, false, "Reveal");
+                ui.selectable_value(&mut st.fog_hide, true, "Hide");
+            });
+            ui.add(egui::Slider::new(&mut st.brush, 1..=6).text("brush"));
+            if map.fog == FogMode::Off {
+                ui.colored_label(theme::ORANGE, "Fog is off: choose a fog mode under Map below first.");
+            }
+        }
+        _ => {}
+    }
+}
+
+/// Name, size, fog and darkness of the map on the canvas.
+fn map_settings(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
+    theme::section(ui, "Map");
+    ui.add(egui::TextEdit::singleline(&mut map.name).desired_width(f32::INFINITY).hint_text("map name"));
+    ui.add(egui::TextEdit::singleline(&mut map.chapter).desired_width(f32::INFINITY).hint_text("chapter / place")).on_hover_text("Which part of the campaign this map belongs to; maps are grouped by it");
+    ui.horizontal(|ui| {
+        let (mut mw, mut mh) = (map.width, map.height);
+        ui.add(egui::DragValue::new(&mut mw).range(4..=200).prefix("W "));
+        ui.add(egui::DragValue::new(&mut mh).range(4..=200).prefix("H "));
+        if (mw, mh) != (map.width, map.height) {
+            map.resize(mw, mh);
+        }
+        ui.add(egui::DragValue::new(&mut map.feet_per_square).range(1..=100).suffix(" ft/sq"));
+    });
+    ui.horizontal(|ui| {
+        ui.label("Fog");
+        egui::ComboBox::from_id_salt("fogmode")
+            .selected_text(match map.fog {
+                FogMode::Off => "Off",
+                FogMode::Manual => "Painted by me",
+                FogMode::Vision => "What characters see",
+            })
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut map.fog, FogMode::Off, "Off").on_hover_text("Players see the whole map");
+                ui.selectable_value(&mut map.fog, FogMode::Manual, "Painted by me").on_hover_text("Players see only what you reveal with the Fog tool");
+                ui.selectable_value(&mut map.fog, FogMode::Vision, "What characters see").on_hover_text("Walls, doors and darkness decide; each player sees through their own character");
+            });
+    });
+    if map.fog != FogMode::Off {
+        ui.horizontal(|ui| {
+            if ui.small_button("Reveal all").clicked() {
+                remember(st, map);
+                map.reveal_all();
+            }
+            if ui.small_button("Forget all").on_hover_text("Players forget everything they have seen here").clicked() {
+                remember(st, map);
+                map.reset_fog();
+            }
+        });
+    }
+    ui.horizontal(|ui| {
+        ui.label("Darkness");
+        ui.add(egui::Slider::new(&mut map.darkness, 0.0..=1.0).show_value(false)).on_hover_text("Left: daylight. Middle: dim. Right: pitch black, only lights and darkvision help.");
+    });
+}
+
+/// Hit points, dead or alive, and conditions of the selected token.
+fn token_health(c: &mut Combatant, amount: &mut i32, conditions: &[String], ui: &mut egui::Ui) -> Option<String> {
+    let mut log = None;
+    let dead = c.is_dead();
+    let (state, col) = if dead {
+        ("dead", theme::BAD)
+    } else if c.is_down() {
+        ("down", theme::BAD)
+    } else if c.hp * 2 <= c.hp_max {
+        ("bloodied", theme::ORANGE)
+    } else if c.hp < c.hp_max {
+        ("injured", theme::TEXT)
+    } else {
+        ("unhurt", theme::GOOD)
+    };
+    ui.horizontal(|ui| {
+        ui.label("HP");
+        let top = c.hp_max.max(c.hp);
+        ui.add(egui::DragValue::new(&mut c.hp).range(0..=top));
+        ui.label(format!("/ {}", c.hp_max));
+        ui.label(egui::RichText::new(state).color(col).strong());
+    });
+    ui.horizontal(|ui| {
+        ui.add(egui::DragValue::new(amount).range(0..=999));
+        if ui.button("💥 Hurt").on_hover_text("Take this much damage").clicked() {
+            let lost = c.damage(*amount);
+            log = Some(format!("{} takes {} damage ({lost} to HP), now {}", c.name, *amount, c.hp));
+        }
+        if ui.button("💚 Heal").clicked() {
+            c.set_dead(false);
+            c.heal(*amount);
+            log = Some(format!("{} heals {}, now {}", c.name, *amount, c.hp));
+        }
+    });
+    ui.horizontal(|ui| {
+        if dead {
+            if ui.button("Not dead").on_hover_text("Back up with 1 hit point").clicked() {
+                c.set_dead(false);
+                c.hp = c.hp.max(1);
+                log = Some(format!("{} is not dead after all", c.name));
+            }
+        } else if ui.button("☠ Dead").on_hover_text("0 hit points and marked dead on the map").clicked() {
+            c.hp = 0;
+            c.temp_hp = 0;
+            c.set_dead(true);
+            log = Some(format!("{} is dead", c.name));
+        }
+        if !dead && c.hp < c.hp_max && ui.button("Full health").clicked() {
+            c.hp = c.hp_max;
+        }
+    });
+    ui.label(theme::muted("Conditions").small());
+    ui.horizontal_wrapped(|ui| {
+        ui.spacing_mut().item_spacing = egui::vec2(4.0, 3.0);
+        for cond in conditions.iter().filter(|c| c.as_str() != DEAD) {
+            let on = c.conditions.contains(cond);
+            let text = egui::RichText::new(cond).small().color(if on { egui::Color32::BLACK } else { theme::TEXT });
+            if ui.add(egui::Button::new(text).fill(if on { theme::ORANGE } else { theme::CARD })).clicked() {
+                if on {
+                    c.conditions.retain(|x| x != cond);
+                } else {
+                    c.conditions.push(cond.clone());
+                }
+            }
+        }
+    });
+    log
+}
+
+/// Right: the options of the tool in hand, who is on this map (with their
+/// health and conditions), and the map's own settings.
+fn side_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: bool) {
+    let st = &mut app.map;
+    let est = &mut app.encounter;
+    egui::SidePanel::right("map_side").resizable(false).exact_width(236.0).show_inside(ui, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
+            tool_options(st, &mut w.campaign.map, ui);
+
             theme::section(ui, if preparing { "Waiting on this map" } else { "On the table" });
             if preparing {
                 ui.label(theme::muted("Creatures you put here wait until the party arrives.").small());
             }
             let mut remove: Option<String> = None;
             for c in &w.campaign.encounter.combatants {
-                let sel = selected.as_deref() == Some(c.id.as_str());
+                let sel = est.selected.as_deref() == Some(c.id.as_str());
                 ui.horizontal(|ui| {
                     let col = match c.kind {
                         CombatantKind::Pc { .. } => theme::PC_BLUE,
@@ -298,14 +548,25 @@ fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: boo
                     };
                     ui.colored_label(col, "⏺");
                     let label = if c.pos.is_some() { c.name.clone() } else { format!("{} (not placed)", c.name) };
-                    if ui.selectable_label(sel, label).on_hover_text("Select, then click a square to put it there").clicked() {
-                        *selected = if sel { None } else { Some(c.id.clone()) };
+                    if ui.selectable_label(sel, label).on_hover_text("Select to see its health and conditions; then click a square to put it there").clicked() {
+                        est.selected = if sel { None } else { Some(c.id.clone()) };
                         st.tool = Tool::Select;
+                    }
+                    if c.is_dead() {
+                        ui.label(egui::RichText::new("dead").small().color(theme::BAD));
+                    } else if c.is_down() {
+                        ui.label(egui::RichText::new("down").small().color(theme::BAD));
+                    } else {
+                        ui.label(egui::RichText::new(format!("{}/{}", c.hp, c.hp_max)).small().color(if c.hp * 2 <= c.hp_max { theme::ORANGE } else { theme::MUTED }));
                     }
                     if !c.visible {
                         ui.label(theme::muted("hidden").small());
                     }
                 });
+                let conds: Vec<&str> = c.conditions.iter().map(|s| s.as_str()).filter(|s| *s != DEAD).collect();
+                if !conds.is_empty() {
+                    ui.label(egui::RichText::new(format!("      {}", conds.join(", "))).small().color(theme::CONDITION));
+                }
             }
             if w.campaign.encounter.combatants.is_empty() {
                 ui.label(theme::muted("Nobody yet. Add player characters on the Encounter tab; add creatures below."));
@@ -317,7 +578,7 @@ fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: boo
             });
             if ui.button("➕ Add creature").clicked() && !st.creature_pick.is_empty() {
                 if let Some(c) = w.combatant_from_creature(&st.creature_pick, None) {
-                    *selected = Some(c.id.clone());
+                    est.selected = Some(c.id.clone());
                     w.campaign.encounter.combatants.push(c);
                     st.tool = Tool::Select;
                 }
@@ -327,9 +588,13 @@ fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: boo
                 w.campaign.place_party(|s| rules.size_squares(s));
             }
 
-            if let Some(id) = selected.clone() {
+            if let Some(id) = est.selected.clone() {
+                let conditions = w.library.rules.conditions.clone();
+                let mut log = None;
                 if let Some(c) = w.campaign.encounter.find_mut(&id) {
                     theme::section(ui, &c.name.clone());
+                    log = token_health(c, &mut est.amount, &conditions, ui);
+                    ui.add_space(4.0);
                     ui.checkbox(&mut c.visible, "Players can see it");
                     ui.horizontal(|ui| {
                         ui.label("Light");
@@ -354,131 +619,19 @@ fn token_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: boo
                         }
                     });
                 }
+                if let Some(text) = log {
+                    w.campaign.log(text);
+                }
+            } else if !w.campaign.encounter.combatants.is_empty() {
+                ui.label(theme::muted("Click a token or a name to set its hit points, mark it dead or give it a condition.").small());
             }
             if let Some(id) = remove {
                 w.campaign.encounter.remove(&id);
-                *selected = None;
+                est.selected = None;
             }
-        });
-    });
-}
 
-fn toolbar(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui) {
-    let st = &mut app.map;
-    let map = &mut w.campaign.map;
-    ui.horizontal_wrapped(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut map.name).desired_width(150.0).hint_text("map name"));
-        ui.add(egui::TextEdit::singleline(&mut map.chapter).desired_width(110.0).hint_text("chapter / place")).on_hover_text("Which part of the campaign this map belongs to; maps are grouped by it");
-        let (mut mw, mut mh) = (map.width, map.height);
-        ui.add(egui::DragValue::new(&mut mw).range(4..=200).prefix("W "));
-        ui.add(egui::DragValue::new(&mut mh).range(4..=200).prefix("H "));
-        if (mw, mh) != (map.width, map.height) {
-            map.resize(mw, mh);
-        }
-        ui.add(egui::DragValue::new(&mut map.feet_per_square).range(1..=100).suffix(" ft/sq"));
-        ui.separator();
-        ui.label("Fog");
-        egui::ComboBox::from_id_salt("fogmode")
-            .selected_text(match map.fog {
-                FogMode::Off => "Off",
-                FogMode::Manual => "Painted by me",
-                FogMode::Vision => "What characters see",
-            })
-            .show_ui(ui, |ui| {
-                ui.selectable_value(&mut map.fog, FogMode::Off, "Off").on_hover_text("Players see the whole map");
-                ui.selectable_value(&mut map.fog, FogMode::Manual, "Painted by me").on_hover_text("Players see only what you reveal with the Fog tool");
-                ui.selectable_value(&mut map.fog, FogMode::Vision, "What characters see").on_hover_text("Walls, doors and darkness decide; each player sees through their own character");
-            });
-        if map.fog != FogMode::Off {
-            if ui.small_button("Reveal all").clicked() {
-                remember(st, map);
-                map.reveal_all();
-            }
-            if ui.small_button("Forget all").on_hover_text("Players forget everything they have seen here").clicked() {
-                remember(st, map);
-                map.reset_fog();
-            }
-        }
-        ui.label("Darkness");
-        ui.add(egui::Slider::new(&mut map.darkness, 0.0..=1.0).show_value(false)).on_hover_text("Left: daylight. Middle: dim. Right: pitch black, only lights and darkvision help.");
-        ui.separator();
-        ui.toggle_value(&mut st.player_view, "👁 Players' view").on_hover_text("Show exactly what the players can see right now");
-        let mut grid = !st.no_grid;
-        ui.toggle_value(&mut grid, "# Grid");
-        st.no_grid = !grid;
-        if ui.button("Fit").clicked() {
-            st.cam = Camera::default();
-        }
-    });
-    ui.horizontal_wrapped(|ui| {
-        for (t, label, tip) in Tool::ALL {
-            let sel = st.tool == t;
-            let text = egui::RichText::new(label).color(if sel { egui::Color32::BLACK } else { theme::TEXT });
-            if ui.add(egui::Button::new(text).fill(if sel { theme::ORANGE } else { theme::CARD })).on_hover_text(tip).clicked() {
-                st.tool = t;
-            }
-        }
-        ui.separator();
-        if ui.add_enabled(!st.undo.is_empty(), egui::Button::new("↩ Undo")).on_hover_text("Ctrl+Z").clicked() {
-            undo(st, map);
-        }
-        if ui.add_enabled(!st.redo.is_empty(), egui::Button::new("↪ Redo")).clicked() {
-            if let Some(m) = st.redo.pop() {
-                st.undo.push(std::mem::replace(map, m));
-            }
-        }
-    });
-    // options for the tool in hand
-    ui.horizontal_wrapped(|ui| match st.tool {
-        Tool::Paint | Tool::Room => {
-            for (c, name) in tile::ALL {
-                let sel = st.tile == c;
-                let text = egui::RichText::new(name).color(if sel { egui::Color32::BLACK } else { theme::TEXT }).small();
-                if ui.add(egui::Button::new(text).fill(if sel { theme::ORANGE } else { theme::CARD })).clicked() {
-                    st.tile = c;
-                }
-            }
-            if st.tool == Tool::Paint {
-                ui.add(egui::Slider::new(&mut st.brush, 1..=6).text("brush"));
-            }
-        }
-        Tool::Door => {
-            for (i, (_, name)) in DOOR_KINDS.iter().enumerate() {
-                ui.selectable_value(&mut st.door_kind, i, *name);
-            }
-        }
-        Tool::Light => {
-            ui.label("Bright light");
-            ui.add(egui::DragValue::new(&mut st.light_bright).range(5..=120).suffix(" ft"));
-            ui.label(theme::muted("(dim light reaches twice as far)"));
-        }
-        Tool::Prop => {
-            egui::ComboBox::from_id_salt("propkind").selected_text(st.prop.clone()).show_ui(ui, |ui| {
-                for k in PROP_KINDS {
-                    ui.selectable_value(&mut st.prop, k.to_string(), k);
-                }
-            });
-            if ui.button("⟳ Turn").clicked() {
-                st.prop_rot = (st.prop_rot + 1) % 4;
-            }
-            ui.checkbox(&mut st.prop_hidden, "Hidden from players").on_hover_text("A trap or hidden loot: only you see it until you right-click it");
-        }
-        Tool::Note => {
-            ui.add(egui::TextEdit::singleline(&mut st.note).desired_width(260.0).hint_text("what to remember here"));
-            ui.checkbox(&mut st.note_public, "Players can read it");
-        }
-        Tool::Fog => {
-            ui.selectable_value(&mut st.fog_hide, false, "Reveal");
-            ui.selectable_value(&mut st.fog_hide, true, "Hide");
-            ui.add(egui::Slider::new(&mut st.brush, 1..=6).text("brush"));
-            if map.fog == FogMode::Off {
-                ui.colored_label(theme::ORANGE, "Fog is off: choose a fog mode above first.");
-            }
-        }
-        _ => {
-            let tip = Tool::ALL.iter().find(|(t, _, _)| *t == st.tool).map(|t| t.2).unwrap_or("");
-            ui.label(theme::muted(tip).small());
-        }
+            map_settings(st, &mut w.campaign.map, ui);
+        });
     });
 }
 

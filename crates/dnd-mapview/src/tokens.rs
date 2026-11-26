@@ -108,7 +108,18 @@ fn draw_one(p: &Painter, c: Pos2, s: f32, t: &TokenView, facing: f32, walking: b
         "creature" => Color32::from_rgb(206, 62, 52),
         _ => Color32::from_rgb(150, 150, 156),
     };
-    let dim = |col: Color32| if t.down { alpha(shade(col, 0.45), fade) } else { alpha(col, fade) };
+    let dead = t.conditions.iter().any(|c| c == dnd_core::model::DEAD);
+    // down is darkened; dead is darker still and drained of colour
+    let dim = |col: Color32| {
+        if dead {
+            let g = ((col.r() as u16 + col.g() as u16 + col.b() as u16) / 3) as u8;
+            alpha(shade(Color32::from_gray(g), 0.4), fade)
+        } else if t.down {
+            alpha(shade(col, 0.45), fade)
+        } else {
+            alpha(col, fade)
+        }
+    };
 
     // shadow, further away while it is held in the air
     let lift = if held { 0.24 } else { 0.1 };
@@ -166,24 +177,48 @@ fn draw_one(p: &Painter, c: Pos2, s: f32, t: &TokenView, facing: f32, walking: b
     if selected {
         p.circle_stroke(c, r + s * 0.13, Stroke::new(2.0, Color32::WHITE));
     }
-    if t.down {
-        let x = Stroke::new((s * 0.08).max(2.0), Color32::from_rgb(220, 50, 50));
+    if t.down || dead {
+        let x = Stroke::new((s * if dead { 0.12 } else { 0.08 }).max(2.0), if dead { Color32::from_rgb(150, 20, 20) } else { Color32::from_rgb(220, 50, 50) });
         p.line_segment([c + vec2(-r, -r) * 0.6, c + vec2(r, r) * 0.6], x);
         p.line_segment([c + vec2(r, -r) * 0.6, c + vec2(-r, r) * 0.6], x);
     }
     if t.hidden {
         p.extend(Shape::dashed_line(&arc(c, r + s * 0.2, 0.0, std::f32::consts::TAU), Stroke::new(1.5, Color32::from_rgb(214, 120, 255)), 4.0, 3.0));
     }
-    for i in 0..t.conditions.len().min(4) {
-        p.circle_filled(c + vec2(r * 0.9 - i as f32 * s * 0.16, -r * 0.95), (s * 0.07).max(2.5), Color32::from_rgb(190, 110, 255));
+    let conditions: Vec<&str> = t.conditions.iter().map(|c| c.as_str()).filter(|c| *c != dnd_core::model::DEAD).collect();
+    if s < 14.0 {
+        // too small for words: a dot for each condition
+        for i in 0..conditions.len().min(4) {
+            p.circle_filled(c + vec2(r * 0.9 - i as f32 * s * 0.16, -r * 0.95), (s * 0.07).max(2.5), Color32::from_rgb(190, 110, 255));
+        }
+        return;
     }
-    if s >= 24.0 {
-        let name: String = t.name.chars().take(16).collect();
-        let font = egui::FontId::proportional((s * 0.24).clamp(10.0, 15.0));
-        let at = c + vec2(0.0, r + s * 0.14);
-        let size = vec2(name.chars().count() as f32 * font.size * 0.56 + 6.0, font.size + 3.0);
-        p.rect_filled(Rect::from_center_size(at + vec2(0.0, size.y * 0.5), size), 3.0, alpha(Color32::BLACK, 0.55 * fade));
-        p.text(at, egui::Align2::CENTER_TOP, name, font, if t.mine && t.kind == "pc" { Color32::from_rgb(255, 196, 110) } else { Color32::WHITE });
+    // name, then how it is doing, then its conditions, each on a dark plate
+    let font = egui::FontId::proportional((s * 0.24).clamp(10.0, 15.0));
+    let small = egui::FontId::proportional((s * 0.2).clamp(9.0, 12.5));
+    let mut at = c + vec2(0.0, r + s * 0.14);
+    let mut plate = |text: String, font: &egui::FontId, bg: Color32, fg: Color32| {
+        let size = vec2(text.chars().count() as f32 * font.size * 0.56 + 6.0, font.size + 3.0);
+        p.rect_filled(Rect::from_center_size(at + vec2(0.0, size.y * 0.5), size), 3.0, bg);
+        p.text(at, egui::Align2::CENTER_TOP, text, font.clone(), fg);
+        at.y += size.y + 1.0;
+    };
+    let black = alpha(Color32::BLACK, 0.55 * fade);
+    plate(t.name.chars().take(16).collect(), &font, black, if t.mine && t.kind == "pc" { Color32::from_rgb(255, 196, 110) } else { Color32::WHITE });
+    let red = Color32::from_rgb(170, 28, 28);
+    if dead {
+        plate("DEAD".into(), &small, red, Color32::WHITE);
+    } else if t.down {
+        plate("DOWN".into(), &small, red, Color32::WHITE);
+    } else if t.hp.map(|hp| hp <= 0.5).unwrap_or(false) {
+        plate("bloodied".into(), &small, alpha(Color32::BLACK, 0.7), Color32::from_rgb(255, 120, 100));
+    }
+    if !conditions.is_empty() {
+        let mut text = conditions.join(", ");
+        if text.chars().count() > 30 {
+            text = text.chars().take(29).chain(std::iter::once('…')).collect();
+        }
+        plate(text, &small, alpha(Color32::from_rgb(52, 22, 84), 0.9), Color32::from_rgb(226, 190, 255));
     }
 }
 

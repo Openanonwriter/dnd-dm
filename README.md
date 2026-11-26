@@ -69,11 +69,11 @@ git. The complete SRD ships in the box.
 
 <table>
   <tr>
-    <td><img src="docs/img/player-stats.png" alt="Player sheet: ability scores, armor, initiative, speed, proficiency and hit points with damage and heal buttons" width="170"></td>
-    <td><img src="docs/img/player-combat.png" alt="Combat tab: hit points, your turn, advantage choice, targets with distances and an attack button" width="170"></td>
-    <td><img src="docs/img/player-spells.png" alt="Spells tab: spell attack, save DC, spell slots as pips and cantrips with Cast buttons" width="170"></td>
-    <td><img src="docs/img/player-map.png" alt="Map tab: the player's own view of the dungeon, initiative strip across the top, a downed goblin and movement left this turn" width="170"></td>
-    <td><img src="docs/img/player-builder.png" alt="Character builder: name, species choices and the chosen species' traits, each with an (i) help icon" width="170"></td>
+    <td width="20%"><img src="docs/img/player-stats.png" alt="Player sheet: ability scores, armor, initiative, speed, proficiency and hit points with damage and heal buttons" width="170"></td>
+    <td width="20%"><img src="docs/img/player-combat.png" alt="Combat tab: hit points, your turn, advantage choice, targets with distances and an attack button" width="170"></td>
+    <td width="20%"><img src="docs/img/player-spells.png" alt="Spells tab: spell attack, save DC, spell slots as pips and cantrips with Cast buttons" width="170"></td>
+    <td width="20%"><img src="docs/img/player-map.png" alt="Map tab: the player's own view of the dungeon, initiative strip across the top, a downed goblin and movement left this turn" width="170"></td>
+    <td width="20%"><img src="docs/img/player-builder.png" alt="Character builder: name, species choices and the chosen species' traits, each with an (i) help icon" width="170"></td>
   </tr>
   <tr>
     <td><sub><b>Sheet</b></sub></td>

@@ -55,6 +55,10 @@ pub struct Paths {
 impl Paths {
     pub fn discover() -> Self {
         let mut candidates: Vec<PathBuf> = Vec::new();
+        // DND_DM_HOME names the folder that holds content/, saves/ and dnd-dm.toml
+        if let Some(home) = std::env::var_os("DND_DM_HOME").map(PathBuf::from).filter(|p| p.is_dir()) {
+            candidates.push(home);
+        }
         if let Ok(cwd) = std::env::current_dir() {
             candidates.push(cwd);
         }

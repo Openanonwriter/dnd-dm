@@ -3,7 +3,7 @@ name = "dnd-dm"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Dungeon Master desktop app (Windows first) for D&D 5e and homebrew"
+description = "Dungeon Master desktop app (Windows and Linux) for D&D 5e and homebrew"
 default-run = "dnd-dm"
 
 [[bin]]

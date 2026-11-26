@@ -95,7 +95,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 }
             }
             ui.add_space(24.0);
-            ui.label(theme::muted("Both devices must be on the same Wi-Fi. If the scan finds nothing, the DM may need to allow dnd-dm.exe through the Windows firewall.").small());
+            ui.label(theme::muted("Both devices must be on the same Wi-Fi. If the scan finds nothing, the DM's computer may be blocking it: allow dnd-dm through the firewall (TCP port 8420).").small());
         });
     });
 }

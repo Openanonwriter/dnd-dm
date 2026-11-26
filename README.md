@@ -50,6 +50,12 @@ spells, creatures, rules tables, characters and whole saved campaigns.
   items/notes and sends the changes back; works offline from a cache. See
   [docs/PLAYER_APP.md](docs/PLAYER_APP.md) and `build-android.ps1`.
 
+## Linux
+
+`./build-linux.sh --deps --desktop --firewall` builds both apps on x86_64 or
+ARM64 and puts them in `dist/dnd-dm-linux-<arch>/`. See
+[docs/LINUX.md](docs/LINUX.md).
+
 ## Build & run
 
 Requires Rust 1.80+ (https://rustup.rs). From this folder:

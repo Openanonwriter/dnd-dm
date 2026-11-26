@@ -17,6 +17,9 @@ fn dirs_fallback() -> std::path::PathBuf {
     if let Ok(p) = std::env::var("APPDATA") {
         return std::path::PathBuf::from(p);
     }
+    if let Some(p) = std::env::var_os("XDG_DATA_HOME").filter(|p| !p.is_empty()) {
+        return std::path::PathBuf::from(p);
+    }
     if let Ok(p) = std::env::var("HOME") {
         return std::path::PathBuf::from(p).join(".local/share");
     }

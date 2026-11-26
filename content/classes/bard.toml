@@ -1,0 +1,73 @@
+id = "bard"
+name = "Bard"
+hit_die = 8
+primary_abilities = ["cha"]
+saving_throws = ["dex", "cha"]
+armor_proficiencies = ["light"]
+weapon_proficiencies = ["simple", "hand_crossbow", "longsword", "rapier", "shortsword"]
+tool_proficiencies = ["three musical instruments of your choice"]
+subclass_level = 3
+subclass_label = "Bard College"
+multiclass_prerequisite = "Charisma 13"
+starting_equipment = ["rapier, longsword or simple weapon", "diplomat's pack or entertainer's pack", "lute or musical instrument", "leather_armor + dagger"]
+description = "An inspiring magician whose power echoes the music of creation."
+
+[skill_choices]
+count = 3
+from = []
+
+[spellcasting]
+ability = "cha"
+progression = "full"
+cantrips_known = [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+spells_known = [4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22]
+ritual_casting = true
+focus = "musical instrument"
+
+[[features]]
+name = "Spellcasting"
+level = 1
+description = "Charisma is your spellcasting ability. You know a fixed number of bard spells; when you gain a level you can replace one you know with another bard spell. You can cast a bard spell you know as a ritual if it has the ritual tag, and use a musical instrument as a focus."
+
+[[features]]
+name = "Bardic Inspiration"
+level = 1
+description = "Bonus action: give one creature other than you within 60 feet that can hear you an inspiration die (d6). Within 10 minutes it can add the die to one ability check, attack roll or saving throw after seeing the d20. The die becomes a d8 at 5th level, d10 at 10th and d12 at 15th. Uses equal your Charisma modifier (minimum 1); from 5th level they come back on a short rest too (Font of Inspiration)."
+uses = "max(1, cha_mod)"
+recharge = "long_rest"
+
+[[features]]
+name = "Jack of All Trades"
+level = 2
+description = "Add half your proficiency bonus, rounded down, to any ability check that doesn't already include your proficiency bonus (initiative included)."
+modifiers = [{ target = "initiative", op = "add", value = "floor(pb / 2)" }]
+
+[[features]]
+name = "Song of Rest"
+level = 2
+description = "If you or friendly creatures who hear your performance regain hit points by spending hit dice at the end of a short rest, each of them regains an extra 1d6 hit points (1d8 at 9th level, 1d10 at 13th, 1d12 at 17th)."
+
+[[features]]
+name = "Expertise"
+level = 3
+description = "Choose two of your skill proficiencies: your proficiency bonus is doubled for checks with them. Choose two more at 10th level. Tick them on the Build tab."
+
+[[features]]
+name = "Font of Inspiration"
+level = 5
+description = "You regain all expended uses of Bardic Inspiration when you finish a short or long rest."
+
+[[features]]
+name = "Countercharm"
+level = 6
+description = "Action: start a performance that lasts until the end of your next turn. You and friendly creatures within 30 feet who can hear you have advantage on saving throws against being frightened or charmed."
+
+[[features]]
+name = "Magical Secrets"
+level = 10
+description = "Choose two spells from any class's spell list (cantrips allowed) of a level you can cast. They count as bard spells and toward your spells known. Two more at 14th level and two more at 18th. Ask the DM to add them to your known spells."
+
+[[features]]
+name = "Superior Inspiration"
+level = 20
+description = "When you roll initiative and have no uses of Bardic Inspiration left, you regain one use."

@@ -278,6 +278,16 @@ pub fn features(ui: &mut egui::Ui, label: &str, list: &mut Vec<Feature>, level_l
                     });
                 });
                 ui.add(egui::TextEdit::multiline(&mut f.description).desired_rows(2).desired_width(f32::INFINITY).hint_text("What it does"));
+                if !with_attack {
+                    ui.horizontal(|ui| {
+                        ui.label(theme::muted("Choice: options tag"));
+                        ui.add(egui::TextEdit::singleline(&mut f.options).desired_width(170.0).hint_text("e.g. fighting_style"))
+                            .on_hover_text("The character picks from the feats carrying this tag (and the tag `option`). Leave empty for no choice.");
+                        ui.label(theme::muted("how many"));
+                        ui.add(egui::TextEdit::singleline(&mut f.choose).desired_width(120.0).hint_text("1 (formula)"));
+                    });
+                    list_edit(ui, "Granted spells (ids; always prepared, unlock as the spell level becomes castable)", &mut f.spells);
+                }
                 if with_attack {
                     let mut has = f.attack.is_some();
                     if ui.checkbox(&mut has, "Attack roll").changed() {
@@ -360,7 +370,7 @@ pub fn species(ui: &mut egui::Ui, s: &mut Species) {
     multiline(ui, "Description", &mut s.description, 3);
     section(ui, "Ability bonuses & other modifiers");
     modifiers(ui, &mut s.modifiers);
-    features(ui, "Traits", &mut s.traits, None, false);
+    features(ui, "Traits", &mut s.traits, Some("Character level"), false);
 }
 
 pub fn class(ui: &mut egui::Ui, c: &mut Class, lib: &Library) {
@@ -545,8 +555,12 @@ pub fn feat(ui: &mut egui::Ui, f: &mut Feat) {
     text_w(ui, "Name", &mut f.name, 300.0);
     text(ui, "Prerequisite", &mut f.prerequisite);
     chips(ui, "Tags", &mut f.tags, &[]);
+    row(ui, "", |ui| {
+        ui.label(theme::muted("Tag a class option with `option` plus the word its feature offers (e.g. fighting_style)."));
+    });
     row(ui, "", |ui| hidden_box(ui, &mut f.hidden));
     multiline(ui, "Description", &mut f.description, 4);
+    list_edit(ui, "Granted spells (ids)", &mut f.spells);
     section(ui, "Modifiers");
     modifiers(ui, &mut f.modifiers);
 }

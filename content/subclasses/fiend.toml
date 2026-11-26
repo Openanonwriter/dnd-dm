@@ -1,0 +1,33 @@
+id = "fiend"
+name = "The Fiend"
+class = "warlock"
+description = "You have made a pact with a fiend from the lower planes of existence, a being whose aims are evil."
+
+[[features]]
+name = "Expanded Spell List"
+level = 1
+description = "These spells are added to the warlock list for you (you still learn them as spells known): burning hands, command (1st); blindness/deafness, scorching ray (2nd); fireball, stinking cloud (3rd); fire shield, wall of fire (4th); flame strike, hallow (5th)."
+
+[[features]]
+name = "Dark One's Blessing"
+level = 1
+description = "When you reduce a hostile creature to 0 hit points, gain temporary hit points equal to your Charisma modifier + warlock level (minimum 1)."
+
+[[features]]
+name = "Dark One's Own Luck"
+level = 6
+description = "When you make an ability check or saving throw, add a d10 to it. You can decide after seeing the roll but before its effects occur."
+uses = "1"
+recharge = "short_rest"
+
+[[features]]
+name = "Fiendish Resilience"
+level = 10
+description = "When you finish a short or long rest, choose one damage type. You resist it until you choose another; damage from magical or silvered weapons ignores this resistance."
+
+[[features]]
+name = "Hurl Through Hell"
+level = 14
+description = "When you hit a creature with an attack, send it through the lower planes. It vanishes until the end of your next turn, then returns to its space (or the nearest free one); unless it is a fiend it takes 10d10 psychic damage as it reels from the experience."
+uses = "1"
+recharge = "long_rest"

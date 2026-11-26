@@ -9,7 +9,8 @@ tool_proficiencies = ["thieves' tools"]
 subclass_level = 3
 subclass_label = "Roguish Archetype"
 asi_levels = [4, 8, 10, 12, 16, 19]
-starting_equipment = ["rapier or shortsword", "shortbow + 20 arrows or shortsword", "burglar's pack", "leather_armor, two daggers, thieves' tools"]
+multiclass_prerequisite = "Dexterity 13"
+starting_equipment = ["rapier or shortsword", "shortbow + 20 arrows or shortsword", "burglar's pack, dungeoneer's pack or explorer's pack", "leather_armor, two daggers, thieves' tools"]
 description = "A scoundrel who uses stealth and trickery to overcome obstacles and enemies."
 
 [skill_choices]
@@ -24,29 +25,53 @@ description = "Choose two skill proficiencies (or one plus thieves' tools): your
 [[features]]
 name = "Sneak Attack"
 level = 1
-description = "Once per turn, deal extra damage to one creature you hit with a finesse or ranged weapon if you have advantage, or if another enemy of the target is within 5 ft of it. Extra damage: 1d6 per two rogue levels (rounded up)."
+description = "Once per turn, deal extra damage to one creature you hit with a finesse or ranged weapon if you have advantage on the attack, or if another enemy of the target is within 5 feet of it, isn't incapacitated, and you don't have disadvantage. Extra damage: 1d6 per two rogue levels, rounded up (1d6 at 1st, 2d6 at 3rd … 10d6 at 19th)."
+modifiers = [{ target = "damage.all", op = "note", note = "Sneak Attack +Xd6 (X = half rogue level, rounded up), finesse or ranged, once per turn" }]
 
 [[features]]
 name = "Thieves' Cant"
 level = 1
-description = "You know the secret rogue dialect of hidden messages and signs."
+description = "You know thieves' cant, a secret mix of dialect, jargon and code for hiding messages in normal conversation, plus a set of secret signs and symbols."
 
 [[features]]
 name = "Cunning Action"
 level = 2
-description = "Bonus action: Dash, Disengage or Hide."
+description = "Bonus action on each of your turns in combat: Dash, Disengage or Hide."
 
 [[features]]
 name = "Uncanny Dodge"
 level = 5
-description = "Reaction: halve the damage of an attack from an attacker you can see."
+description = "Reaction when an attacker you can see hits you with an attack: halve the attack's damage against you."
 
 [[features]]
 name = "Evasion"
 level = 7
-description = "On a successful Dex save for half damage you take none; on a failure, half."
+description = "When an effect allows a Dexterity save for half damage, you take none on a success and half on a failure."
 
 [[features]]
 name = "Reliable Talent"
 level = 11
-description = "Treat any d20 roll of 9 or lower as a 10 on ability checks with proficiency."
+description = "When you make an ability check that uses your proficiency bonus, treat a d20 roll of 9 or lower as a 10."
+
+[[features]]
+name = "Blindsense"
+level = 14
+description = "If you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you."
+
+[[features]]
+name = "Slippery Mind"
+level = 15
+description = "You gain proficiency in Wisdom saving throws."
+modifiers = [{ target = "proficiency.save.wis", op = "grant" }]
+
+[[features]]
+name = "Elusive"
+level = 18
+description = "No attack roll has advantage against you while you aren't incapacitated."
+
+[[features]]
+name = "Stroke of Luck"
+level = 20
+description = "If your attack misses a target in range, you can turn the miss into a hit. Or, if you fail an ability check, you can treat the d20 roll as a 20."
+uses = "1"
+recharge = "short_rest"

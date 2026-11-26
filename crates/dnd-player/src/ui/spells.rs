@@ -205,12 +205,16 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
             }
         }
         let is_prepared = ch.spells.prepared.contains(&sp.id);
-        let ready = sp.level == 0 || !prepares || is_prepared;
+        // granted by a feature (domain, oath, circle, racial magic): always ready
+        let granted = s.spells_granted.contains(&sp.id);
+        let ready = sp.level == 0 || !prepares || is_prepared || granted;
         let open = app.ui_state.spell_open == sp.id;
         theme::card().show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
-                if sp.level > 0 && prepares {
+                if granted && sp.level > 0 {
+                    ui.label(theme::accent("always").small()).on_hover_text("Granted by a feature: always prepared, doesn't count against your limit");
+                } else if sp.level > 0 && prepares {
                     let mut p = is_prepared;
                     if ui.add_enabled(is_prepared || prepared_now < prepared_max, egui::Checkbox::new(&mut p, "")).changed() {
                         toggle = Some(sp.id.clone());
@@ -349,7 +353,7 @@ pub fn builder_section(ui: &mut egui::Ui, lib: &Library, draft: &mut Character, 
         draft.spells.prepared.clear();
         return Vec::new();
     }
-    let allowed = |s: &Spell| sheet.spellcasting.iter().any(|b| play::on_class_list(lib, &b.class, s) && (s.level == 0 || (b.spell_limit.is_some() && s.level <= b.max_spell_level)));
+    let allowed = |s: &Spell| sheet.spellcasting.iter().any(|b| play::on_list(lib, b, s) && (s.level == 0 || (b.spell_limit.is_some() && s.level <= b.max_spell_level)));
     draft.spells.known.retain(|id| lib.spells.get(id).map(|s| !s.hidden && allowed(s)).unwrap_or(false));
     let cantrip_max: usize = sheet.spellcasting.iter().map(|b| b.cantrips_known as usize).sum();
     let spell_max: usize = sheet.spellcasting.iter().filter_map(|b| b.spell_limit).sum::<u32>() as usize;

@@ -145,6 +145,10 @@ pub struct Character {
     /// Extra feats not tied to an advancement (e.g. variant human).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub feats: Vec<String>,
+    /// Picks for features that offer options (Fighting Style, Eldritch
+    /// Invocations, Draconic Ancestry...): feature name -> feat ids.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub choices: BTreeMap<String, Vec<String>>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub inventory: Vec<InventoryItem>,
     #[serde(default)]

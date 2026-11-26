@@ -1,0 +1,39 @@
+id = "tiefling"
+name = "Tiefling"
+size = "Medium"
+speed = 30
+darkvision = 60
+languages = ["Common", "Infernal"]
+description = "Descendants of humans touched by an infernal bloodline, marked by horns, tails and an innate affinity for hellish magic."
+
+[[modifiers]]
+target = "ability.cha"
+value = "2"
+[[modifiers]]
+target = "ability.int"
+value = "1"
+
+[[traits]]
+name = "Hellish Resistance"
+description = "You have resistance to fire damage."
+
+[[traits]]
+name = "Infernal Legacy"
+description = "You know the thaumaturgy cantrip. Charisma is your spellcasting ability for these spells."
+spells = ["thaumaturgy"]
+
+[[traits]]
+name = "Infernal Legacy: Hellish Rebuke"
+level = 3
+description = "From 3rd character level you can cast hellish rebuke as a 2nd-level spell once, regaining the use on a long rest."
+uses = "1"
+recharge = "long_rest"
+spells = ["hellish_rebuke"]
+
+[[traits]]
+name = "Infernal Legacy: Darkness"
+level = 5
+description = "From 5th character level you can cast darkness once, regaining the use on a long rest."
+uses = "1"
+recharge = "long_rest"
+spells = ["darkness"]

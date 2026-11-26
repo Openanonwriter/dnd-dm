@@ -1,0 +1,33 @@
+id = "goliath"
+name = "Goliath"
+size = "Medium"
+speed = 35
+languages = ["Common", "Giant"]
+description = "Towering folk descended from giants, each bearing the favor of one kind of giant. (Traits from SRD 5.2; ability increases follow the older style so goliaths fit the rest of this pack.)"
+
+[[modifiers]]
+target = "ability.str"
+value = "2"
+[[modifiers]]
+target = "ability.con"
+value = "1"
+
+[[traits]]
+name = "Giant Ancestry"
+description = "Choose a supernatural boon from your giant ancestors. You can use it a number of times equal to your proficiency bonus, regaining all uses on a long rest."
+options = "giant_ancestry"
+choose = "1"
+uses = "pb"
+recharge = "long_rest"
+
+[[traits]]
+name = "Large Form"
+level = 5
+description = "From 5th character level, as a bonus action you can become Large for 10 minutes (if there's room). You have advantage on Strength checks and your speed increases by 10 feet."
+uses = "1"
+recharge = "long_rest"
+
+[[traits]]
+name = "Powerful Build"
+description = "You have advantage on any ability check you make to end the grappled condition, and you count as one size larger when working out your carrying capacity."
+modifiers = [{ target = "carrying_capacity", op = "mul", value = "2" }]

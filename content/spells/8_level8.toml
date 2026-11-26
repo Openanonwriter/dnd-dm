@@ -1,0 +1,222 @@
+# 8th-level spells.
+
+[[spells]]
+id = "animal_shapes"
+name = "Animal Shapes"
+level = 8
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Concentration, up to 24 hours"
+concentration = true
+classes = ["druid"]
+description = "Transform any number of willing creatures you can see into beasts of CR 4 or lower (Large or smaller). On later turns you can use your action to give them new forms. Each uses the beast's statistics and hit points but keeps its mind; when those hit points drop to 0 it reverts, carrying over excess damage."
+
+[[spells]]
+id = "antimagic_field"
+name = "Antimagic Field"
+level = 8
+school = "abjuration"
+casting_time = "1 action"
+range = "Self (10-foot-radius sphere)"
+components = "V, S, M (a pinch of powdered iron or iron filings)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["cleric", "wizard"]
+area = { shape = "sphere", size = 10 }
+description = "A 10-foot-radius sphere of antimagic surrounds you and moves with you. Spells can't be cast inside, summoned creatures wink out, magic items become mundane, and spell effects are suppressed while in it. Teleportation and planar travel into or out of it fail. Only gods and artifacts ignore it."
+
+[[spells]]
+id = "antipathy_sympathy"
+name = "Antipathy/Sympathy"
+level = 8
+school = "enchantment"
+casting_time = "1 hour"
+range = "60 feet"
+components = "V, S, M (either a lump of alum soaked in vinegar for antipathy or a drop of honey for sympathy)"
+duration = "10 days"
+classes = ["druid", "wizard"]
+save = "wis"
+description = "Make a creature or object (up to a 200-foot cube) repel or attract a kind of intelligent creature you name. Antipathy: such creatures make a Wisdom save or become frightened and must stay at least 60 feet away. Sympathy: they make a Wisdom save or feel compelled to approach and stay within 60 feet. Affected creatures can repeat the save after 1 minute away or on taking damage."
+
+[[spells]]
+id = "clone"
+name = "Clone"
+level = 8
+school = "necromancy"
+casting_time = "1 hour"
+range = "Touch"
+components = "V, S, M (a diamond worth at least 1,000 gp and at least 1 cubic inch of flesh of the creature, both consumed, and a sealable vessel worth at least 2,000 gp)"
+duration = "Instantaneous"
+classes = ["wizard"]
+description = "Grow an inert duplicate of a living creature in a sealed vessel; it matures over 120 days and doesn't age while the vessel stays intact. If the original dies after the clone matures, its soul transfers to the clone (if free and willing), with the same memories and abilities but not its equipment."
+
+[[spells]]
+id = "control_weather"
+name = "Control Weather"
+level = 8
+school = "transmutation"
+casting_time = "10 minutes"
+range = "Self (5-mile radius)"
+components = "V, S, M (burning incense and bits of earth and wood mixed in water)"
+duration = "Concentration, up to 8 hours"
+concentration = true
+classes = ["cleric", "druid", "wizard"]
+description = "Take control of the weather within 5 miles of you for the duration; you must be outdoors. Change precipitation, temperature and wind by one stage at a time (each change takes 1d4 × 10 minutes), and choose the wind's direction."
+
+[[spells]]
+id = "demiplane"
+name = "Demiplane"
+level = 8
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "S"
+duration = "1 hour"
+classes = ["warlock", "wizard"]
+description = "A shadowy door appears on a flat solid surface, leading to an empty 30-foot-cube room of wood or stone. When the spell ends, anything inside stays trapped there. You can create a new demiplane or connect to one you made before, or to one another caster made if you know its nature and contents."
+
+[[spells]]
+id = "dominate_monster"
+name = "Dominate Monster"
+level = 8
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "wis"
+description = "A creature you can see makes a Wisdom save (with advantage if you are fighting it) or is charmed by you. You have a telepathic link and can issue commands; as an action you can take total control of it. It repeats the save whenever it takes damage."
+higher_levels = "With a 9th-level slot, up to 8 hours."
+
+[[spells]]
+id = "earthquake"
+name = "Earthquake"
+level = 8
+school = "evocation"
+casting_time = "1 action"
+range = "500 feet"
+components = "V, S, M (a pinch of dirt, a piece of rock and a lump of clay)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric", "druid", "sorcerer"]
+save = "dex"
+area = { shape = "sphere", size = 100 }
+description = "A violent tremor shakes a 100-foot-radius circle. The ground becomes difficult terrain; concentrating creatures there must make Constitution saves; each creature makes a Dexterity save or falls prone. Fissures open (creatures may fall in), and structures take 50 bludgeoning damage each turn and may collapse, burying creatures nearby."
+
+[[spells]]
+id = "feeblemind"
+name = "Feeblemind"
+level = 8
+school = "enchantment"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (a handful of clay, crystal, glass or mineral spheres)"
+duration = "Instantaneous"
+classes = ["bard", "druid", "warlock", "wizard"]
+save = "int"
+damage = "4d6"
+damage_type = "psychic"
+description = "Blast the mind of a creature you can see: it takes 4d6 psychic damage and makes an Intelligence save. On a failure its Intelligence and Charisma become 1: it can't cast spells, activate magic items, understand language or communicate. It repeats the save every 30 days; greater restoration, heal or wish also ends it."
+
+[[spells]]
+id = "glibness"
+name = "Glibness"
+level = 8
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V"
+duration = "1 hour"
+classes = ["bard", "warlock"]
+description = "Until the spell ends, when you make a Charisma check you can replace the number you roll with a 15. No matter what you say, magic that would determine if you are telling the truth indicates that you are."
+
+[[spells]]
+id = "holy_aura"
+name = "Holy Aura"
+level = 8
+school = "abjuration"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a tiny reliquary worth at least 1,000 gp containing a sacred relic)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric"]
+area = { shape = "sphere", size = 30 }
+description = "Divine light shines from you in a 30-foot radius. Creatures of your choice there shed dim light, have advantage on all saving throws, and other creatures have disadvantage on attack rolls against them. A fiend or undead that hits an affected creature with a melee attack makes a Constitution save or is blinded until the spell ends."
+
+[[spells]]
+id = "incendiary_cloud"
+name = "Incendiary Cloud"
+level = 8
+school = "conjuration"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "10d8"
+damage_type = "fire"
+area = { shape = "sphere", size = 20 }
+description = "A swirling cloud of smoke shot through with white-hot embers fills a 20-foot-radius sphere, heavily obscuring it. A creature in it when it appears, entering it for the first time on a turn, or ending its turn there makes a Dexterity save, taking 10d8 fire damage on a failure or half on a success. The cloud moves 10 feet away from you each turn."
+
+[[spells]]
+id = "maze"
+name = "Maze"
+level = 8
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["wizard"]
+description = "Banish a creature you can see into a labyrinthine demiplane. It can use its action to attempt a DC 20 Intelligence check to escape; on a success it returns to where it vanished (or the nearest free space). Minotaurs and goristro demons automatically succeed."
+
+[[spells]]
+id = "mind_blank"
+name = "Mind Blank"
+level = 8
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "24 hours"
+classes = ["bard", "wizard"]
+description = "A willing creature you touch is immune to psychic damage, any effect that would sense its emotions or read its thoughts, divination spells, and the charmed condition. The spell even foils wish and spells of similar power used to affect its mind or gain information about it."
+
+[[spells]]
+id = "power_word_stun"
+name = "Power Word Stun"
+level = 8
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "con"
+description = "Speak a word of power at a creature you can see. If it has 150 hit points or fewer, it is stunned; otherwise nothing happens. A stunned creature makes a Constitution save at the end of each of its turns, ending the effect on a success."
+
+[[spells]]
+id = "sunburst"
+name = "Sunburst"
+level = 8
+school = "evocation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (fire and a piece of sunstone)"
+duration = "Instantaneous"
+classes = ["druid", "sorcerer", "wizard"]
+save = "con"
+save_half = true
+damage = "12d6"
+damage_type = "radiant"
+area = { shape = "sphere", size = 60 }
+description = "Brilliant sunlight flashes in a 60-foot radius. Each creature there makes a Constitution save, taking 12d6 radiant damage and being blinded for 1 minute on a failure, or half damage on a success. Undead and oozes have disadvantage. A blinded creature repeats the save at the end of each of its turns. It dispels darkness created by spells."

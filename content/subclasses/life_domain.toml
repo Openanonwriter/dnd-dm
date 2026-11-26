@@ -4,6 +4,12 @@ class = "cleric"
 description = "The Life domain focuses on the vibrant positive energy that sustains all life."
 
 [[features]]
+name = "Domain Spells"
+level = 1
+description = "Always prepared and not counted against your prepared spells: bless, cure wounds (1st); lesser restoration, spiritual weapon (3rd); beacon of hope, revivify (5th); death ward, guardian of faith (7th); mass cure wounds, raise dead (9th). Each unlocks once you can cast spells of its level."
+spells = ["bless", "cure_wounds", "lesser_restoration", "spiritual_weapon", "beacon_of_hope", "revivify", "death_ward", "guardian_of_faith", "mass_cure_wounds", "raise_dead"]
+
+[[features]]
 name = "Bonus Proficiency"
 level = 1
 description = "You gain proficiency with heavy armor."
@@ -12,19 +18,25 @@ modifiers = [{ target = "proficiency.armor.heavy", op = "grant" }]
 [[features]]
 name = "Disciple of Life"
 level = 1
-description = "Healing spells of 1st level or higher restore additional hit points equal to 2 + the spell's level."
+description = "Whenever you use a spell of 1st level or higher to restore hit points, the creature regains an additional 2 + the spell's level hit points."
 
 [[features]]
 name = "Channel Divinity: Preserve Life"
 level = 2
-description = "Action: restore hit points equal to five times your cleric level, divided among creatures within 30 ft (none above half its maximum)."
+description = "Action: restore a number of hit points equal to five times your cleric level, divided as you choose among creatures within 30 feet of you. No creature can be healed above half its hit point maximum this way. No effect on undead or constructs."
 
 [[features]]
 name = "Blessed Healer"
 level = 6
-description = "When you cast a healing spell of 1st level or higher on another creature, you regain 2 + the spell's level hit points."
+description = "When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain 2 + the spell's level hit points."
 
 [[features]]
 name = "Divine Strike"
 level = 8
-description = "Once per turn, a weapon hit deals an extra 1d8 radiant damage (2d8 at 14th level)."
+description = "Once on each of your turns when you hit a creature with a weapon attack, deal an extra 1d8 radiant damage (2d8 from 14th level)."
+modifiers = [{ target = "damage.all", op = "note", note = "Divine Strike +1d8 radiant once per turn (2d8 at 14th)" }]
+
+[[features]]
+name = "Supreme Healing"
+level = 17
+description = "When you would roll dice to restore hit points with a spell, use the highest possible number for each die instead."

@@ -1,7 +1,7 @@
 id = "evocation"
 name = "School of Evocation"
 class = "wizard"
-description = "Channel potent magic to create explosive, elemental effects."
+description = "You focus your study on magic that creates powerful elemental effects such as bitter cold, searing flame, rolling thunder, crackling lightning and burning acid."
 
 [[features]]
 name = "Evocation Savant"
@@ -11,14 +11,21 @@ description = "Copying an evocation spell into your spellbook costs half the usu
 [[features]]
 name = "Sculpt Spells"
 level = 2
-description = "When you cast an evocation spell, choose 1 + spell level creatures; they automatically succeed on their saves and take no damage if they would normally take half."
+description = "When you cast an evocation spell that affects other creatures you can see, choose up to 1 + the spell's level of them. They automatically succeed on their saves against it and take no damage if they would normally take half on a success."
 
 [[features]]
 name = "Potent Cantrip"
 level = 6
-description = "A creature that succeeds on a save against your cantrip still takes half damage."
+description = "When a creature succeeds on a saving throw against your cantrip, it still takes half the cantrip's damage (if any) but suffers no other effect."
 
 [[features]]
 name = "Empowered Evocation"
 level = 10
-description = "Add your Intelligence modifier to one damage roll of any wizard evocation spell."
+description = "Add your Intelligence modifier to one damage roll of any wizard evocation spell you cast."
+
+[[features]]
+name = "Overchannel"
+level = 14
+description = "When you cast a wizard spell of 1st to 5th level that deals damage, you can deal maximum damage with it. The first time is free; each further use before a long rest deals 2d12 necrotic damage per spell level to you, plus 1d12 per level for each use after that. This damage ignores resistance and immunity."
+uses = "1"
+recharge = "long_rest"

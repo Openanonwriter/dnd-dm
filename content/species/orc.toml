@@ -1,0 +1,26 @@
+id = "orc"
+name = "Orc"
+size = "Medium"
+speed = 30
+darkvision = 120
+languages = ["Common", "Orc"]
+description = "Tireless, driven folk granted the gifts of endurance and vigor. (Traits from SRD 5.2; ability increases follow the older style so orcs fit the rest of this pack.)"
+
+[[modifiers]]
+target = "ability.str"
+value = "2"
+[[modifiers]]
+target = "ability.con"
+value = "1"
+
+[[traits]]
+name = "Adrenaline Rush"
+description = "Bonus action: take the Dash action and gain temporary hit points equal to your proficiency bonus. Uses equal your proficiency bonus, regained on a short or long rest."
+uses = "pb"
+recharge = "short_rest"
+
+[[traits]]
+name = "Relentless Endurance"
+description = "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead."
+uses = "1"
+recharge = "long_rest"

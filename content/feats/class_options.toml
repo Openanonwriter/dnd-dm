@@ -1,0 +1,728 @@
+# Options for class and species features that offer a choice. A feature with
+# `options = "fighting_style"` lets the character pick feats carrying that
+# tag; the pick is stored in the character's `choices`. Every feat here also
+# carries the tag `option`, which keeps it out of the general feat list at
+# ability score improvements.
+
+# ------------------------------------------------------------ fighting styles
+
+[[feats]]
+id = "style_archery"
+name = "Archery"
+tags = ["option", "fighting_style", "fighting_style_ranger"]
+description = "You gain a +2 bonus to attack rolls you make with ranged weapons."
+modifiers = [{ target = "attack.ranged", op = "add", value = "2" }]
+
+[[feats]]
+id = "style_defense"
+name = "Defense"
+tags = ["option", "fighting_style", "fighting_style_paladin", "fighting_style_ranger"]
+description = "While you are wearing armor, you gain a +1 bonus to AC."
+modifiers = [{ target = "ac", op = "add", value = "1", condition = "armored" }]
+
+[[feats]]
+id = "style_dueling"
+name = "Dueling"
+tags = ["option", "fighting_style", "fighting_style_paladin", "fighting_style_ranger"]
+description = "When you wield a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."
+modifiers = [{ target = "damage.melee", op = "note", note = "+2 with a one-handed weapon and no other weapon (Dueling)" }]
+
+[[feats]]
+id = "style_great_weapon"
+name = "Great Weapon Fighting"
+tags = ["option", "fighting_style", "fighting_style_paladin"]
+description = "When you roll a 1 or 2 on a damage die for an attack with a melee weapon you wield in two hands, you can reroll the die and must use the new roll. The weapon must have the two-handed or versatile property."
+
+[[feats]]
+id = "style_protection"
+name = "Protection"
+tags = ["option", "fighting_style", "fighting_style_paladin"]
+description = "When a creature you can see attacks a target other than you within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."
+
+[[feats]]
+id = "style_two_weapon"
+name = "Two-Weapon Fighting"
+tags = ["option", "fighting_style", "fighting_style_ranger"]
+description = "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."
+
+# ------------------------------------------------------------ metamagic
+
+[[feats]]
+id = "meta_careful"
+name = "Careful Spell"
+tags = ["option", "metamagic"]
+description = "When you cast a spell that forces other creatures to make a saving throw, spend 1 sorcery point and choose up to your Charisma modifier (minimum 1) of them: they automatically succeed on the save."
+
+[[feats]]
+id = "meta_distant"
+name = "Distant Spell"
+tags = ["option", "metamagic"]
+description = "Spend 1 sorcery point to double the range of a spell with a range of 5 feet or more, or make a touch spell's range 30 feet."
+
+[[feats]]
+id = "meta_empowered"
+name = "Empowered Spell"
+tags = ["option", "metamagic"]
+description = "When you roll damage for a spell, spend 1 sorcery point to reroll up to your Charisma modifier (minimum 1) of the damage dice; you must use the new rolls. Works even if you use another Metamagic option on the spell."
+
+[[feats]]
+id = "meta_extended"
+name = "Extended Spell"
+tags = ["option", "metamagic"]
+description = "Spend 1 sorcery point to double the duration of a spell with a duration of 1 minute or longer, to a maximum of 24 hours."
+
+[[feats]]
+id = "meta_heightened"
+name = "Heightened Spell"
+tags = ["option", "metamagic"]
+description = "Spend 3 sorcery points to give one target of a spell disadvantage on its first saving throw against the spell."
+
+[[feats]]
+id = "meta_quickened"
+name = "Quickened Spell"
+tags = ["option", "metamagic"]
+description = "Spend 2 sorcery points to change a spell's casting time from 1 action to 1 bonus action."
+
+[[feats]]
+id = "meta_subtle"
+name = "Subtle Spell"
+tags = ["option", "metamagic"]
+description = "Spend 1 sorcery point to cast a spell without any somatic or verbal components."
+
+[[feats]]
+id = "meta_twinned"
+name = "Twinned Spell"
+tags = ["option", "metamagic"]
+description = "When you cast a spell that targets only one creature and can't target the caster at its current level, spend sorcery points equal to the spell's level (1 for a cantrip) to target a second creature in range with it."
+
+# ------------------------------------------------------------ pact boons
+
+[[feats]]
+id = "pact_chain"
+name = "Pact of the Chain"
+tags = ["option", "pact_boon"]
+description = "You learn find familiar and can cast it as a ritual. Your familiar can also be an imp, pseudodragon, quasit or sprite. When you take the Attack action, you can forgo one of your attacks to let your familiar make one attack with its reaction."
+spells = ["find_familiar"]
+
+[[feats]]
+id = "pact_blade"
+name = "Pact of the Blade"
+tags = ["option", "pact_boon"]
+description = "Action: create a pact weapon in your empty hand, in any melee form you like. You are proficient with it while you wield it, and it counts as magical. It vanishes if it is more than 5 feet from you for a minute, if you dismiss it or summon another, or if you die. You can also bond a magic weapon over a 1-hour ritual and summon it the same way (not an artifact or sentient weapon)."
+
+[[feats]]
+id = "pact_tome"
+name = "Pact of the Tome"
+tags = ["option", "pact_boon"]
+description = "Your patron gives you a Book of Shadows. Choose three cantrips from any class's spell list: while you have the book they count as warlock cantrips and don't count against your cantrips known. If you lose it, a 1-hour ceremony during a rest makes a new one. Ask the DM to add the three cantrips."
+
+# ------------------------------------------------------------ eldritch invocations
+
+[[feats]]
+id = "inv_agonizing_blast"
+name = "Agonizing Blast"
+prerequisite = "eldritch blast cantrip"
+tags = ["option", "eldritch_invocation"]
+description = "When you cast eldritch blast, add your Charisma modifier to the damage it deals on a hit."
+
+[[feats]]
+id = "inv_armor_of_shadows"
+name = "Armor of Shadows"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast mage armor on yourself at will, without expending a spell slot or material components."
+
+[[feats]]
+id = "inv_ascendant_step"
+name = "Ascendant Step"
+prerequisite = "9th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast levitate on yourself at will, without expending a spell slot or material components."
+
+[[feats]]
+id = "inv_beast_speech"
+name = "Beast Speech"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast speak with animals at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_beguiling_influence"
+name = "Beguiling Influence"
+tags = ["option", "eldritch_invocation"]
+description = "You gain proficiency in the Deception and Persuasion skills."
+modifiers = [{ target = "proficiency.skill.deception", op = "grant" }, { target = "proficiency.skill.persuasion", op = "grant" }]
+
+[[feats]]
+id = "inv_bewitching_whispers"
+name = "Bewitching Whispers"
+prerequisite = "7th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast compulsion once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_book_of_ancient_secrets"
+name = "Book of Ancient Secrets"
+prerequisite = "Pact of the Tome"
+tags = ["option", "eldritch_invocation"]
+description = "Inscribe two 1st-level ritual spells from any class's list in your Book of Shadows; you can cast them as rituals while holding it. You can add other ritual spells you find of up to half your warlock level (rounded up), at 50 gp and 2 hours per spell level."
+
+[[feats]]
+id = "inv_chains_of_carceri"
+name = "Chains of Carceri"
+prerequisite = "15th level, Pact of the Chain"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast hold monster at will — targeting a celestial, fiend or elemental — without a slot or material components. You must finish a long rest before using this on the same creature again."
+
+[[feats]]
+id = "inv_devils_sight"
+name = "Devil's Sight"
+tags = ["option", "eldritch_invocation"]
+description = "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet."
+modifiers = [{ target = "darkvision", op = "max", value = "120" }]
+
+[[feats]]
+id = "inv_dreadful_word"
+name = "Dreadful Word"
+prerequisite = "7th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast confusion once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_eldritch_sight"
+name = "Eldritch Sight"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast detect magic at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_eldritch_spear"
+name = "Eldritch Spear"
+prerequisite = "eldritch blast cantrip"
+tags = ["option", "eldritch_invocation"]
+description = "When you cast eldritch blast, its range is 300 feet."
+
+[[feats]]
+id = "inv_eyes_of_the_rune_keeper"
+name = "Eyes of the Rune Keeper"
+tags = ["option", "eldritch_invocation"]
+description = "You can read all writing."
+
+[[feats]]
+id = "inv_fiendish_vigor"
+name = "Fiendish Vigor"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast false life on yourself at will as a 1st-level spell, without expending a spell slot or material components."
+
+[[feats]]
+id = "inv_gaze_of_two_minds"
+name = "Gaze of Two Minds"
+tags = ["option", "eldritch_invocation"]
+description = "Action: touch a willing humanoid and perceive through its senses until the end of your next turn (extendable with your action each turn). While doing so you are blinded and deafened to your own surroundings."
+
+[[feats]]
+id = "inv_lifedrinker"
+name = "Lifedrinker"
+prerequisite = "12th level, Pact of the Blade"
+tags = ["option", "eldritch_invocation"]
+description = "When you hit a creature with your pact weapon, it takes extra necrotic damage equal to your Charisma modifier (minimum 1)."
+
+[[feats]]
+id = "inv_mask_of_many_faces"
+name = "Mask of Many Faces"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast disguise self at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_master_of_myriad_forms"
+name = "Master of Myriad Forms"
+prerequisite = "15th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast alter self at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_minions_of_chaos"
+name = "Minions of Chaos"
+prerequisite = "9th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast conjure elemental once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_mire_the_mind"
+name = "Mire the Mind"
+prerequisite = "5th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast slow once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_misty_visions"
+name = "Misty Visions"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast silent image at will, without expending a spell slot or material components."
+
+[[feats]]
+id = "inv_one_with_shadows"
+name = "One with Shadows"
+prerequisite = "5th level"
+tags = ["option", "eldritch_invocation"]
+description = "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or reaction."
+
+[[feats]]
+id = "inv_otherworldly_leap"
+name = "Otherworldly Leap"
+prerequisite = "9th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast jump on yourself at will, without expending a spell slot or material components."
+
+[[feats]]
+id = "inv_repelling_blast"
+name = "Repelling Blast"
+prerequisite = "eldritch blast cantrip"
+tags = ["option", "eldritch_invocation"]
+description = "When you hit a creature with eldritch blast, you can push it up to 10 feet away from you in a straight line."
+
+[[feats]]
+id = "inv_sculptor_of_flesh"
+name = "Sculptor of Flesh"
+prerequisite = "7th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast polymorph once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_sign_of_ill_omen"
+name = "Sign of Ill Omen"
+prerequisite = "5th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast bestow curse once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_thief_of_five_fates"
+name = "Thief of Five Fates"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast bane once using a warlock spell slot. You can't do so again until you finish a long rest."
+
+[[feats]]
+id = "inv_thirsting_blade"
+name = "Thirsting Blade"
+prerequisite = "5th level, Pact of the Blade"
+tags = ["option", "eldritch_invocation"]
+description = "You can attack with your pact weapon twice, instead of once, whenever you take the Attack action on your turn."
+
+[[feats]]
+id = "inv_visions_of_distant_realms"
+name = "Visions of Distant Realms"
+prerequisite = "15th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast arcane eye at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_voice_of_the_chain_master"
+name = "Voice of the Chain Master"
+prerequisite = "Pact of the Chain"
+tags = ["option", "eldritch_invocation"]
+description = "You can communicate telepathically with your familiar and perceive through its senses at any distance on the same plane. While doing so you can speak through it in your own voice."
+
+[[feats]]
+id = "inv_whispers_of_the_grave"
+name = "Whispers of the Grave"
+prerequisite = "9th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can cast speak with dead at will, without expending a spell slot."
+
+[[feats]]
+id = "inv_witch_sight"
+name = "Witch Sight"
+prerequisite = "15th level"
+tags = ["option", "eldritch_invocation"]
+description = "You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic within 30 feet of you and within line of sight."
+
+# ------------------------------------------------------------ draconic ancestry
+# Used by the dragonborn (breath weapon + resistance) and the Draconic
+# Bloodline sorcerer (damage type for Elemental Affinity).
+
+[[feats]]
+id = "ancestry_black"
+name = "Black Dragon (acid)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: acid. Dragonborn breath weapon: 5 by 30 ft. line, Dexterity save. Dragonborn resist acid damage."
+
+[[feats]]
+id = "ancestry_blue"
+name = "Blue Dragon (lightning)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: lightning. Dragonborn breath weapon: 5 by 30 ft. line, Dexterity save. Dragonborn resist lightning damage."
+
+[[feats]]
+id = "ancestry_brass"
+name = "Brass Dragon (fire)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: fire. Dragonborn breath weapon: 5 by 30 ft. line, Dexterity save. Dragonborn resist fire damage."
+
+[[feats]]
+id = "ancestry_bronze"
+name = "Bronze Dragon (lightning)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: lightning. Dragonborn breath weapon: 5 by 30 ft. line, Dexterity save. Dragonborn resist lightning damage."
+
+[[feats]]
+id = "ancestry_copper"
+name = "Copper Dragon (acid)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: acid. Dragonborn breath weapon: 5 by 30 ft. line, Dexterity save. Dragonborn resist acid damage."
+
+[[feats]]
+id = "ancestry_gold"
+name = "Gold Dragon (fire)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: fire. Dragonborn breath weapon: 15 ft. cone, Dexterity save. Dragonborn resist fire damage."
+
+[[feats]]
+id = "ancestry_green"
+name = "Green Dragon (poison)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: poison. Dragonborn breath weapon: 15 ft. cone, Constitution save. Dragonborn resist poison damage."
+
+[[feats]]
+id = "ancestry_red"
+name = "Red Dragon (fire)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: fire. Dragonborn breath weapon: 15 ft. cone, Dexterity save. Dragonborn resist fire damage."
+
+[[feats]]
+id = "ancestry_silver"
+name = "Silver Dragon (cold)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: cold. Dragonborn breath weapon: 15 ft. cone, Constitution save. Dragonborn resist cold damage."
+
+[[feats]]
+id = "ancestry_white"
+name = "White Dragon (cold)"
+tags = ["option", "draconic_ancestry"]
+description = "Damage type: cold. Dragonborn breath weapon: 15 ft. cone, Constitution save. Dragonborn resist cold damage."
+
+# ------------------------------------------------------------ giant ancestry (goliath)
+
+[[feats]]
+id = "giant_cloud"
+name = "Cloud's Jaunt (Cloud Giant)"
+tags = ["option", "giant_ancestry"]
+description = "Bonus action: magically teleport up to 30 feet to an unoccupied space you can see. Uses equal your proficiency bonus per long rest."
+
+[[feats]]
+id = "giant_fire"
+name = "Fire's Burn (Fire Giant)"
+tags = ["option", "giant_ancestry"]
+description = "When you hit a target with an attack roll and deal damage to it, you can also deal it 1d10 fire damage. Uses equal your proficiency bonus per long rest."
+
+[[feats]]
+id = "giant_frost"
+name = "Frost's Chill (Frost Giant)"
+tags = ["option", "giant_ancestry"]
+description = "When you hit a target with an attack roll and deal damage to it, you can also deal it 1d6 cold damage and reduce its speed by 10 feet until the start of your next turn. Uses equal your proficiency bonus per long rest."
+
+[[feats]]
+id = "giant_hill"
+name = "Hill's Tumble (Hill Giant)"
+tags = ["option", "giant_ancestry"]
+description = "When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give it the prone condition. Uses equal your proficiency bonus per long rest."
+
+[[feats]]
+id = "giant_stone"
+name = "Stone's Endurance (Stone Giant)"
+tags = ["option", "giant_ancestry"]
+description = "Reaction when you take damage: roll 1d12, add your Constitution modifier, and reduce the damage by that total. Uses equal your proficiency bonus per long rest."
+
+[[feats]]
+id = "giant_storm"
+name = "Storm's Thunder (Storm Giant)"
+tags = ["option", "giant_ancestry"]
+description = "Reaction when a creature within 60 feet damages you: deal it 1d8 thunder damage. Uses equal your proficiency bonus per long rest."
+
+# ------------------------------------------------------------ hunter (ranger)
+
+[[feats]]
+id = "hunter_colossus_slayer"
+name = "Colossus Slayer"
+tags = ["option", "hunter_prey"]
+description = "Once per turn, when you hit a creature with a weapon attack and it is below its hit point maximum, it takes an extra 1d8 damage."
+
+[[feats]]
+id = "hunter_giant_killer"
+name = "Giant Killer"
+tags = ["option", "hunter_prey"]
+description = "When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack it immediately after its attack, if you can see it."
+
+[[feats]]
+id = "hunter_horde_breaker"
+name = "Horde Breaker"
+tags = ["option", "hunter_prey"]
+description = "Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature within 5 feet of the original target and within range."
+
+[[feats]]
+id = "hunter_escape_the_horde"
+name = "Escape the Horde"
+tags = ["option", "hunter_defense"]
+description = "Opportunity attacks against you are made with disadvantage."
+
+[[feats]]
+id = "hunter_multiattack_defense"
+name = "Multiattack Defense"
+tags = ["option", "hunter_defense"]
+description = "When a creature hits you with an attack, you gain +4 AC against all subsequent attacks made by that creature for the rest of the turn."
+
+[[feats]]
+id = "hunter_steel_will"
+name = "Steel Will"
+tags = ["option", "hunter_defense"]
+description = "You have advantage on saving throws against being frightened."
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being frightened" }]
+
+[[feats]]
+id = "hunter_volley"
+name = "Volley"
+tags = ["option", "hunter_multiattack"]
+description = "Action: make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon's range. You need ammunition for each target and roll separately for each."
+
+[[feats]]
+id = "hunter_whirlwind"
+name = "Whirlwind Attack"
+tags = ["option", "hunter_multiattack"]
+description = "Action: make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target."
+
+[[feats]]
+id = "hunter_evasion"
+name = "Evasion"
+tags = ["option", "hunter_superior"]
+description = "When an effect allows a Dexterity save for half damage, you take none on a success and half on a failure."
+
+[[feats]]
+id = "hunter_stand_against_the_tide"
+name = "Stand Against the Tide"
+tags = ["option", "hunter_superior"]
+description = "When a hostile creature misses you with a melee attack, you can use your reaction to force it to repeat the same attack against another creature (not itself) of your choice."
+
+[[feats]]
+id = "hunter_uncanny_dodge"
+name = "Uncanny Dodge"
+tags = ["option", "hunter_superior"]
+description = "When an attacker you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."
+
+# ------------------------------------------------------------ circle of the land
+
+[[feats]]
+id = "land_arctic"
+name = "Arctic"
+tags = ["option", "circle_land"]
+description = "Circle spells: hold person, spike growth (3rd); sleet storm, slow (5th); freedom of movement, ice storm (7th); commune with nature, cone of cold (9th)."
+spells = ["hold_person", "spike_growth", "sleet_storm", "slow", "freedom_of_movement", "ice_storm", "commune_with_nature", "cone_of_cold"]
+
+[[feats]]
+id = "land_coast"
+name = "Coast"
+tags = ["option", "circle_land"]
+description = "Circle spells: mirror image, misty step (3rd); water breathing, water walk (5th); control water, freedom of movement (7th); conjure elemental, scrying (9th)."
+spells = ["mirror_image", "misty_step", "water_breathing", "water_walk", "control_water", "freedom_of_movement", "conjure_elemental", "scrying"]
+
+[[feats]]
+id = "land_desert"
+name = "Desert"
+tags = ["option", "circle_land"]
+description = "Circle spells: blur, silence (3rd); create food and water, protection from energy (5th); blight, hallucinatory terrain (7th); insect plague, wall of stone (9th)."
+spells = ["blur", "silence", "create_food_and_water", "protection_from_energy", "blight", "hallucinatory_terrain", "insect_plague", "wall_of_stone"]
+
+[[feats]]
+id = "land_forest"
+name = "Forest"
+tags = ["option", "circle_land"]
+description = "Circle spells: barkskin, spider climb (3rd); call lightning, plant growth (5th); divination, freedom of movement (7th); commune with nature, tree stride (9th)."
+spells = ["barkskin", "spider_climb", "call_lightning", "plant_growth", "divination", "freedom_of_movement", "commune_with_nature", "tree_stride"]
+
+[[feats]]
+id = "land_grassland"
+name = "Grassland"
+tags = ["option", "circle_land"]
+description = "Circle spells: invisibility, pass without trace (3rd); daylight, haste (5th); divination, freedom of movement (7th); dream, insect plague (9th)."
+spells = ["invisibility", "pass_without_trace", "daylight", "haste", "divination", "freedom_of_movement", "dream", "insect_plague"]
+
+[[feats]]
+id = "land_mountain"
+name = "Mountain"
+tags = ["option", "circle_land"]
+description = "Circle spells: spider climb, spike growth (3rd); lightning bolt, meld into stone (5th); stone shape, stoneskin (7th); passwall, wall of stone (9th)."
+spells = ["spider_climb", "spike_growth", "lightning_bolt", "meld_into_stone", "stone_shape", "stoneskin", "passwall", "wall_of_stone"]
+
+[[feats]]
+id = "land_swamp"
+name = "Swamp"
+tags = ["option", "circle_land"]
+description = "Circle spells: acid arrow, darkness (3rd); water walk, stinking cloud (5th); freedom of movement, locate creature (7th); insect plague, scrying (9th)."
+spells = ["acid_arrow", "darkness", "water_walk", "stinking_cloud", "freedom_of_movement", "locate_creature", "insect_plague", "scrying"]
+
+[[feats]]
+id = "land_underdark"
+name = "Underdark"
+tags = ["option", "circle_land"]
+description = "Circle spells: spider climb, web (3rd); gaseous form, stinking cloud (5th); greater invisibility, stone shape (7th); cloudkill, insect plague (9th)."
+spells = ["spider_climb", "web", "gaseous_form", "stinking_cloud", "greater_invisibility", "stone_shape", "cloudkill", "insect_plague"]
+
+# ------------------------------------------------------------ +1 to an ability (half-elf)
+
+[[feats]]
+id = "ability_plus_str"
+name = "+1 Strength"
+tags = ["option", "ability_plus_one"]
+description = "Your Strength score increases by 1."
+modifiers = [{ target = "ability.str", op = "add", value = "1" }]
+
+[[feats]]
+id = "ability_plus_dex"
+name = "+1 Dexterity"
+tags = ["option", "ability_plus_one"]
+description = "Your Dexterity score increases by 1."
+modifiers = [{ target = "ability.dex", op = "add", value = "1" }]
+
+[[feats]]
+id = "ability_plus_con"
+name = "+1 Constitution"
+tags = ["option", "ability_plus_one"]
+description = "Your Constitution score increases by 1."
+modifiers = [{ target = "ability.con", op = "add", value = "1" }]
+
+[[feats]]
+id = "ability_plus_int"
+name = "+1 Intelligence"
+tags = ["option", "ability_plus_one"]
+description = "Your Intelligence score increases by 1."
+modifiers = [{ target = "ability.int", op = "add", value = "1" }]
+
+[[feats]]
+id = "ability_plus_wis"
+name = "+1 Wisdom"
+tags = ["option", "ability_plus_one"]
+description = "Your Wisdom score increases by 1."
+modifiers = [{ target = "ability.wis", op = "add", value = "1" }]
+
+# ------------------------------------------------------------ a skill of your choice
+
+[[feats]]
+id = "skill_acrobatics"
+name = "Acrobatics"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Acrobatics."
+modifiers = [{ target = "proficiency.skill.acrobatics", op = "grant" }]
+
+[[feats]]
+id = "skill_animal_handling"
+name = "Animal Handling"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Animal Handling."
+modifiers = [{ target = "proficiency.skill.animal_handling", op = "grant" }]
+
+[[feats]]
+id = "skill_arcana"
+name = "Arcana"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Arcana."
+modifiers = [{ target = "proficiency.skill.arcana", op = "grant" }]
+
+[[feats]]
+id = "skill_athletics"
+name = "Athletics"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Athletics."
+modifiers = [{ target = "proficiency.skill.athletics", op = "grant" }]
+
+[[feats]]
+id = "skill_deception"
+name = "Deception"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Deception."
+modifiers = [{ target = "proficiency.skill.deception", op = "grant" }]
+
+[[feats]]
+id = "skill_history"
+name = "History"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in History."
+modifiers = [{ target = "proficiency.skill.history", op = "grant" }]
+
+[[feats]]
+id = "skill_insight"
+name = "Insight"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Insight."
+modifiers = [{ target = "proficiency.skill.insight", op = "grant" }]
+
+[[feats]]
+id = "skill_intimidation"
+name = "Intimidation"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Intimidation."
+modifiers = [{ target = "proficiency.skill.intimidation", op = "grant" }]
+
+[[feats]]
+id = "skill_investigation"
+name = "Investigation"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Investigation."
+modifiers = [{ target = "proficiency.skill.investigation", op = "grant" }]
+
+[[feats]]
+id = "skill_medicine"
+name = "Medicine"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Medicine."
+modifiers = [{ target = "proficiency.skill.medicine", op = "grant" }]
+
+[[feats]]
+id = "skill_nature"
+name = "Nature"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Nature."
+modifiers = [{ target = "proficiency.skill.nature", op = "grant" }]
+
+[[feats]]
+id = "skill_perception"
+name = "Perception"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Perception."
+modifiers = [{ target = "proficiency.skill.perception", op = "grant" }]
+
+[[feats]]
+id = "skill_performance"
+name = "Performance"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Performance."
+modifiers = [{ target = "proficiency.skill.performance", op = "grant" }]
+
+[[feats]]
+id = "skill_persuasion"
+name = "Persuasion"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Persuasion."
+modifiers = [{ target = "proficiency.skill.persuasion", op = "grant" }]
+
+[[feats]]
+id = "skill_religion"
+name = "Religion"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Religion."
+modifiers = [{ target = "proficiency.skill.religion", op = "grant" }]
+
+[[feats]]
+id = "skill_sleight_of_hand"
+name = "Sleight of Hand"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Sleight of Hand."
+modifiers = [{ target = "proficiency.skill.sleight_of_hand", op = "grant" }]
+
+[[feats]]
+id = "skill_stealth"
+name = "Stealth"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Stealth."
+modifiers = [{ target = "proficiency.skill.stealth", op = "grant" }]
+
+[[feats]]
+id = "skill_survival"
+name = "Survival"
+tags = ["option", "skill_choice"]
+description = "You gain proficiency in Survival."
+modifiers = [{ target = "proficiency.skill.survival", op = "grant" }]

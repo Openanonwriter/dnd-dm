@@ -1,0 +1,56 @@
+id = "warlock"
+name = "Warlock"
+hit_die = 8
+primary_abilities = ["cha"]
+saving_throws = ["wis", "cha"]
+armor_proficiencies = ["light"]
+weapon_proficiencies = ["simple"]
+subclass_level = 1
+subclass_label = "Otherworldly Patron"
+multiclass_prerequisite = "Charisma 13"
+starting_equipment = ["light_crossbow + 20 bolts or simple weapon", "component pouch or arcane focus", "scholar's pack or dungeoneer's pack", "leather_armor + simple weapon + two daggers"]
+description = "A wielder of magic that is derived from a bargain with an extraplanar entity."
+
+[skill_choices]
+count = 2
+from = ["arcana", "deception", "history", "intimidation", "investigation", "nature", "religion"]
+
+[spellcasting]
+ability = "cha"
+progression = "pact"
+cantrips_known = [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+spells_known = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15]
+focus = "arcane focus"
+
+[[features]]
+name = "Pact Magic"
+level = 1
+description = "Charisma is your spellcasting ability. Your few spell slots are all of the same level (1st at 1st level, rising to 5th at 9th) and come back on a short or long rest. You know a fixed number of warlock spells up to your slot level; when you gain a level you can swap one."
+
+[[features]]
+name = "Eldritch Invocations"
+level = 2
+description = "Fragments of forbidden knowledge that grant lasting magical abilities. Two at 2nd level, three at 5th, four at 7th, five at 9th, six at 12th, seven at 15th, eight at 18th. When you gain a level you can replace one. Some have a level or pact prerequisite."
+options = "eldritch_invocation"
+choose = "if(class.warlock.level >= 18, 8, if(class.warlock.level >= 15, 7, if(class.warlock.level >= 12, 6, if(class.warlock.level >= 9, 5, if(class.warlock.level >= 7, 4, if(class.warlock.level >= 5, 3, 2))))))"
+
+[[features]]
+name = "Pact Boon"
+level = 3
+description = "Your patron bestows a gift for your loyal service: Pact of the Chain, the Blade or the Tome."
+options = "pact_boon"
+choose = "1"
+
+[[features]]
+name = "Mystic Arcanum"
+level = 11
+description = "Choose one 6th-level warlock spell as an arcanum; you can cast it once without a slot and regain the use on a long rest. A 7th-level arcanum at 13th level, 8th-level at 15th, 9th-level at 17th. Ask the DM to note your arcanum spells."
+uses = "if(class.warlock.level >= 17, 4, if(class.warlock.level >= 15, 3, if(class.warlock.level >= 13, 2, 1)))"
+recharge = "long_rest"
+
+[[features]]
+name = "Eldritch Master"
+level = 20
+description = "Spend 1 minute entreating your patron to regain all your expended Pact Magic slots."
+uses = "1"
+recharge = "long_rest"

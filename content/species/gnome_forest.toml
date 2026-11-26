@@ -1,0 +1,32 @@
+id = "gnome_forest"
+name = "Gnome (Forest)"
+size = "Small"
+speed = 25
+darkvision = 60
+languages = ["Common", "Gnomish"]
+description = "Shy, secretive gnomes with a knack for illusion and an affinity with small animals."
+
+[[modifiers]]
+target = "ability.int"
+value = "2"
+[[modifiers]]
+target = "ability.dex"
+value = "1"
+
+[[traits]]
+name = "Gnome Cunning"
+description = "Advantage on all Intelligence, Wisdom and Charisma saving throws against magic."
+modifiers = [
+  { target = "save.int", op = "advantage", note = "vs. magic" },
+  { target = "save.wis", op = "advantage", note = "vs. magic" },
+  { target = "save.cha", op = "advantage", note = "vs. magic" },
+]
+
+[[traits]]
+name = "Natural Illusionist"
+description = "You know the minor illusion cantrip. Intelligence is your spellcasting ability for it."
+spells = ["minor_illusion"]
+
+[[traits]]
+name = "Speak with Small Beasts"
+description = "Through sounds and gestures you can communicate simple ideas with Small or smaller beasts."

@@ -4,7 +4,7 @@ size = "Medium"
 speed = 30
 darkvision = 60
 languages = ["Common", "Elvish"]
-description = "Graceful and long-lived. High elves are quick, keen-eyed and know a wizard cantrip."
+description = "Graceful and long-lived. High elves have a keen mind, master at least the basics of magic, and learn one extra language."
 
 [[modifiers]]
 target = "ability.dex"
@@ -39,4 +39,8 @@ modifiers = [
 
 [[traits]]
 name = "Cantrip"
-description = "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it."
+description = "You know one cantrip of your choice from the wizard spell list. Intelligence is your spellcasting ability for it. Ask the DM to add it to your known spells."
+
+[[traits]]
+name = "Extra Language"
+description = "You can speak, read and write one extra language of your choice."

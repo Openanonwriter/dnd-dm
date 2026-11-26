@@ -276,8 +276,41 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         }
     });
 
+    // features that offer a pick: Fighting Style, Eldritch Invocations, Draconic Ancestry…
+    let open: Vec<_> = sheet.features.iter().filter(|f| !f.options.is_empty()).collect();
+    if !open.is_empty() {
+        heading(ui, "Choices (fighting style, invocations, ancestry…)");
+        for f in open {
+            let opts: Vec<(String, String)> = dnd_core::builder::feature_options(lib, &f.options).iter().map(|x| (x.id.clone(), x.name.clone())).collect();
+            let mut slots: Vec<String> = ch.choices.get(&f.name).cloned().unwrap_or_default();
+            let n = (f.picks as usize).max(slots.len());
+            slots.resize(n, String::new());
+            let mut changed = false;
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new(format!("{} ({}, pick {})", f.name, f.source, f.picks)).strong()).on_hover_text(&f.description);
+                for (i, slot) in slots.iter_mut().enumerate() {
+                    changed |= id_combo(ui, ("choice", &f.name, i), slot, &opts, "— choose —");
+                }
+            });
+            if changed {
+                let mut picked: Vec<String> = Vec::new();
+                for s in slots.into_iter().filter(|s| !s.is_empty()) {
+                    if !picked.contains(&s) {
+                        picked.push(s);
+                    }
+                }
+                if picked.is_empty() {
+                    ch.choices.remove(&f.name);
+                } else {
+                    ch.choices.insert(f.name.clone(), picked);
+                }
+            }
+        }
+    }
+
     heading(ui, "Advancements (ASI / feats at class levels)");
-    let feats = lib.list(Kind::Feat);
+    // class options (tag `option`) are picked above, not as general feats
+    let feats: Vec<(String, String)> = lib.list(Kind::Feat).into_iter().filter(|(id, _)| lib.feats.get(id).map(|f| !dnd_core::builder::is_option_feat(f)).unwrap_or(true)).collect();
     let mut remove: Option<usize> = None;
     for (i, adv) in ch.advancements.iter_mut().enumerate() {
         ui.horizontal(|ui| {

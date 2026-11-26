@@ -79,9 +79,16 @@ pub fn on_class_list(lib: &Library, class: &str, spell: &Spell) -> bool {
     spell.classes.iter().any(|c| lists.contains(c))
 }
 
+/// True when the spell is on one of the lists this spellcasting block draws
+/// from: its class (and that class's `spell_lists`) or its subclass, so a
+/// patron's expanded spells name the subclass id in `classes`.
+pub fn on_list(lib: &Library, block: &SpellcastingBlock, spell: &Spell) -> bool {
+    on_class_list(lib, &block.class, spell) || spell.classes.iter().any(|c| block.lists.contains(c))
+}
+
 /// The spellcasting block a character would cast this spell with.
 pub fn casting_block<'a>(lib: &Library, sheet: &'a Sheet, spell: &Spell) -> Option<&'a SpellcastingBlock> {
-    sheet.spellcasting.iter().find(|b| on_class_list(lib, &b.class, spell)).or(sheet.spellcasting.first())
+    sheet.spellcasting.iter().find(|b| on_list(lib, b, spell)).or(sheet.spellcasting.first())
 }
 
 /// Spells a character could add to the ones they know, and how many picks
@@ -95,8 +102,8 @@ pub fn spell_picks(lib: &Library, ch: &Character, sheet: &Sheet) -> (u32, u32, V
     let cantrips_left = cantrip_max.saturating_sub(known_cantrips);
     let spells_left = spell_max.saturating_sub(known_spells);
     let mut options = Vec::new();
-    for s in lib.spells.values().filter(|s| !s.hidden && !ch.spells.known.contains(&s.id)) {
-        let ok = sheet.spellcasting.iter().any(|b| on_class_list(lib, &b.class, s) && if s.level == 0 { cantrips_left > 0 } else { b.spell_limit.is_some() && spells_left > 0 && s.level <= b.max_spell_level });
+    for s in lib.spells.values().filter(|s| !s.hidden && !ch.spells.known.contains(&s.id) && !sheet.spells_granted.contains(&s.id)) {
+        let ok = sheet.spellcasting.iter().any(|b| on_list(lib, b, s) && if s.level == 0 { cantrips_left > 0 } else { b.spell_limit.is_some() && spells_left > 0 && s.level <= b.max_spell_level });
         if ok {
             options.push(s.id.clone());
         }
@@ -104,12 +111,20 @@ pub fn spell_picks(lib: &Library, ch: &Character, sheet: &Sheet) -> (u32, u32, V
     (cantrips_left, spells_left, options)
 }
 
-/// Spells a character may prepare or cast: the ones they know, plus the
+/// Spells a character may prepare or cast: the ones they know, the ones
+/// their features grant (up to the highest level they can cast), plus the
 /// whole class list for classes that prepare from it.
 pub fn spells_available(lib: &Library, ch: &Character, sheet: &Sheet) -> Vec<String> {
     let mut v = ch.spells.known.clone();
+    let top = sheet.spellcasting.iter().map(|b| b.max_spell_level).max();
+    for id in &sheet.spells_granted {
+        let ok = lib.spells.get(id).map(|s| !s.hidden && (s.level == 0 || top.map(|t| s.level <= t).unwrap_or(true))).unwrap_or(false);
+        if ok && !v.contains(id) {
+            v.push(id.clone());
+        }
+    }
     for s in lib.spells.values().filter(|s| !s.hidden && s.level > 0) {
-        if sheet.spellcasting.iter().any(|b| b.spell_limit.is_none() && s.level <= b.max_spell_level && on_class_list(lib, &b.class, s)) && !v.contains(&s.id) {
+        if sheet.spellcasting.iter().any(|b| b.spell_limit.is_none() && s.level <= b.max_spell_level && on_list(lib, b, s)) && !v.contains(&s.id) {
             v.push(s.id.clone());
         }
     }
@@ -132,7 +147,7 @@ pub fn choose_spells(lib: &Library, ch: &mut Character, wanted: &[String], add_o
         }
         let spell = lib.spells.get(id).filter(|s| !s.hidden).ok_or_else(|| format!("unknown spell '{id}'"))?;
         if !ch.spells.known.contains(id) {
-            let ok = sheet.spellcasting.iter().any(|b| on_class_list(lib, &b.class, spell) && (spell.level == 0 || (b.spell_limit.is_some() && spell.level <= b.max_spell_level)));
+            let ok = sheet.spellcasting.iter().any(|b| on_list(lib, b, spell) && (spell.level == 0 || (b.spell_limit.is_some() && spell.level <= b.max_spell_level)));
             if !ok {
                 return Err(format!("{} is not a spell this character can learn yet", spell.name));
             }
@@ -362,7 +377,8 @@ impl World {
         let ch = self.campaign.character(character_id).ok_or("no such character")?.clone();
         let spell = self.library.spells.get(spell_id).filter(|s| !s.hidden).ok_or("no such spell")?.clone();
         let block = casting_block(&self.library, &sheet, &spell).ok_or("this character does not cast spells")?.clone();
-        let known = ch.spells.known.contains(&spell.id);
+        let granted = sheet.spells_granted.contains(&spell.id);
+        let known = ch.spells.known.contains(&spell.id) || granted;
         if spell.level == 0 {
             if !known {
                 return Err(format!("{} does not know {}", ch.name, spell.name));
@@ -371,7 +387,7 @@ impl World {
             if !spells_available(&self.library, &ch, &sheet).contains(&spell.id) {
                 return Err(format!("{} does not know {}", ch.name, spell.name));
             }
-            if block.prepared_max.is_some() && !ch.spells.prepared.contains(&spell.id) && !(spell.ritual && slot == 0) {
+            if block.prepared_max.is_some() && !granted && !ch.spells.prepared.contains(&spell.id) && !(spell.ritual && slot == 0) {
                 return Err(format!("{} is not prepared", spell.name));
             }
         }

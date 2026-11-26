@@ -4,7 +4,7 @@ size = "Medium"
 speed = 25
 darkvision = 60
 languages = ["Common", "Dwarvish"]
-description = "Bold and hardy, known as skilled warriors, miners and workers of stone and metal."
+description = "Bold and hardy, known as skilled warriors, miners and workers of stone and metal. Hill dwarves have keen senses, deep intuition and remarkable resilience."
 
 [[modifiers]]
 target = "ability.con"
@@ -29,8 +29,12 @@ modifiers = [
 ]
 
 [[traits]]
+name = "Tool Proficiency"
+description = "Proficiency with one artisan's tool of your choice: smith's tools, brewer's supplies or mason's tools."
+
+[[traits]]
 name = "Stonecunning"
-description = "History checks about the origin of stonework count as proficient with double proficiency bonus."
+description = "Intelligence (History) checks about the origin of stonework count as proficient and add double your proficiency bonus."
 
 [[traits]]
 name = "Dwarven Toughness"

@@ -1,0 +1,31 @@
+id = "gnome"
+name = "Gnome (Rock)"
+size = "Small"
+speed = 25
+darkvision = 60
+languages = ["Common", "Gnomish"]
+description = "Energetic, curious inventors and tinkers. Rock gnomes have a natural knack for invention and hardiness beyond other gnomes."
+
+[[modifiers]]
+target = "ability.int"
+value = "2"
+[[modifiers]]
+target = "ability.con"
+value = "1"
+
+[[traits]]
+name = "Gnome Cunning"
+description = "Advantage on all Intelligence, Wisdom and Charisma saving throws against magic."
+modifiers = [
+  { target = "save.int", op = "advantage", note = "vs. magic" },
+  { target = "save.wis", op = "advantage", note = "vs. magic" },
+  { target = "save.cha", op = "advantage", note = "vs. magic" },
+]
+
+[[traits]]
+name = "Artificer's Lore"
+description = "On Intelligence (History) checks about magic items, alchemical objects or technological devices, add double your proficiency bonus instead of any proficiency bonus you normally apply."
+
+[[traits]]
+name = "Tinker"
+description = "Proficiency with tinker's tools. Over 1 hour and 10 gp of materials you can build a Tiny clockwork device (AC 5, 1 hp): a toy, a fire starter or a music box. It stops after 24 hours unless you spend an hour repairing it; you can have three at once."

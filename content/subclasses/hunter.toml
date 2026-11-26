@@ -1,0 +1,32 @@
+id = "hunter"
+name = "Hunter"
+class = "ranger"
+description = "Emulating the Hunter archetype means accepting your place as a bulwark between civilization and the terrors of the wilderness."
+
+[[features]]
+name = "Hunter's Prey"
+level = 3
+description = "Choose one hunting technique."
+options = "hunter_prey"
+choose = "1"
+
+[[features]]
+name = "Defensive Tactics"
+level = 7
+description = "Choose one defensive technique."
+options = "hunter_defense"
+choose = "1"
+
+[[features]]
+name = "Multiattack"
+level = 11
+description = "Choose one multiple-target technique."
+options = "hunter_multiattack"
+choose = "1"
+
+[[features]]
+name = "Superior Hunter's Defense"
+level = 15
+description = "Choose one superior defensive technique."
+options = "hunter_superior"
+choose = "1"

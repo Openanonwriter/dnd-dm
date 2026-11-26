@@ -1,0 +1,32 @@
+id = "half_elf"
+name = "Half-Elf"
+size = "Medium"
+speed = 30
+darkvision = 60
+languages = ["Common", "Elvish"]
+description = "Walking in two worlds but truly belonging to neither, half-elves combine the best qualities of their elf and human parents."
+
+[[modifiers]]
+target = "ability.cha"
+value = "2"
+
+[[traits]]
+name = "Ability Score Increase"
+description = "Two ability scores of your choice other than Charisma increase by 1."
+options = "ability_plus_one"
+choose = "2"
+
+[[traits]]
+name = "Fey Ancestry"
+description = "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being charmed" }]
+
+[[traits]]
+name = "Skill Versatility"
+description = "You gain proficiency in two skills of your choice."
+options = "skill_choice"
+choose = "2"
+
+[[traits]]
+name = "Extra Language"
+description = "You can speak, read and write one extra language of your choice."

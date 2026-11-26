@@ -1,0 +1,84 @@
+id = "barbarian"
+name = "Barbarian"
+hit_die = 12
+primary_abilities = ["str"]
+saving_throws = ["str", "con"]
+armor_proficiencies = ["light", "medium", "shields"]
+weapon_proficiencies = ["simple", "martial"]
+subclass_level = 3
+subclass_label = "Primal Path"
+multiclass_prerequisite = "Strength 13"
+starting_equipment = ["greataxe or martial weapon", "two handaxes or simple weapon", "explorer's pack + four javelins"]
+description = "A fierce warrior of primitive background who can enter a battle rage."
+
+[skill_choices]
+count = 2
+from = ["animal_handling", "athletics", "intimidation", "nature", "perception", "survival"]
+
+[[features]]
+name = "Rage"
+level = 1
+description = "Bonus action, while not wearing heavy armor: for 1 minute you have advantage on Strength checks and saves, add your rage damage to melee weapon attacks using Strength (+2; +3 at 9th level, +4 at 16th), and resist bludgeoning, piercing and slashing damage. You can't cast or concentrate on spells. It ends early if you are knocked out or your turn ends without you attacking a hostile creature or taking damage since your last turn. Unlimited rages at 20th level."
+uses = "if(class.barbarian.level >= 20, 99, if(class.barbarian.level >= 17, 6, if(class.barbarian.level >= 12, 5, if(class.barbarian.level >= 6, 4, if(class.barbarian.level >= 3, 3, 2)))))"
+recharge = "long_rest"
+modifiers = [{ target = "damage.melee", op = "note", note = "+2 rage damage while raging (+3 at 9th, +4 at 16th)" }]
+
+[[features]]
+name = "Unarmored Defense"
+level = 1
+description = "While you wear no armor, your AC is 10 + Dexterity modifier + Constitution modifier. You can still use a shield."
+modifiers = [{ target = "ac.base", op = "max", value = "10 + dex_mod + con_mod", condition = "!armored" }]
+
+[[features]]
+name = "Reckless Attack"
+level = 2
+description = "When you make your first attack on your turn, you can attack recklessly: advantage on melee weapon attacks using Strength this turn, but attacks against you have advantage until your next turn."
+
+[[features]]
+name = "Danger Sense"
+level = 2
+description = "Advantage on Dexterity saving throws against effects you can see, such as traps and spells, while you aren't blinded, deafened or incapacitated."
+modifiers = [{ target = "save.dex", op = "advantage", note = "vs. effects you can see" }]
+
+[[features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+
+[[features]]
+name = "Fast Movement"
+level = 5
+description = "Your speed increases by 10 feet while you aren't wearing heavy armor."
+modifiers = [{ target = "speed", op = "add", value = "10", condition = "!armor_heavy" }]
+
+[[features]]
+name = "Feral Instinct"
+level = 7
+description = "Advantage on initiative rolls. If you are surprised at the start of combat but not incapacitated, you can act normally on your first turn if you rage first."
+modifiers = [{ target = "initiative", op = "advantage" }]
+
+[[features]]
+name = "Brutal Critical"
+level = 9
+description = "Roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. Two additional dice at 13th level, three at 17th."
+
+[[features]]
+name = "Relentless Rage"
+level = 11
+description = "If you drop to 0 hit points while raging and don't die outright, make a DC 10 Constitution save to drop to 1 hit point instead. Each later use adds 5 to the DC; it resets to 10 after a short or long rest."
+
+[[features]]
+name = "Persistent Rage"
+level = 15
+description = "Your rage ends early only if you fall unconscious or choose to end it."
+
+[[features]]
+name = "Indomitable Might"
+level = 18
+description = "If your total for a Strength check is less than your Strength score, you can use the score in place of the total."
+
+[[features]]
+name = "Primal Champion"
+level = 20
+description = "Your Strength and Constitution scores increase by 4. Your maximum for those scores is now 24."
+modifiers = [{ target = "ability.str", op = "add", value = "4" }, { target = "ability.con", op = "add", value = "4" }]

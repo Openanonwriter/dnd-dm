@@ -108,7 +108,29 @@ uses = "1"                      # formula, optional
 recharge = "short_rest"         # free text
 modifiers = [ { target = "ac", op = "add", value = "1", condition = "armored" } ]
 attack = { to_hit = 4, reach = "reach 5 ft.", damage = "1d6 + 2", damage_type = "slashing" }  # creatures
+options = "fighting_style"      # a choice: pick from the feats tagged with this word
+choose = "1"                    # how many picks (formula), e.g. "if(class.warlock.level >= 5, 3, 2)"
+spells = ["bless", "cure_wounds"]   # granted spells: always prepared, never counted
 ```
+
+**Choices.** A feature with `options` lets the character pick that many
+feats carrying the tag (Fighting Style, Eldritch Invocations, Metamagic,
+Pact Boon, Draconic Ancestry, the Hunter's techniques, the Land druid's
+terrain, a half-elf's +1s and skills). The picks are stored on the
+character as `choices = { "Fighting Style" = ["style_defense"] }`; each
+picked feat's modifiers and granted spells apply, and it shows on the sheet
+as "Fighting Style: Defense". Option feats also carry the tag `option`,
+which keeps them out of the general feat list at ability score
+improvements. The DM picks on the Characters tab; players pick in the
+builder, and the server checks every pick. The built-in options live in
+`content/feats/class_options.toml`.
+
+**Granted spells.** Spells in a feature's (or feat's) `spells` are always
+prepared and don't count against known or prepared limits. Each unlocks
+once the character can cast spells of its level (domain spells at cleric
+1/3/5/7/9, oath spells at paladin 3/5/9/13/17), so list them all at once.
+Species traits take a `level` (character level), so racial magic can arrive
+later: the tiefling gets hellish rebuke at 3rd and darkness at 5th.
 
 ## Species
 
@@ -229,6 +251,8 @@ id = "tough"
 name = "Tough"
 prerequisite = ""
 description = "…"
+tags = []                 # "option" + a word makes it a class option (see Choices)
+spells = []               # granted spells while the character has it
 [[modifiers]] …
 ```
 
@@ -245,7 +269,7 @@ components = "V, S, M"
 duration = "Instantaneous"
 concentration = false
 ritual = false
-classes = ["wizard", "sorcerer"]
+classes = ["wizard", "sorcerer"]   # a subclass id ("fiend") adds it to that subclass's list
 attack = false
 save = "dex"
 save_half = true          # a successful save halves the damage (default: none)

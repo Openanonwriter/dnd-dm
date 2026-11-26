@@ -1,0 +1,38 @@
+id = "land"
+name = "Circle of the Land"
+class = "druid"
+description = "Mystics and sages who safeguard ancient knowledge and rites, drawing magic from the land where they were initiated."
+
+[[features]]
+name = "Bonus Cantrip"
+level = 2
+description = "You learn one additional druid cantrip of your choice."
+
+[[features]]
+name = "Natural Recovery"
+level = 2
+description = "Once per day during a short rest, recover expended spell slots with a combined level up to half your druid level (rounded up), none of 6th level or higher."
+uses = "1"
+recharge = "long_rest"
+
+[[features]]
+name = "Circle Spells"
+level = 3
+description = "Your link to the land where you became a druid grants extra spells, always prepared and not counted against your prepared spells. Pick that land; its spells unlock as you can cast their level (at druid levels 3, 5, 7 and 9)."
+options = "circle_land"
+choose = "1"
+
+[[features]]
+name = "Land's Stride"
+level = 6
+description = "Moving through nonmagical difficult terrain costs no extra movement, and nonmagical plants don't slow or hurt you. Advantage on saves against plants magically created or manipulated to impede movement."
+
+[[features]]
+name = "Nature's Ward"
+level = 10
+description = "You can't be charmed or frightened by elementals or fey, and you are immune to poison and disease."
+
+[[features]]
+name = "Nature's Sanctuary"
+level = 14
+description = "When a beast or plant creature attacks you, it must make a Wisdom save against your spell save DC or choose another target (or miss automatically). On a success it is immune to this effect for 24 hours."

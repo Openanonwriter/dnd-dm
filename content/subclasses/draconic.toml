@@ -1,0 +1,36 @@
+id = "draconic"
+name = "Draconic Bloodline"
+class = "sorcerer"
+description = "Your innate magic comes from draconic magic that was mingled with your blood or that of your ancestors."
+
+[[features]]
+name = "Dragon Ancestor"
+level = 1
+description = "Choose one type of dragon as your ancestor; its damage type is used by your later features. You can speak, read and write Draconic, and your proficiency bonus is doubled on Charisma checks with dragons."
+options = "draconic_ancestry"
+choose = "1"
+modifiers = [{ target = "proficiency.language.draconic", op = "grant" }]
+
+[[features]]
+name = "Draconic Resilience"
+level = 1
+description = "Your hit point maximum increases by 1 for each sorcerer level. While you aren't wearing armor, your AC is 13 + your Dexterity modifier."
+modifiers = [
+  { target = "hp.max", op = "add", value = "class.sorcerer.level" },
+  { target = "ac.base", op = "max", value = "13 + dex_mod", condition = "!armored" },
+]
+
+[[features]]
+name = "Elemental Affinity"
+level = 6
+description = "When you cast a spell that deals damage of your ancestry's type, add your Charisma modifier to one damage roll of it. You can also spend 1 sorcery point to gain resistance to that damage type for 1 hour."
+
+[[features]]
+name = "Dragon Wings"
+level = 14
+description = "Bonus action: sprout dragon wings and gain a flying speed equal to your current speed, until you dismiss them. Armor not made for them blocks this."
+
+[[features]]
+name = "Draconic Presence"
+level = 18
+description = "Action, 5 sorcery points: for 1 minute (concentration), each hostile creature that starts its turn within 60 feet of you makes a Wisdom save or is charmed (awe) or frightened (fear), your choice, until the aura ends. A creature that succeeds is immune for 24 hours."

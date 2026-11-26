@@ -1,0 +1,46 @@
+id = "elf_wood"
+name = "Elf (Wood)"
+size = "Medium"
+speed = 35
+darkvision = 60
+languages = ["Common", "Elvish"]
+description = "Wood elves have keen senses and intuition, and their fleet feet carry them quickly and stealthily through their native forests."
+
+[[modifiers]]
+target = "ability.dex"
+value = "2"
+[[modifiers]]
+target = "ability.wis"
+value = "1"
+
+[[traits]]
+name = "Keen Senses"
+description = "You have proficiency in the Perception skill."
+modifiers = [{ target = "proficiency.skill.perception", op = "grant" }]
+
+[[traits]]
+name = "Fey Ancestry"
+description = "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being charmed" }]
+
+[[traits]]
+name = "Trance"
+description = "You don't need to sleep. You meditate deeply for 4 hours a day and gain the benefit of a long rest."
+
+[[traits]]
+name = "Elf Weapon Training"
+description = "Proficiency with the longsword, shortsword, shortbow and longbow."
+modifiers = [
+  { target = "proficiency.weapon.longsword", op = "grant" },
+  { target = "proficiency.weapon.shortsword", op = "grant" },
+  { target = "proficiency.weapon.shortbow", op = "grant" },
+  { target = "proficiency.weapon.longbow", op = "grant" },
+]
+
+[[traits]]
+name = "Fleet of Foot"
+description = "Your base walking speed is 35 feet."
+
+[[traits]]
+name = "Mask of the Wild"
+description = "You can try to hide even when you are only lightly obscured by foliage, heavy rain, falling snow, mist or other natural phenomena."

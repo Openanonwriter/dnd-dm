@@ -108,6 +108,19 @@ pub struct Feature {
     /// Optional attack block for creature actions.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub attack: Option<Attack>,
+    /// A choice: the feats tagged with this word are the options
+    /// (`options = "fighting_style"`). The character's picks are stored in
+    /// `Character.choices` under this feature's name.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub options: String,
+    /// How many options to pick (formula, default 1), e.g.
+    /// `"if(class.warlock.level >= 5, 3, 2)"`.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub choose: String,
+    /// Spell ids this feature grants: always prepared, never counted
+    /// against the prepared or known limits (domain spells, racial magic).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub spells: Vec<String>,
 }
 
 fn one() -> u32 {

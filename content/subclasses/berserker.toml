@@ -1,0 +1,24 @@
+id = "berserker"
+name = "Path of the Berserker"
+class = "barbarian"
+description = "For some barbarians, rage is a means to an end — that end being violence. The Path of the Berserker is a path of untrammeled fury."
+
+[[features]]
+name = "Frenzy"
+level = 3
+description = "When you rage you can choose to frenzy: for the rest of the rage you can make a single melee weapon attack as a bonus action on each of your turns after this one. When the rage ends you suffer one level of exhaustion."
+
+[[features]]
+name = "Mindless Rage"
+level = 6
+description = "You can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the rage's duration."
+
+[[features]]
+name = "Intimidating Presence"
+level = 10
+description = "Action: choose one creature within 30 feet that can see or hear you. It makes a Wisdom save (DC 8 + proficiency bonus + Charisma modifier) or is frightened of you until the end of your next turn; you can extend it with your action each turn. If it ends its turn out of sight or more than 60 feet away, the effect ends. A creature that succeeds can't be affected again for 24 hours."
+
+[[features]]
+name = "Retaliation"
+level = 14
+description = "Reaction when a creature within 5 feet of you damages you: make a melee weapon attack against that creature."

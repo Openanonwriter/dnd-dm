@@ -25,8 +25,11 @@ spells, creatures, rules tables, characters and whole saved campaigns.
   hidden ("fog of war" for loot); DM notes never leave the DM app. The
   `/api/player/*` endpoints strip all of it, and `/api/dm/*` lets a remote DM
   tool add, hide or remove items on a sheet.
-- **Human-writable content packs** — `content/` ships a small SRD sample;
-  `homebrew/` is yours. Later packs override earlier ones by id.
+- **Human-writable content packs** — `content/` ships the whole SRD: all 12
+  classes (levels 1–20) with their subclass and every class choice (fighting
+  styles, invocations, metamagic…), 16 races and subraces, all 321 SRD spells
+  with class lists, and the full weapon table. `homebrew/` is yours. Later
+  packs override earlier ones by id.
 - **Rules engine** — ability modifiers, proficiency, saves, skills, expertise,
   AC (armor, shields, Unarmored-Defense-style formulas), hit points, hit dice,
   initiative, speed, attacks, spell attack / DC / slots (single and multiclass),
@@ -69,7 +72,7 @@ cargo test
 ## Folder layout
 
 ```
-content/            base pack (SRD sample) — species/ classes/ items/ ... rules.toml
+content/            base pack (complete SRD) — species/ classes/ items/ ... rules.toml
 homebrew/           your pack; same layout; overrides content/ by id
 saves/<campaign>/   campaign.toml + characters/*.toml
 exports/            printable HTML sheets and TOML character exports
@@ -101,5 +104,10 @@ condition = "armored"    # optional formula; applies only when true
 
 ## License
 
-MIT. The sample content paraphrases game mechanics from the SRD 5.1
-(Creative Commons Attribution 4.0, Wizards of the Coast).
+MIT. The content in `content/` includes game mechanics from the System
+Reference Document 5.1 ("SRD 5.1") and 5.2 ("SRD 5.2") by Wizards of the
+Coast LLC, available at https://www.dndbeyond.com/srd, licensed under the
+Creative Commons Attribution 4.0 International License
+(https://creativecommons.org/licenses/by/4.0/legalcode). Descriptions are
+written in our own words. Material outside the SRD (the books' other
+subclasses, races and spells) is not included; add it in `homebrew/`.

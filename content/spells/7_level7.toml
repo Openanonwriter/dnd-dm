@@ -1,0 +1,283 @@
+# 7th-level spells.
+
+[[spells]]
+id = "arcane_sword"
+name = "Arcane Sword"
+level = 7
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a miniature platinum sword with a grip and pommel of copper and zinc, worth 250 gp)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "wizard"]
+attack = true
+damage = "3d10"
+damage_type = "force"
+description = "A sword-shaped plane of force hovers within range. When it appears, make a melee spell attack against a target within 5 feet of it: 3d10 force damage on a hit. As a bonus action on later turns, move it up to 20 feet and attack again."
+
+[[spells]]
+id = "conjure_celestial"
+name = "Conjure Celestial"
+level = 7
+school = "conjuration"
+casting_time = "1 minute"
+range = "90 feet"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["cleric"]
+description = "Summon a celestial of CR 4 or lower. It is friendly to you and your companions, rolls its own initiative and obeys your verbal commands."
+higher_levels = "With a 9th-level slot, a celestial of CR 5 or lower."
+
+[[spells]]
+id = "delayed_blast_fireball"
+name = "Delayed Blast Fireball"
+level = 7
+school = "evocation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (a tiny ball of bat guano and sulfur)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "12d6"
+damage_type = "fire"
+upcast = "1d6"
+area = { shape = "sphere", size = 20 }
+description = "A glowing bead of fire waits at a point. When the spell ends (concentration broken or you end it) it explodes in a 20-foot-radius sphere: each creature makes a Dexterity save, taking 12d6 fire damage on a failure or half on a success. The damage grows by 1d6 for each of your turns that ends before it explodes. A creature touching the bead may set it off."
+higher_levels = "+1d6 base damage for each slot level above 7th."
+
+[[spells]]
+id = "divine_word"
+name = "Divine Word"
+level = 7
+school = "evocation"
+casting_time = "1 bonus action"
+range = "30 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["cleric"]
+save = "cha"
+description = "Speak a word imbued with divine power. Each creature of your choice that can hear you makes a Charisma save; on a failure its current hit points decide the effect: 50 or fewer deafened for 1 minute; 40 or fewer also blinded for 10 minutes; 30 or fewer also stunned for an hour; 20 or fewer killed instantly. Celestials, elementals, fey and fiends that fail are sent back to their home planes."
+
+[[spells]]
+id = "etherealness"
+name = "Etherealness"
+level = 7
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V, S"
+duration = "Up to 8 hours"
+classes = ["bard", "cleric", "sorcerer", "warlock", "wizard"]
+description = "Step into the border regions of the Ethereal Plane. You can move in any direction, see and hear the plane you came from in shades of gray within 60 feet, and only affect or be affected by other ethereal things. When the spell ends you return to the plane you left (shunted to the nearest free space if occupied)."
+higher_levels = "Up to three willing creatures (including you) for each slot level above 7th."
+
+[[spells]]
+id = "finger_of_death"
+name = "Finger of Death"
+level = 7
+school = "necromancy"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["sorcerer", "warlock", "wizard"]
+save = "con"
+save_half = true
+damage = "7d8 + 30"
+damage_type = "necrotic"
+description = "Send negative energy coursing through a creature you can see. It makes a Constitution save, taking 7d8 + 30 necrotic damage on a failure or half on a success. A humanoid killed by it rises at the start of your next turn as a zombie permanently under your command."
+
+[[spells]]
+id = "fire_storm"
+name = "Fire Storm"
+level = 7
+school = "evocation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric", "druid", "sorcerer"]
+save = "dex"
+save_half = true
+damage = "7d10"
+damage_type = "fire"
+area = { shape = "cube", size = 10 }
+description = "A storm of roaring flame fills up to ten connected 10-foot cubes you arrange. Each creature in the area makes a Dexterity save, taking 7d10 fire damage on a failure or half on a success. It ignites unattended flammable objects, and you can choose for plant life in the area not to be affected."
+
+[[spells]]
+id = "forcecage"
+name = "Forcecage"
+level = 7
+school = "evocation"
+casting_time = "1 action"
+range = "100 feet"
+components = "V, S, M (ruby dust worth 1,500 gp)"
+duration = "1 hour"
+classes = ["bard", "warlock", "wizard"]
+save = "cha"
+description = "An immobile, invisible cube-shaped prison of magical force appears: a cage (20-foot cube of bars 1/2 inch apart) or a solid box (10-foot cube). A creature only partly inside is pushed out. A creature inside can't leave by nonmagical means; to teleport or travel planes out it must first succeed on a Charisma save. It can't be dispelled."
+
+[[spells]]
+id = "magnificent_mansion"
+name = "Magnificent Mansion"
+level = 7
+school = "conjuration"
+casting_time = "1 minute"
+range = "300 feet"
+components = "V, S, M (a miniature portal carved from ivory, a small piece of polished marble and a tiny silver spoon, each item worth at least 5 gp)"
+duration = "24 hours"
+classes = ["bard", "wizard"]
+description = "Conjure a shimmering door to an extradimensional dwelling of up to fifty 10-foot cubes, furnished and decorated as you choose, with a staff of up to a hundred near-transparent servants and a nine-course banquet for a hundred people. Only creatures you designate can enter. Anything left inside when the spell ends is expelled."
+
+[[spells]]
+id = "mirage_arcane"
+name = "Mirage Arcane"
+level = 7
+school = "illusion"
+casting_time = "10 minutes"
+range = "Sight"
+components = "V, S"
+duration = "10 days"
+classes = ["bard", "druid", "wizard"]
+description = "Make terrain in an area up to 1 mile square look, sound, smell and even feel like some other sort of terrain — a road becomes a swamp, a pit becomes a hill. Structures can be altered or added. Creatures with truesight see through it but can still physically interact with it."
+
+[[spells]]
+id = "plane_shift"
+name = "Plane Shift"
+level = 7
+school = "conjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a forked, metal rod worth at least 250 gp, attuned to a particular plane of existence)"
+duration = "Instantaneous"
+classes = ["cleric", "druid", "sorcerer", "warlock", "wizard"]
+save = "cha"
+description = "You and up to eight willing creatures linking hands are transported to a different plane, at a general destination or a known teleportation circle. Or banish an unwilling creature: make a melee spell attack, and on a hit it makes a Charisma save or is sent to a random place on a plane you name."
+
+[[spells]]
+id = "prismatic_spray"
+name = "Prismatic Spray"
+level = 7
+school = "evocation"
+casting_time = "1 action"
+range = "Self (60-foot cone)"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "10d6"
+damage_type = "fire, acid, lightning, poison or cold (random)"
+area = { shape = "cone", size = 60 }
+description = "Eight rays of light flash from your hand in a 60-foot cone. Each creature there makes a Dexterity save and is struck by a random ray (d8): 1 red fire, 2 orange acid, 3 yellow lightning, 4 green poison, 5 blue cold — 10d6 damage, half on a success; 6 indigo — restrained, then petrified after three failed saves; 7 violet — blinded, then possibly shunted to another plane; 8 — struck by two rays."
+
+[[spells]]
+id = "project_image"
+name = "Project Image"
+level = 7
+school = "illusion"
+casting_time = "1 action"
+range = "500 miles"
+components = "V, S, M (a small replica of you made from materials worth at least 5 gp)"
+duration = "Concentration, up to 1 day"
+concentration = true
+classes = ["bard", "wizard"]
+description = "Create an illusory copy of yourself at a place you have seen within range. You can see and hear through it as if you were there, and as an action move it up to twice your speed and make it gesture, speak and behave as you choose. Physical interaction reveals it; an Investigation check sees through it."
+
+[[spells]]
+id = "regenerate"
+name = "Regenerate"
+level = 7
+school = "transmutation"
+casting_time = "1 minute"
+range = "Touch"
+components = "V, S, M (a prayer wheel and holy water)"
+duration = "1 hour"
+classes = ["bard", "cleric", "druid"]
+heal = "4d8 + 15"
+description = "A creature you touch regains 4d8 + 15 hit points, then 1 hit point at the start of each of its turns for the duration (10 per minute). Severed body parts regrow after 2 minutes, or reattach instantly if held to the stump."
+
+[[spells]]
+id = "resurrection"
+name = "Resurrection"
+level = 7
+school = "necromancy"
+casting_time = "1 hour"
+range = "Touch"
+components = "V, S, M (a diamond worth at least 1,000 gp, which the spell consumes)"
+duration = "Instantaneous"
+classes = ["bard", "cleric"]
+description = "Return a creature dead no longer than 100 years (not of old age) to life with all its hit points, if its soul is willing. It neutralizes poisons, cures diseases and lifts curses at time of death, and restores missing body parts. The creature has -4 on attacks, saves and checks, reduced by 1 each long rest. Casting it leaves you weakened (-4 on attacks, saves and checks) until you finish a long rest."
+
+[[spells]]
+id = "reverse_gravity"
+name = "Reverse Gravity"
+level = 7
+school = "transmutation"
+casting_time = "1 action"
+range = "100 feet"
+components = "V, S, M (a lodestone and iron filings)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "sorcerer", "wizard"]
+save = "dex"
+area = { shape = "cylinder", size = 50 }
+description = "Gravity reverses in a 50-foot-radius, 100-foot-high cylinder. Unanchored creatures and objects fall upward to the top (a creature can make a Dexterity save to grab a fixed object). They hover there, oscillating, until the spell ends, then fall back down."
+
+[[spells]]
+id = "sequester"
+name = "Sequester"
+level = 7
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a powder composed of diamond, emerald, ruby and sapphire dust worth at least 5,000 gp, which the spell consumes)"
+duration = "Until dispelled"
+classes = ["wizard"]
+description = "A willing creature or an object is hidden, safe from detection: it becomes invisible and can't be targeted by divination or perceived through scrying sensors. A creature falls into suspended animation and doesn't age. You can set a condition that ends the spell early."
+
+[[spells]]
+id = "simulacrum"
+name = "Simulacrum"
+level = 7
+school = "illusion"
+casting_time = "12 hours"
+range = "Touch"
+components = "V, S, M (snow or ice to make a life-size copy, some hair or fingernail clippings of the creature, and powdered ruby worth 1,500 gp, consumed)"
+duration = "Until dispelled"
+classes = ["wizard"]
+description = "Shape an illusory duplicate of a beast or humanoid within range for the whole casting. It looks real, has half the creature's hit point maximum and its statistics, and is friendly and obedient to you. It can't gain levels or regain spell slots, and it is destroyed at 0 hit points. Casting it again destroys an existing simulacrum."
+
+[[spells]]
+id = "symbol"
+name = "Symbol"
+level = 7
+school = "abjuration"
+casting_time = "1 minute"
+range = "Touch"
+components = "V, S, M (mercury, phosphorus, and powdered diamond and opal with a total value of at least 1,000 gp, which the spell consumes)"
+duration = "Until dispelled or triggered"
+classes = ["bard", "cleric", "wizard"]
+save = "con"
+save_half = true
+damage = "10d10"
+damage_type = "necrotic"
+area = { shape = "sphere", size = 60 }
+description = "Inscribe a harmful glyph on a surface or object, set to trigger as you choose. When triggered it fills a 60-foot radius for 10 minutes. Death: Constitution save, 10d10 necrotic damage (half on success). Other options: discord, fear, hopelessness, insanity, pain, sleep or stunning, each with its own saving throw."
+
+[[spells]]
+id = "teleport"
+name = "Teleport"
+level = 7
+school = "conjuration"
+casting_time = "1 action"
+range = "10 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "wizard"]
+description = "Instantly transport yourself and up to eight willing creatures (or one object) to a destination on the same plane. How well you know it decides the chance of arriving on target, off target, in a similar area, or of a mishap (3d10 force damage and a reroll): permanent circle or linked object — always on target; very familiar, seen casually, viewed once, described or false destination — progressively riskier."

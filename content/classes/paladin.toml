@@ -1,0 +1,94 @@
+id = "paladin"
+name = "Paladin"
+hit_die = 10
+primary_abilities = ["str", "cha"]
+saving_throws = ["wis", "cha"]
+armor_proficiencies = ["light", "medium", "heavy", "shields"]
+weapon_proficiencies = ["simple", "martial"]
+subclass_level = 3
+subclass_label = "Sacred Oath"
+multiclass_prerequisite = "Strength 13 and Charisma 13"
+starting_equipment = ["martial weapon + shield or two martial weapons", "five javelins or simple melee weapon", "priest's pack or explorer's pack", "chain_mail + holy symbol"]
+description = "A holy warrior bound to a sacred oath."
+
+[skill_choices]
+count = 2
+from = ["athletics", "insight", "intimidation", "medicine", "persuasion", "religion"]
+
+[spellcasting]
+ability = "cha"
+progression = "half"
+prepared = "max(1, cha_mod + floor(class.paladin.level / 2))"
+focus = "holy symbol"
+
+[[features]]
+name = "Divine Sense"
+level = 1
+description = "Action: until the end of your next turn you know the location of any celestial, fiend or undead within 60 feet that isn't behind total cover, and you sense consecrated or desecrated places and objects."
+uses = "1 + max(0, cha_mod)"
+recharge = "long_rest"
+
+[[features]]
+name = "Lay on Hands"
+level = 1
+description = "You have a pool of healing equal to five times your paladin level. Action: touch a creature and restore any number of hit points from the pool, or spend 5 points to cure one disease or neutralize one poison. No effect on undead or constructs."
+uses = "5 * class.paladin.level"
+recharge = "long_rest"
+
+[[features]]
+name = "Fighting Style"
+level = 2
+description = "Adopt a particular style of fighting as your specialty."
+options = "fighting_style_paladin"
+choose = "1"
+
+[[features]]
+name = "Spellcasting"
+level = 2
+description = "Charisma is your spellcasting ability. After a long rest, prepare Charisma modifier + half your paladin level (rounded down, minimum 1) spells from the paladin list; oath spells are always prepared on top. You can use a holy symbol as a focus."
+
+[[features]]
+name = "Divine Smite"
+level = 2
+description = "When you hit with a melee weapon attack, you can expend a spell slot to deal 2d8 extra radiant damage for a 1st-level slot, plus 1d8 per slot level above 1st (maximum 5d8). Add 1d8 against undead or fiends."
+
+[[features]]
+name = "Divine Health"
+level = 3
+description = "The divine magic flowing through you makes you immune to disease."
+
+[[features]]
+name = "Channel Divinity"
+level = 3
+description = "Your oath lets you channel divine energy; you choose which of your oath's Channel Divinity options to use. Its save DC is your spell save DC."
+uses = "1"
+recharge = "short_rest"
+
+[[features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+
+[[features]]
+name = "Aura of Protection"
+level = 6
+description = "While you are conscious, you and friendly creatures within 10 feet of you add your Charisma modifier (minimum +1) to saving throws. The aura reaches 30 feet at 18th level."
+modifiers = [{ target = "save.all", op = "add", value = "max(1, cha_mod)" }]
+
+[[features]]
+name = "Aura of Courage"
+level = 10
+description = "While you are conscious, you and friendly creatures within 10 feet of you can't be frightened. 30 feet at 18th level."
+
+[[features]]
+name = "Improved Divine Smite"
+level = 11
+description = "Whenever you hit a creature with a melee weapon, it takes an extra 1d8 radiant damage (this stacks with Divine Smite)."
+modifiers = [{ target = "damage.melee", op = "add", value = "1d8", note = "radiant" }]
+
+[[features]]
+name = "Cleansing Touch"
+level = 14
+description = "Action: end one spell on yourself or on one willing creature that you touch."
+uses = "max(1, cha_mod)"
+recharge = "long_rest"

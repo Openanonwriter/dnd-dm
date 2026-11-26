@@ -7,6 +7,7 @@ armor_proficiencies = []
 weapon_proficiencies = ["dagger", "dart", "sling", "quarterstaff", "light_crossbow"]
 subclass_level = 2
 subclass_label = "Arcane Tradition"
+multiclass_prerequisite = "Intelligence 13"
 starting_equipment = ["quarterstaff or dagger", "component pouch or arcane focus", "scholar's pack or explorer's pack", "spellbook"]
 description = "A scholarly magic-user capable of manipulating the structures of reality."
 
@@ -27,16 +28,28 @@ spellbook_per_level = 2
 [[features]]
 name = "Spellbook"
 level = 1
-description = "Your spellbook holds six 1st-level wizard spells to start; add two per level and copy found spells (50 gp and 2 hours per spell level)."
+description = "Your spellbook holds six 1st-level wizard spells to start; add two wizard spells of a level you can cast each time you gain a level, and copy found spells (50 gp and 2 hours per spell level)."
+
+[[features]]
+name = "Spellcasting"
+level = 1
+description = "Intelligence is your spellcasting ability. After a long rest, prepare Intelligence modifier + wizard level spells from your spellbook. You can cast any ritual spell in your spellbook as a ritual without preparing it, and use an arcane focus."
 
 [[features]]
 name = "Arcane Recovery"
 level = 1
-description = "Once per day after a short rest, recover expended spell slots with a combined level up to half your wizard level (rounded up), none above 5th."
+description = "Once per day when you finish a short rest, recover expended spell slots with a combined level up to half your wizard level (rounded up), none of 6th level or higher."
 uses = "1"
 recharge = "long_rest"
 
 [[features]]
 name = "Spell Mastery"
 level = 18
-description = "Choose one 1st-level and one 2nd-level wizard spell; cast them at their lowest level without expending a slot."
+description = "Choose one 1st-level and one 2nd-level wizard spell in your spellbook. You can cast them at their lowest level without expending a slot while you have them prepared. You can swap them by studying for 8 hours."
+
+[[features]]
+name = "Signature Spells"
+level = 20
+description = "Choose two 3rd-level wizard spells in your spellbook. They are always prepared, don't count against your prepared spells, and you can cast each once at 3rd level without a slot, regaining that use on a short or long rest."
+uses = "2"
+recharge = "short_rest"

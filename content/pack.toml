@@ -1,4 +1,4 @@
-name = "Base (SRD 5.1 sample)"
+name = "Base (complete SRD)"
 author = "dnd-dm"
-license = "Game mechanics derived from the System Reference Document 5.1, Creative Commons Attribution 4.0 (Wizards of the Coast). Descriptions paraphrased."
-description = "A small starter set covering every content kind. Copy any file into homebrew/ and change it; files there override these by id."
+license = "Includes game mechanics from the System Reference Document 5.1 and 5.2 by Wizards of the Coast LLC (https://www.dndbeyond.com/srd), licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/legalcode). Descriptions written in our own words."
+description = "Every SRD class (levels 1-20) with its subclass and class choices, the SRD races plus common subraces, every SRD spell with class lists, weapons and armor, and a starter set of feats, backgrounds, items and monsters. Copy any file into homebrew/ and change it; files there override these by id."

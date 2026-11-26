@@ -1,0 +1,742 @@
+# 2nd-level spells.
+
+[[spells]]
+id = "acid_arrow"
+name = "Acid Arrow"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "90 feet"
+components = "V, S, M (powdered rhubarb leaf and an adder's stomach)"
+duration = "Instantaneous"
+classes = ["wizard"]
+attack = true
+damage = "4d4"
+damage_type = "acid"
+upcast = "1d4"
+description = "A shimmering green arrow streaks toward a target. Ranged spell attack: on a hit, 4d4 acid damage immediately and 2d4 acid damage at the end of its next turn. On a miss, half the initial damage and none later."
+higher_levels = "Both the initial and later damage grow by 1d4 for each slot level above 2nd."
+
+[[spells]]
+id = "aid"
+name = "Aid"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a tiny strip of white cloth)"
+duration = "8 hours"
+classes = ["cleric", "paladin"]
+description = "Up to three creatures each have their hit point maximum and current hit points increased by 5 for the duration."
+higher_levels = "+5 more for each slot level above 2nd."
+
+[[spells]]
+id = "alter_self"
+name = "Alter Self"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["sorcerer", "wizard"]
+description = "Assume a different form, choosing one option (you can switch as an action): Aquatic Adaptation (gills and webbing; breathe underwater, swim speed equal to walking); Change Appearance (alter how you look, keeping the same basic shape and size category); or Natural Weapons (claws, fangs, horns or hooves dealing 1d6 of a fitting type, magical with +1 to attack and damage)."
+
+[[spells]]
+id = "animal_messenger"
+name = "Animal Messenger"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a morsel of food)"
+duration = "24 hours"
+ritual = true
+classes = ["bard", "druid", "ranger"]
+description = "A Tiny beast of your choice delivers a message of up to 25 words to a location you have visited and a recipient you describe, travelling about 50 miles per day (25 if it can't fly). When it arrives it speaks your message in your voice."
+higher_levels = "Duration +48 hours for each slot level above 2nd."
+
+[[spells]]
+id = "arcane_lock"
+name = "Arcane Lock"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (gold dust worth at least 25 gp, which the spell consumes)"
+duration = "Until dispelled"
+classes = ["wizard"]
+description = "Magically lock a closed door, window, gate, chest or other entryway. You and creatures you designate can open it normally; you can also set a password that suppresses the spell for a minute. Otherwise it is impassable until broken or the spell is dispelled, and the DC to break or pick it rises by 10."
+
+[[spells]]
+id = "arcanists_magic_aura"
+name = "Arcanist's Magic Aura"
+level = 2
+school = "illusion"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a small square of silk)"
+duration = "24 hours"
+classes = ["wizard"]
+description = "Place an illusion on a creature or object that misleads divination spells: make an object appear to carry a different kind of magic (or none) to detect magic, or make a creature register as a different creature type to spells and magic that detect types. Casting it on the same target every day for 30 days makes it last until dispelled."
+
+[[spells]]
+id = "augury"
+name = "Augury"
+level = 2
+school = "divination"
+casting_time = "1 minute"
+range = "Self"
+components = "V, S, M (specially marked sticks, bones or similar tokens worth at least 25 gp)"
+duration = "Instantaneous"
+ritual = true
+classes = ["cleric"]
+description = "Receive an omen about the results of a course of action you plan within the next 30 minutes: weal, woe, weal and woe, or nothing. Each casting after the first before a long rest has a cumulative 25% chance of a random reading."
+
+[[spells]]
+id = "barkskin"
+name = "Barkskin"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a handful of oak bark)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "ranger"]
+description = "A willing creature's skin becomes rough and bark-like: its AC can't be less than 16, whatever armor it is wearing."
+
+[[spells]]
+id = "blindness_deafness"
+name = "Blindness/Deafness"
+level = 2
+school = "necromancy"
+casting_time = "1 action"
+range = "30 feet"
+components = "V"
+duration = "1 minute"
+classes = ["bard", "cleric", "sorcerer", "wizard", "fiend"]
+save = "con"
+description = "Choose one creature you can see. It makes a Constitution save or is blinded or deafened (your choice) for the duration. It repeats the save at the end of each of its turns, ending the effect on a success."
+higher_levels = "One additional creature for each slot level above 2nd."
+
+[[spells]]
+id = "blur"
+name = "Blur"
+level = 2
+school = "illusion"
+casting_time = "1 action"
+range = "Self"
+components = "V"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+description = "Your body becomes blurred and wavering. Creatures have disadvantage on attack rolls against you, unless they don't rely on sight (blindsight, truesight, or they can see through illusions)."
+
+[[spells]]
+id = "calm_emotions"
+name = "Calm Emotions"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "cleric"]
+save = "cha"
+area = { shape = "sphere", size = 20 }
+description = "Each humanoid in a 20-foot-radius sphere makes a Charisma save (it may choose to fail). On a failure, choose one: suppress any effect making it charmed or frightened; or make it indifferent toward creatures of your choice it is hostile to (ending if it is attacked or harmed, or sees friends harmed)."
+
+[[spells]]
+id = "continual_flame"
+name = "Continual Flame"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (ruby dust worth 50 gp, which the spell consumes)"
+duration = "Until dispelled"
+classes = ["cleric", "wizard"]
+description = "A flame as bright as a torch springs from an object you touch. It looks like a regular flame but creates no heat, uses no oxygen, and can be covered or hidden but not smothered or quenched."
+
+[[spells]]
+id = "darkness"
+name = "Darkness"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, M (bat fur and a drop of pitch or piece of coal)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["sorcerer", "warlock", "wizard"]
+area = { shape = "sphere", size = 15 }
+description = "Magical darkness fills a 15-foot-radius sphere centred on a point or on an object you hold or that isn't worn or carried. Darkvision can't see through it and nonmagical light can't illuminate it. It dispels light from a spell of 2nd level or lower."
+
+[[spells]]
+id = "darkvision"
+name = "Darkvision"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (either a pinch of dried carrot or an agate)"
+duration = "8 hours"
+classes = ["druid", "ranger", "sorcerer", "wizard"]
+description = "A willing creature gains darkvision out to 60 feet for the duration."
+
+[[spells]]
+id = "detect_thoughts"
+name = "Detect Thoughts"
+level = 2
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a copper piece)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "sorcerer", "wizard"]
+save = "wis"
+description = "Read the surface thoughts of a creature you can see within 30 feet (Intelligence 4 or more). As an action you can probe deeper: it makes a Wisdom save, and on a failure you gain insight into its reasoning, emotions and something that looms large in its mind. You can also sense thinking creatures you can't see within 30 feet."
+
+[[spells]]
+id = "enhance_ability"
+name = "Enhance Ability"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (fur or a feather from a beast)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "cleric", "druid", "sorcerer"]
+description = "Choose one effect for the creature you touch: Bear's Endurance (advantage on Constitution checks and 2d6 temporary hit points), Bull's Strength (advantage on Strength checks, double carrying capacity), Cat's Grace (advantage on Dexterity checks, no damage from falls of 20 feet or less), Eagle's Splendor (Charisma checks), Fox's Cunning (Intelligence checks) or Owl's Wisdom (Wisdom checks)."
+higher_levels = "One additional creature for each slot level above 2nd."
+
+[[spells]]
+id = "enlarge_reduce"
+name = "Enlarge/Reduce"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a pinch of powdered iron)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "con"
+description = "A creature or object grows or shrinks (an unwilling creature makes a Constitution save). Enlarge: it doubles in size, its size category rises by one, it has advantage on Strength checks and saves, and its weapons deal +1d4 damage. Reduce: it halves in size, drops one size category, has disadvantage on Strength checks and saves, and its weapons deal -1d4 damage (minimum 1)."
+
+[[spells]]
+id = "enthrall"
+name = "Enthrall"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "1 minute"
+classes = ["bard", "warlock"]
+save = "wis"
+description = "Weave a distracting string of words. Creatures of your choice that can hear you make a Wisdom save (with advantage if you or your companions are fighting them). On a failure, a creature has disadvantage on Wisdom (Perception) checks to perceive anyone other than you until the spell ends or it can no longer hear you."
+
+[[spells]]
+id = "find_steed"
+name = "Find Steed"
+level = 2
+school = "conjuration"
+casting_time = "10 minutes"
+range = "30 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["paladin"]
+description = "Summon a spirit in the form of a loyal steed — warhorse, pony, camel, elk or mastiff (or others with the DM's approval) — with Intelligence 6 and the celestial, fey or fiend type. You communicate telepathically within 1 mile, and while mounted you can have spells that target only you also target it. Dismiss it or recast to summon it again."
+
+[[spells]]
+id = "find_traps"
+name = "Find Traps"
+level = 2
+school = "divination"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric", "druid", "ranger"]
+description = "You sense the presence of any trap within range that is within line of sight, and learn the general nature of the danger — but not its location or how to disarm it."
+
+[[spells]]
+id = "flame_blade"
+name = "Flame Blade"
+level = 2
+school = "evocation"
+casting_time = "1 bonus action"
+range = "Self"
+components = "V, S, M (leaf of sumac)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["druid"]
+attack = true
+damage = "3d6"
+damage_type = "fire"
+description = "A fiery blade forms in your free hand, shedding bright light 10 feet and dim light 10 feet beyond. As an action you make a melee spell attack with it: 3d6 fire damage on a hit. You can dismiss it and summon it again as a bonus action."
+higher_levels = "+1d6 damage for every two slot levels above 2nd."
+
+[[spells]]
+id = "flaming_sphere"
+name = "Flaming Sphere"
+level = 2
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a bit of tallow, a pinch of brimstone and a dusting of powdered iron)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "wizard"]
+save = "dex"
+save_half = true
+damage = "2d6"
+damage_type = "fire"
+upcast = "1d6"
+area = { shape = "sphere", size = 5 }
+description = "A 5-foot-diameter sphere of fire appears. A creature ending its turn within 5 feet of it makes a Dexterity save, taking 2d6 fire damage on a failure or half on a success. As a bonus action you move it up to 30 feet; ramming a creature forces the save, and the sphere stops moving that turn."
+higher_levels = "+1d6 damage for each slot level above 2nd."
+
+[[spells]]
+id = "gentle_repose"
+name = "Gentle Repose"
+level = 2
+school = "necromancy"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a pinch of salt and one copper piece placed on each of the corpse's eyes)"
+duration = "10 days"
+ritual = true
+classes = ["cleric", "wizard"]
+description = "Protect a corpse or remains from decay and from becoming undead. The days under this spell don't count against time limits such as raise dead's."
+
+[[spells]]
+id = "gust_of_wind"
+name = "Gust of Wind"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "Self (60-foot line)"
+components = "V, S, M (a legume seed)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "sorcerer", "wizard"]
+save = "str"
+area = { shape = "line", size = 60, width = 10 }
+description = "A line of strong wind 60 feet long and 10 feet wide blasts from you. Each creature starting its turn in it makes a Strength save or is pushed 15 feet away along the line. Moving toward you costs double. It disperses gas and vapor and extinguishes unprotected flames. As a bonus action you can change its direction."
+
+[[spells]]
+id = "heat_metal"
+name = "Heat Metal"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a piece of iron and a flame)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "druid"]
+save = "con"
+damage = "2d8"
+damage_type = "fire"
+upcast = "1d8"
+description = "A manufactured metal object you can see glows red-hot. A creature touching it takes 2d8 fire damage when you cast the spell and again each time you use a bonus action. If held or worn, the creature must succeed on a Constitution save or drop it (if it can); if it doesn't, it has disadvantage on attacks and ability checks until your next turn."
+higher_levels = "+1d8 damage for each slot level above 2nd."
+
+[[spells]]
+id = "hold_person"
+name = "Hold Person"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a small, straight piece of iron)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "cleric", "druid", "sorcerer", "warlock", "wizard"]
+save = "wis"
+description = "Choose a humanoid you can see. It makes a Wisdom save or is paralyzed for the duration, repeating the save at the end of each of its turns."
+higher_levels = "One additional humanoid for each slot level above 2nd; they must be within 30 feet of each other."
+
+[[spells]]
+id = "invisibility"
+name = "Invisibility"
+level = 2
+school = "illusion"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (an eyelash encased in gum arabic)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+description = "A creature you touch, and anything it wears or carries, becomes invisible until the spell ends. It ends for a target that attacks or casts a spell."
+higher_levels = "One additional creature for each slot level above 2nd."
+
+[[spells]]
+id = "knock"
+name = "Knock"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "wizard"]
+description = "Choose an object you can see — a door, box, chest, set of manacles or padlock — held shut by mundane or magical means. One lock is unlocked, or a stuck item is freed; arcane lock is suppressed for 10 minutes. A loud knock audible 300 feet away sounds."
+
+[[spells]]
+id = "lesser_restoration"
+name = "Lesser Restoration"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["bard", "cleric", "druid", "paladin", "ranger"]
+description = "End either one disease or one condition afflicting the creature you touch: blinded, deafened, paralyzed or poisoned."
+
+[[spells]]
+id = "levitate"
+name = "Levitate"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (either a small leather loop or a piece of golden wire bent into a cup shape with a long shank on one end)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "con"
+description = "One creature or loose object (up to 500 pounds) rises vertically up to 20 feet and stays aloft. An unwilling creature makes a Constitution save. The target can move only by pushing or pulling against fixed objects. On your turn you can move it up or down 20 feet. When the spell ends it floats gently down."
+
+[[spells]]
+id = "locate_animals_or_plants"
+name = "Locate Animals or Plants"
+level = 2
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a bit of fur from a bloodhound)"
+duration = "Instantaneous"
+ritual = true
+classes = ["bard", "druid", "ranger"]
+description = "Name a specific kind of beast or plant. You learn the direction and distance to the closest one within 5 miles, if any."
+
+[[spells]]
+id = "locate_object"
+name = "Locate Object"
+level = 2
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a forked twig)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["bard", "cleric", "druid", "paladin", "ranger", "wizard"]
+description = "Describe or name an object familiar to you. You sense the direction to it if it is within 1,000 feet, or to the nearest object of a kind you name if you have seen one up close. Any thickness of lead blocks it."
+
+[[spells]]
+id = "magic_mouth"
+name = "Magic Mouth"
+level = 2
+school = "illusion"
+casting_time = "1 minute"
+range = "30 feet"
+components = "V, S, M (a small bit of honeycomb and jade dust worth at least 10 gp, which the spell consumes)"
+duration = "Until dispelled"
+ritual = true
+classes = ["bard", "wizard"]
+description = "Implant a message of up to 25 words in an object, spoken over up to 10 minutes, and a visual or audible trigger condition within 30 feet. When triggered, a magical mouth appears on the object and recites the message in your voice."
+
+[[spells]]
+id = "magic_weapon"
+name = "Magic Weapon"
+level = 2
+school = "transmutation"
+casting_time = "1 bonus action"
+range = "Touch"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["paladin", "wizard"]
+description = "A nonmagical weapon you touch becomes a magic weapon with a +1 bonus to attack and damage rolls."
+higher_levels = "+2 with a 4th-level slot, +3 with a 6th-level or higher slot."
+
+[[spells]]
+id = "mirror_image"
+name = "Mirror Image"
+level = 2
+school = "illusion"
+casting_time = "1 action"
+range = "Self"
+components = "V, S"
+duration = "1 minute"
+classes = ["sorcerer", "warlock", "wizard"]
+description = "Three illusory duplicates of yourself appear. When a creature targets you with an attack, roll a d20: with three duplicates it hits one on 6+, with two on 8+, with one on 11+. A duplicate has AC 10 + your Dex modifier and is destroyed when hit. Creatures that don't rely on sight are unaffected."
+
+[[spells]]
+id = "misty_step"
+name = "Misty Step"
+level = 2
+school = "conjuration"
+casting_time = "1 bonus action"
+range = "Self"
+components = "V"
+duration = "Instantaneous"
+classes = ["sorcerer", "warlock", "wizard"]
+description = "Briefly surrounded by silvery mist, you teleport up to 30 feet to an unoccupied space that you can see."
+
+[[spells]]
+id = "moonbeam"
+name = "Moonbeam"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S, M (several seeds of any moonseed plant and a piece of opalescent feldspar)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid"]
+save = "con"
+save_half = true
+damage = "2d10"
+damage_type = "radiant"
+upcast = "1d10"
+area = { shape = "cylinder", size = 5 }
+description = "A silvery beam of pale light shines down in a 5-foot-radius, 40-foot-high cylinder. A creature entering it for the first time on a turn or starting its turn there makes a Constitution save, taking 2d10 radiant damage on a failure or half on a success (shapechangers have disadvantage and revert to true form). As an action you can move the beam 60 feet."
+higher_levels = "+1d10 damage for each slot level above 2nd."
+
+[[spells]]
+id = "pass_without_trace"
+name = "Pass without Trace"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (ashes from a burned leaf of mistletoe and a sprig of spruce)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "ranger"]
+description = "A veil of shadows and silence radiates from you, masking you and your companions. Each creature you choose within 30 feet of you (including you) has +10 to Dexterity (Stealth) checks and can't be tracked except by magic, and leaves no tracks."
+
+[[spells]]
+id = "prayer_of_healing"
+name = "Prayer of Healing"
+level = 2
+school = "evocation"
+casting_time = "10 minutes"
+range = "30 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["cleric"]
+heal = "2d8 + mod"
+upcast = "1d8"
+description = "Up to six creatures of your choice that you can see each regain hit points equal to 2d8 + your spellcasting ability modifier. No effect on undead or constructs."
+higher_levels = "+1d8 healing for each slot level above 2nd."
+
+[[spells]]
+id = "protection_from_poison"
+name = "Protection from Poison"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "1 hour"
+classes = ["cleric", "druid", "paladin", "ranger"]
+description = "Neutralize one poison afflicting the creature you touch (or one at random). For the duration it has advantage on saving throws against being poisoned and resistance to poison damage."
+
+[[spells]]
+id = "ray_of_enfeeblement"
+name = "Ray of Enfeeblement"
+level = 2
+school = "necromancy"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["warlock", "wizard"]
+attack = true
+description = "A black beam of enervating energy. Ranged spell attack: on a hit, the target deals only half damage with weapon attacks that use Strength until the spell ends. At the end of each of its turns it makes a Constitution save, ending the spell on a success."
+
+[[spells]]
+id = "rope_trick"
+name = "Rope Trick"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (powdered corn extract and a twisted loop of parchment)"
+duration = "1 hour"
+classes = ["wizard"]
+description = "Touch a rope up to 60 feet long: one end rises until the whole rope hangs in the air, and an invisible entrance at the top opens to an extradimensional space that holds up to eight Medium or smaller creatures. Attacks and spells can't cross into or out of it, but those inside can see out through a window. Anything inside drops out when the spell ends."
+
+[[spells]]
+id = "scorching_ray"
+name = "Scorching Ray"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard", "fiend"]
+attack = true
+damage = "2d6"
+damage_type = "fire"
+description = "Create three rays of fire and hurl them at targets in range — one or several. Make a ranged spell attack for each ray; on a hit it deals 2d6 fire damage."
+higher_levels = "One additional ray for each slot level above 2nd."
+
+[[spells]]
+id = "see_invisibility"
+name = "See Invisibility"
+level = 2
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a pinch of talc and a small sprinkling of powdered silver)"
+duration = "1 hour"
+classes = ["bard", "sorcerer", "wizard"]
+description = "For the duration you see invisible creatures and objects as if they were visible, and you can see into the Ethereal Plane. Ethereal creatures and objects appear ghostly and translucent."
+
+[[spells]]
+id = "shatter"
+name = "Shatter"
+level = 2
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a chip of mica)"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "con"
+save_half = true
+damage = "3d8"
+damage_type = "thunder"
+upcast = "1d8"
+area = { shape = "sphere", size = 10 }
+description = "A sudden loud ringing noise erupts from a point you choose. Each creature in a 10-foot-radius sphere makes a Constitution save, taking 3d8 thunder damage on a failure or half on a success; creatures of stone, crystal or metal have disadvantage. Nonmagical objects not worn or carried take the damage too."
+higher_levels = "+1d8 damage for each slot level above 2nd."
+
+[[spells]]
+id = "silence"
+name = "Silence"
+level = 2
+school = "illusion"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+ritual = true
+classes = ["bard", "cleric", "ranger"]
+area = { shape = "sphere", size = 20 }
+description = "No sound can be created within or pass through a 20-foot-radius sphere. Any creature or object entirely inside is immune to thunder damage and deafened while there. Casting a spell with a verbal component there is impossible."
+
+[[spells]]
+id = "spider_climb"
+name = "Spider Climb"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a drop of bitumen and a spider)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["sorcerer", "warlock", "wizard"]
+description = "A willing creature you touch can move up, down and across vertical surfaces and upside down along ceilings while leaving its hands free, and gains a climbing speed equal to its walking speed."
+
+[[spells]]
+id = "spike_growth"
+name = "Spike Growth"
+level = 2
+school = "transmutation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (seven sharp thorns or seven small twigs, each sharpened to a point)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["druid", "ranger"]
+damage = "2d4"
+damage_type = "piercing"
+area = { shape = "sphere", size = 20 }
+description = "The ground in a 20-foot radius sprouts hard spikes and thorns, becoming difficult terrain. A creature moving into or within the area takes 2d4 piercing damage for every 5 feet it travels. The area is camouflaged: a creature that can't see it when cast must make a Wisdom (Perception) check against your spell save DC to notice it."
+
+[[spells]]
+id = "spiritual_weapon"
+name = "Spiritual Weapon"
+level = 2
+school = "evocation"
+casting_time = "1 bonus action"
+range = "60 feet"
+components = "V, S"
+duration = "1 minute"
+classes = ["cleric"]
+attack = true
+damage = "1d8 + mod"
+damage_type = "force"
+description = "A floating spectral weapon appears. When you cast the spell, and as a bonus action on later turns, you can move it up to 20 feet and make a melee spell attack against a creature within 5 feet of it: 1d8 + your spellcasting ability modifier force damage on a hit."
+higher_levels = "+1d8 damage for every two slot levels above 2nd."
+
+[[spells]]
+id = "suggestion"
+name = "Suggestion"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, M (a snake's tongue and either a bit of honeycomb or a drop of sweet oil)"
+duration = "Concentration, up to 8 hours"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "wis"
+description = "Suggest a course of activity (a sentence or two) to a creature you can see that can hear and understand you. It must sound reasonable; obviously harmful requests end the spell. On a failed Wisdom save, it pursues the course as best it can. It ends early if you or your companions damage it."
+
+[[spells]]
+id = "warding_bond"
+name = "Warding Bond"
+level = 2
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a pair of platinum rings worth at least 50 gp each, which you and the target must wear)"
+duration = "1 hour"
+classes = ["cleric"]
+description = "A willing creature you touch gains +1 to AC and saving throws and resistance to all damage while it is within 60 feet of you. Each time it takes damage, you take the same amount. It ends if you drop to 0 hit points or the two of you become separated by more than 60 feet."
+
+[[spells]]
+id = "web"
+name = "Web"
+level = 2
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a bit of spiderweb)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "dex"
+area = { shape = "cube", size = 20 }
+description = "Thick sticky webs fill a 20-foot cube; they are difficult terrain and lightly obscure the area, and must be anchored between solid masses. A creature that starts its turn in them or enters them makes a Dexterity save or is restrained. A restrained creature can use its action for a Strength check against your spell save DC to break free. The webs burn away in a round when exposed to fire, dealing 2d4 fire damage to creatures starting their turn in the fire."
+
+[[spells]]
+id = "zone_of_truth"
+name = "Zone of Truth"
+level = 2
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "10 minutes"
+classes = ["bard", "cleric", "paladin"]
+save = "cha"
+area = { shape = "sphere", size = 15 }
+description = "A magical zone guards against deception in a 15-foot-radius sphere. A creature entering it for the first time on a turn or starting its turn there makes a Charisma save; on a failure it can't speak a deliberate lie while in the zone. You know whether each creature succeeds. An affected creature can be evasive as long as it stays truthful."

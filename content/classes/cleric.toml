@@ -7,6 +7,7 @@ armor_proficiencies = ["light", "medium", "shields"]
 weapon_proficiencies = ["simple"]
 subclass_level = 1
 subclass_label = "Divine Domain"
+multiclass_prerequisite = "Wisdom 13"
 starting_equipment = ["mace or warhammer", "scale_mail, leather_armor or chain_mail", "light_crossbow + 20 bolts or simple weapon", "priest's pack or explorer's pack", "shield, holy symbol"]
 description = "A priestly champion who wields divine magic in service of a higher power."
 
@@ -23,18 +24,30 @@ ritual_casting = true
 focus = "holy symbol"
 
 [[features]]
-name = "Channel Divinity: Turn Undead"
+name = "Spellcasting"
+level = 1
+description = "Wisdom is your spellcasting ability. After a long rest, prepare Wisdom modifier + cleric level spells from the whole cleric list; domain spells are always prepared on top. You can cast prepared ritual spells as rituals and use a holy symbol as a focus."
+
+[[features]]
+name = "Channel Divinity"
 level = 2
-description = "Action: each undead within 30 ft that can see or hear you must make a Wisdom save or be turned for 1 minute."
+description = "Channel divine energy to fuel an effect: Turn Undead, or one granted by your domain. Once between rests at first; twice from 6th level, three times from 18th. Its save DC is your spell save DC."
 uses = "if(class.cleric.level >= 18, 3, if(class.cleric.level >= 6, 2, 1))"
 recharge = "short_rest"
 
 [[features]]
+name = "Channel Divinity: Turn Undead"
+level = 2
+description = "Action: each undead within 30 feet that can see or hear you makes a Wisdom save. On a failure it is turned for 1 minute or until it takes damage: it must spend its turns moving away from you and can't take reactions or come within 30 feet of you willingly."
+
+[[features]]
 name = "Destroy Undead"
 level = 5
-description = "Undead of CR 1/2 or lower that you turn are destroyed instead. (CR rises at 8th, 11th, 14th, 17th.)"
+description = "When an undead fails its save against your Turn Undead, it is destroyed instantly if its challenge rating is 1/2 or lower (CR 1 at 8th level, 2 at 11th, 3 at 14th, 4 at 17th)."
 
 [[features]]
 name = "Divine Intervention"
 level = 10
-description = "Implore your deity's aid: roll d100; success if you roll your cleric level or lower."
+description = "Action: describe the help you seek and roll d100; if the roll is no higher than your cleric level, your deity intervenes (the DM chooses how). On a success you can't use this again for 7 days, otherwise until after a long rest. From 20th level it succeeds automatically."
+uses = "1"
+recharge = "long_rest"

@@ -1,0 +1,46 @@
+id = "dwarf_mountain"
+name = "Dwarf (Mountain)"
+size = "Medium"
+speed = 25
+darkvision = 60
+languages = ["Common", "Dwarvish"]
+description = "Strong and hardy dwarves used to a difficult life in rugged terrain, often warriors who wear armor from an early age."
+
+[[modifiers]]
+target = "ability.con"
+value = "2"
+[[modifiers]]
+target = "ability.str"
+value = "2"
+
+[[traits]]
+name = "Dwarven Resilience"
+description = "Advantage on saving throws against poison, and resistance to poison damage."
+modifiers = [{ target = "save.con", op = "advantage", note = "vs. poison" }]
+
+[[traits]]
+name = "Dwarven Combat Training"
+description = "Proficiency with the battleaxe, handaxe, light hammer and warhammer."
+modifiers = [
+  { target = "proficiency.weapon.battleaxe", op = "grant" },
+  { target = "proficiency.weapon.handaxe", op = "grant" },
+  { target = "proficiency.weapon.light_hammer", op = "grant" },
+  { target = "proficiency.weapon.warhammer", op = "grant" },
+]
+
+[[traits]]
+name = "Dwarven Armor Training"
+description = "Proficiency with light and medium armor."
+modifiers = [{ target = "proficiency.armor.light", op = "grant" }, { target = "proficiency.armor.medium", op = "grant" }]
+
+[[traits]]
+name = "Tool Proficiency"
+description = "Proficiency with one artisan's tool of your choice: smith's tools, brewer's supplies or mason's tools."
+
+[[traits]]
+name = "Stonecunning"
+description = "Intelligence (History) checks about the origin of stonework count as proficient and add double your proficiency bonus."
+
+[[traits]]
+name = "Speed"
+description = "Your speed is not reduced by wearing heavy armor."

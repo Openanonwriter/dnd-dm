@@ -136,3 +136,167 @@ kind = "weapon"
 cost = "75 gp"
 weight = 3.0
 weapon = { damage = "1d6", damage_type = "piercing", category = "martial", kind = "ranged", properties = ["ammunition", "light", "loading"], range = "30/120" }
+
+# ---- the rest of the SRD weapon table
+
+[[items]]
+id = "club"
+name = "Club"
+kind = "weapon"
+cost = "1 sp"
+weight = 2.0
+weapon = { damage = "1d4", damage_type = "bludgeoning", category = "simple", kind = "melee", properties = ["light"] }
+
+[[items]]
+id = "greatclub"
+name = "Greatclub"
+kind = "weapon"
+cost = "2 sp"
+weight = 10.0
+weapon = { damage = "1d8", damage_type = "bludgeoning", category = "simple", kind = "melee", properties = ["two_handed"] }
+
+[[items]]
+id = "javelin"
+name = "Javelin"
+kind = "weapon"
+cost = "5 sp"
+weight = 2.0
+weapon = { damage = "1d6", damage_type = "piercing", category = "simple", kind = "melee", properties = ["thrown"], range = "30/120" }
+
+[[items]]
+id = "light_hammer"
+name = "Light Hammer"
+kind = "weapon"
+cost = "2 gp"
+weight = 2.0
+weapon = { damage = "1d4", damage_type = "bludgeoning", category = "simple", kind = "melee", properties = ["light", "thrown"], range = "20/60" }
+
+[[items]]
+id = "sickle"
+name = "Sickle"
+kind = "weapon"
+cost = "1 gp"
+weight = 2.0
+weapon = { damage = "1d4", damage_type = "slashing", category = "simple", kind = "melee", properties = ["light"] }
+
+[[items]]
+id = "dart"
+name = "Dart"
+kind = "weapon"
+cost = "5 cp"
+weight = 0.25
+weapon = { damage = "1d4", damage_type = "piercing", category = "simple", kind = "ranged", properties = ["finesse", "thrown"], range = "20/60" }
+
+[[items]]
+id = "sling"
+name = "Sling"
+kind = "weapon"
+cost = "1 sp"
+weight = 0.0
+weapon = { damage = "1d4", damage_type = "bludgeoning", category = "simple", kind = "ranged", properties = ["ammunition"], range = "30/120" }
+
+[[items]]
+id = "scimitar"
+name = "Scimitar"
+kind = "weapon"
+cost = "25 gp"
+weight = 3.0
+weapon = { damage = "1d6", damage_type = "slashing", category = "martial", kind = "melee", properties = ["finesse", "light"] }
+
+[[items]]
+id = "flail"
+name = "Flail"
+kind = "weapon"
+cost = "10 gp"
+weight = 2.0
+weapon = { damage = "1d8", damage_type = "bludgeoning", category = "martial", kind = "melee" }
+
+[[items]]
+id = "morningstar"
+name = "Morningstar"
+kind = "weapon"
+cost = "15 gp"
+weight = 4.0
+weapon = { damage = "1d8", damage_type = "piercing", category = "martial", kind = "melee" }
+
+[[items]]
+id = "trident"
+name = "Trident"
+kind = "weapon"
+cost = "5 gp"
+weight = 4.0
+weapon = { damage = "1d6", damage_type = "piercing", category = "martial", kind = "melee", properties = ["thrown", "versatile"], versatile = "1d8", range = "20/60" }
+
+[[items]]
+id = "war_pick"
+name = "War Pick"
+kind = "weapon"
+cost = "5 gp"
+weight = 2.0
+weapon = { damage = "1d8", damage_type = "piercing", category = "martial", kind = "melee" }
+
+[[items]]
+id = "whip"
+name = "Whip"
+kind = "weapon"
+cost = "2 gp"
+weight = 3.0
+weapon = { damage = "1d4", damage_type = "slashing", category = "martial", kind = "melee", properties = ["finesse", "reach"] }
+
+[[items]]
+id = "pike"
+name = "Pike"
+kind = "weapon"
+cost = "5 gp"
+weight = 18.0
+weapon = { damage = "1d10", damage_type = "piercing", category = "martial", kind = "melee", properties = ["heavy", "reach", "two_handed"] }
+
+[[items]]
+id = "halberd"
+name = "Halberd"
+kind = "weapon"
+cost = "20 gp"
+weight = 6.0
+weapon = { damage = "1d10", damage_type = "slashing", category = "martial", kind = "melee", properties = ["heavy", "reach", "two_handed"] }
+
+[[items]]
+id = "lance"
+name = "Lance"
+kind = "weapon"
+cost = "10 gp"
+weight = 6.0
+description = "Disadvantage when attacking a target within 5 feet; needs two hands unless you are mounted."
+weapon = { damage = "1d12", damage_type = "piercing", category = "martial", kind = "melee", properties = ["reach"] }
+
+[[items]]
+id = "maul"
+name = "Maul"
+kind = "weapon"
+cost = "10 gp"
+weight = 10.0
+weapon = { damage = "2d6", damage_type = "bludgeoning", category = "martial", kind = "melee", properties = ["heavy", "two_handed"] }
+
+[[items]]
+id = "blowgun"
+name = "Blowgun"
+kind = "weapon"
+cost = "10 gp"
+weight = 1.0
+weapon = { damage = "1", damage_type = "piercing", category = "martial", kind = "ranged", properties = ["ammunition", "loading"], range = "25/100" }
+
+[[items]]
+id = "heavy_crossbow"
+name = "Crossbow, heavy"
+kind = "weapon"
+cost = "50 gp"
+weight = 18.0
+weapon = { damage = "1d10", damage_type = "piercing", category = "martial", kind = "ranged", properties = ["ammunition", "heavy", "loading", "two_handed"], range = "100/400" }
+
+[[items]]
+id = "net"
+name = "Net"
+kind = "weapon"
+cost = "1 gp"
+weight = 3.0
+description = "A Large or smaller creature hit is restrained until freed (DC 10 Strength check, or 5 slashing damage to the net). Only one attack per action with a net."
+weapon = { damage = "0", damage_type = "", category = "martial", kind = "ranged", properties = ["thrown"], range = "5/15" }

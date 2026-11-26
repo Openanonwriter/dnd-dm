@@ -1,0 +1,37 @@
+id = "devotion"
+name = "Oath of Devotion"
+class = "paladin"
+description = "The Oath of Devotion binds a paladin to the loftiest ideals of justice, virtue and order. Tenets: honesty, courage, compassion, honor, duty."
+
+[[features]]
+name = "Oath Spells"
+level = 3
+description = "Always prepared and not counted against your prepared spells: protection from evil and good, sanctuary (3rd); lesser restoration, zone of truth (5th); beacon of hope, dispel magic (9th); freedom of movement, guardian of faith (13th); commune, flame strike (17th)."
+spells = ["protection_from_evil_and_good", "sanctuary", "lesser_restoration", "zone_of_truth", "beacon_of_hope", "dispel_magic", "freedom_of_movement", "guardian_of_faith", "commune", "flame_strike"]
+
+[[features]]
+name = "Channel Divinity: Sacred Weapon"
+level = 3
+description = "Action: for 1 minute add your Charisma modifier (minimum +1) to attack rolls with one weapon you hold; it sheds bright light 20 feet and dim light 20 feet beyond and counts as magical. Ends if you drop the weapon or fall unconscious."
+
+[[features]]
+name = "Channel Divinity: Turn the Unholy"
+level = 3
+description = "Action: each fiend or undead within 30 feet that can see or hear you makes a Wisdom save or is turned for 1 minute or until it takes damage."
+
+[[features]]
+name = "Aura of Devotion"
+level = 7
+description = "You and friendly creatures within 10 feet of you can't be charmed while you are conscious. 30 feet at 18th level."
+
+[[features]]
+name = "Purity of Spirit"
+level = 15
+description = "You are always under the effects of a protection from evil and good spell."
+
+[[features]]
+name = "Holy Nimbus"
+level = 20
+description = "Action: for 1 minute you emanate bright light in a 30-foot radius and dim light 30 feet beyond. Enemies that start their turn in the bright light take 10 radiant damage, and you have advantage on saves against spells cast by fiends or undead."
+uses = "1"
+recharge = "long_rest"

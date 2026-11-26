@@ -116,6 +116,7 @@ impl DmApp {
             };
         }
         app.encounter.selected = std::env::var("DND_DM_SELECT").ok();
+        app.characters.selected = std::env::var("DND_DM_SELECT").ok();
         // a picture-taking run stays off the network
         if app.paths.config.autostart_server && std::env::var("DND_DM_SHOT").is_err() {
             app.start_server();

@@ -23,3 +23,7 @@ value = "1"
 [[modifiers]]
 target = "ability.cha"
 value = "1"
+
+[[traits]]
+name = "Extra Language"
+description = "You can speak, read and write one extra language of your choice."

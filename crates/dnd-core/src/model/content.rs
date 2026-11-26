@@ -344,6 +344,10 @@ pub struct Feat {
     pub prerequisite: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modifiers: Vec<Modifier>,
+    /// Spell ids granted while the character has this feat or option
+    /// (always prepared, not counted against limits).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub spells: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     /// Hidden from player apps (DM-only content).

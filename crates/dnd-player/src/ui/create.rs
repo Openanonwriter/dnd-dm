@@ -227,6 +227,58 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
         });
     }
 
+    // ------------------------------------------------------------ choices
+    // features that offer a pick: Fighting Style, Metamagic, Draconic Ancestryâ€¦
+    let mut choices_open: Vec<String> = Vec::new();
+    let open: Vec<_> = sheet.features.iter().filter(|f| !f.options.is_empty() && f.picks > 0).collect();
+    let keep: Vec<String> = open.iter().map(|f| f.name.clone()).collect();
+    app.draft.choices.retain(|k, _| keep.contains(k));
+    if !open.is_empty() {
+        theme::section(ui, "Choices");
+        for f in open {
+            let options = builder::feature_options(lib, &f.options);
+            let mut picked: Vec<String> = app.draft.choices.get(&f.name).cloned().unwrap_or_default();
+            picked.retain(|id| options.iter().any(|o| &o.id == id));
+            theme::card().show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.label(egui::RichText::new(format!("{} Â· pick {}", f.name, f.picks)).strong().size(16.0));
+                if !f.description.is_empty() {
+                    ui.label(theme::muted(&f.description).small());
+                }
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().button_padding = egui::vec2(12.0, 8.0);
+                    for o in &options {
+                        let on = picked.contains(&o.id);
+                        let full = picked.len() as u32 >= f.picks;
+                        if ui.add_enabled(on || !full, egui::Button::new(egui::RichText::new(&o.name).size(15.0)).selected(on)).clicked() {
+                            if on {
+                                picked.retain(|p| p != &o.id);
+                            } else {
+                                picked.push(o.id.clone());
+                            }
+                        }
+                    }
+                });
+                for id in &picked {
+                    if let Some(o) = options.iter().find(|o| &o.id == id) {
+                        if !o.prerequisite.is_empty() {
+                            ui.label(theme::accent(format!("{} needs: {}", o.name, o.prerequisite)).small());
+                        }
+                        ui.label(theme::muted(format!("{}: {}", o.name, o.description)).small());
+                    }
+                }
+            });
+            if (picked.len() as u32) < f.picks {
+                choices_open.push(format!("{} ({} more)", f.name, f.picks - picked.len() as u32));
+            }
+            if picked.is_empty() {
+                app.draft.choices.remove(&f.name);
+            } else {
+                app.draft.choices.insert(f.name.clone(), picked);
+            }
+        }
+    }
+
     // ------------------------------------------------------------ abilities
     theme::section(ui, "Ability scores");
     let methods = [("standard_array".to_string(), "Standard array".to_string()), ("point_buy".to_string(), "Point buy".to_string()), ("rolled".to_string(), "Rolled".to_string())];
@@ -324,6 +376,8 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     let levels = class.map(|c| builder::improvement_levels(c, level)).unwrap_or_default();
     app.draft.advancements.retain(|a| levels.contains(&a.level));
     let mut improvements_open = 0usize;
+    // class options (tag `option`) are picked under Choices, not here
+    let general_feats: Vec<&dnd_core::Feat> = opts.feats.iter().filter(|f| !builder::is_option_feat(f)).collect();
     if !levels.is_empty() {
         theme::section(ui, "Improvements");
         ui.label(theme::muted("At each of these levels raise one ability by 2, two abilities by 1, or take a feat.").small());
@@ -340,16 +394,16 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                         feat_mode = false;
                         adv.feat = None;
                     }
-                    if !opts.feats.is_empty() && ui.selectable_label(feat_mode, "Feat").clicked() && adv.feat.is_none() {
-                        adv.feat = Some(opts.feats[0].id.clone());
+                    if let Some(first) = general_feats.first().filter(|_| ui.selectable_label(feat_mode, "Feat").clicked() && adv.feat.is_none()) {
+                        adv.feat = Some(first.id.clone());
                         adv.ability_increases.clear();
                     }
                 });
                 if adv.feat.is_some() {
                     let mut id = adv.feat.clone().unwrap_or_default();
-                    let list: Vec<(String, String)> = opts.feats.iter().map(|f| (f.id.clone(), f.name.clone())).collect();
+                    let list: Vec<(String, String)> = general_feats.iter().map(|f| (f.id.clone(), f.name.clone())).collect();
                     chips(ui, &mut id, &list);
-                    if let Some(f) = opts.feats.iter().find(|f| f.id == id) {
+                    if let Some(f) = general_feats.iter().find(|f| f.id == id) {
                         if !f.prerequisite.is_empty() {
                             ui.label(theme::accent(format!("needs: {}", f.prerequisite)).small());
                         }
@@ -521,6 +575,9 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
         }
         if !spells_open.is_empty() {
             ui.label(theme::muted(format!("Spells: you can still choose {}.", spells_open.join(", "))));
+        }
+        if !choices_open.is_empty() {
+            ui.label(theme::muted(format!("Choices still open: {}.", choices_open.join(", "))));
         }
         if improvements_open > 0 {
             ui.label(theme::muted(format!("{improvements_open} improvement(s) not chosen yet; the DM can add them later.")));

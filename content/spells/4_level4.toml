@@ -1,0 +1,446 @@
+# 4th-level spells.
+
+[[spells]]
+id = "arcane_eye"
+name = "Arcane Eye"
+level = 4
+school = "divination"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a bit of bat fur)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["cleric", "wizard"]
+description = "Create an invisible, floating magical eye with darkvision 30 feet. You receive its visual information and can look in any direction. As an action move it up to 30 feet in any direction; it can pass through openings an inch across but solid barriers block it."
+
+[[spells]]
+id = "banishment"
+name = "Banishment"
+level = 4
+school = "abjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (an item distasteful to the target)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric", "paladin", "sorcerer", "warlock", "wizard"]
+save = "cha"
+description = "A creature you can see makes a Charisma save or is banished. A native of your plane goes to a harmless demiplane, incapacitated, returning when the spell ends. A creature from another plane returns to its home plane and stays there if the spell lasts the full minute."
+higher_levels = "One additional creature for each slot level above 4th."
+
+[[spells]]
+id = "black_tentacles"
+name = "Black Tentacles"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "90 feet"
+components = "V, S, M (a piece of tentacle from a giant octopus or a giant squid)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["wizard"]
+save = "dex"
+damage = "3d6"
+damage_type = "bludgeoning"
+area = { shape = "cube", size = 20 }
+description = "Squirming ebony tentacles fill a 20-foot square of difficult terrain. A creature entering it for the first time on a turn or starting its turn there makes a Dexterity save or takes 3d6 bludgeoning damage and is restrained. A restrained creature starting its turn there takes 3d6 bludgeoning damage, and can use its action for a Strength or Dexterity check against your spell save DC to escape."
+
+[[spells]]
+id = "blight"
+name = "Blight"
+level = 4
+school = "necromancy"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["druid", "sorcerer", "warlock", "wizard"]
+save = "con"
+save_half = true
+damage = "8d8"
+damage_type = "necrotic"
+upcast = "1d8"
+description = "Necromantic energy drains moisture and vitality from a creature you can see. It makes a Constitution save, taking 8d8 necrotic damage on a failure or half on a success. No effect on undead or constructs; plant creatures have disadvantage and take maximum damage. A nonmagical plant simply withers and dies."
+higher_levels = "+1d8 damage for each slot level above 4th."
+
+[[spells]]
+id = "compulsion"
+name = "Compulsion"
+level = 4
+school = "enchantment"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard"]
+save = "wis"
+description = "Creatures of your choice that can hear you make Wisdom saves (immune to being charmed = automatic success). Until the spell ends, as a bonus action on each of your turns, you can name a direction: each affected creature must use as much of its movement as possible to go that way on its next turn. After moving it repeats the save."
+
+[[spells]]
+id = "confusion"
+name = "Confusion"
+level = 4
+school = "enchantment"
+casting_time = "1 action"
+range = "90 feet"
+components = "V, S, M (three nut shells)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "druid", "sorcerer", "wizard"]
+save = "wis"
+area = { shape = "sphere", size = 10 }
+description = "Each creature in a 10-foot-radius sphere makes a Wisdom save or is confused: it can't take reactions and rolls a d10 at the start of each turn — 1: wanders randomly; 2–6: does nothing; 7–8: melee attacks a random creature in reach; 9–10: acts normally. It repeats the save at the end of each of its turns."
+higher_levels = "The radius grows by 5 feet for each slot level above 4th."
+
+[[spells]]
+id = "conjure_minor_elementals"
+name = "Conjure Minor Elementals"
+level = 4
+school = "conjuration"
+casting_time = "1 minute"
+range = "90 feet"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "wizard"]
+description = "Summon elementals: one of CR 2, two of CR 1, four of CR 1/2 or eight of CR 1/4. They are friendly, roll initiative as a group and obey your verbal commands."
+higher_levels = "Twice as many with a 6th-level slot, three times with 8th."
+
+[[spells]]
+id = "conjure_woodland_beings"
+name = "Conjure Woodland Beings"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (one holly berry per creature summoned)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "ranger"]
+description = "Summon fey creatures: one of CR 2, two of CR 1, four of CR 1/2 or eight of CR 1/4. They are friendly, roll initiative as a group and obey your verbal commands."
+higher_levels = "Twice as many with a 6th-level slot, three times with 8th."
+
+[[spells]]
+id = "control_water"
+name = "Control Water"
+level = 4
+school = "transmutation"
+casting_time = "1 action"
+range = "300 feet"
+components = "V, S, M (a drop of water and a pinch of dust)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["cleric", "druid", "wizard"]
+save = "str"
+area = { shape = "cube", size = 100 }
+description = "Control freestanding water inside a 100-foot cube. Choose an effect (change it as an action): Flood (raise the level 20 feet, or a wave that knocks creatures prone); Part Water (a trench through the area); Redirect Flow (water moves in a direction you choose); or Whirlpool (a vortex 50 feet wide that pulls creatures in, Strength save, 2d8 bludgeoning)."
+
+[[spells]]
+id = "death_ward"
+name = "Death Ward"
+level = 4
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "8 hours"
+classes = ["cleric", "paladin"]
+description = "The first time the warded creature would drop to 0 hit points, it drops to 1 hit point instead and the spell ends. If an effect would kill it instantly without dealing damage, that effect is negated instead."
+
+[[spells]]
+id = "dimension_door"
+name = "Dimension Door"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "500 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+description = "Teleport to any spot within range that you can see, picture or describe by distance and direction. You can bring objects you carry and one willing creature of your size or smaller within 5 feet. If you would arrive in an occupied space, you each take 4d6 force damage and the spell fails."
+
+[[spells]]
+id = "divination"
+name = "Divination"
+level = 4
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (incense and a sacrificial offering worth at least 25 gp, which the spell consumes)"
+duration = "Instantaneous"
+ritual = true
+classes = ["cleric"]
+description = "Ask a single question about a specific goal, event or activity occurring within 7 days. The DM gives a truthful reply — a short phrase, cryptic rhyme or omen. Repeat castings before a long rest have a cumulative 25% chance of a random reading."
+
+[[spells]]
+id = "dominate_beast"
+name = "Dominate Beast"
+level = 4
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "sorcerer"]
+save = "wis"
+description = "A beast you can see makes a Wisdom save (with advantage if you are fighting it) or is charmed by you. You have a telepathic link and can issue commands; as an action you can take total control of it. It repeats the save whenever it takes damage."
+higher_levels = "5th-level slot: 10 minutes. 6th: 1 hour. 7th or higher: 8 hours."
+
+[[spells]]
+id = "fabricate"
+name = "Fabricate"
+level = 4
+school = "transmutation"
+casting_time = "10 minutes"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["wizard"]
+description = "Convert raw materials into products of the same material: a wooden bridge from a clump of trees, a rope from hemp, clothes from flax or wool. Up to a Large object (in a 10-foot cube), or Medium for mineral material. Quality depends on materials; items needing high craftsmanship require proficiency with the right artisan's tools."
+
+[[spells]]
+id = "faithful_hound"
+name = "Faithful Hound"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a tiny silver whistle, a piece of bone and a thread)"
+duration = "8 hours"
+damage = "4d8"
+damage_type = "piercing"
+classes = ["wizard"]
+description = "An invisible phantom watchdog guards a spot. It sees invisible creatures and into the Ethereal Plane and ignores illusions. When a hostile Small or larger creature comes within 30 feet without your password, it barks loudly. At the start of each of your turns it bites one hostile creature within 5 feet: your spell attack bonus to hit, 4d8 piercing damage."
+
+[[spells]]
+id = "fire_shield"
+name = "Fire Shield"
+level = 4
+school = "evocation"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a bit of phosphorus or a firefly)"
+duration = "10 minutes"
+classes = ["wizard", "fiend"]
+damage = "2d8"
+damage_type = "fire or cold"
+description = "Thin flames wreathe you, shedding light. Warm shield: resistance to cold damage. Chill shield: resistance to fire damage. Whenever a creature within 5 feet hits you with a melee attack, the shield erupts: the attacker takes 2d8 fire (warm) or cold (chill) damage."
+
+[[spells]]
+id = "freedom_of_movement"
+name = "Freedom of Movement"
+level = 4
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a leather strap, bound around the arm or a similar appendage)"
+duration = "1 hour"
+classes = ["bard", "cleric", "druid", "ranger"]
+description = "A willing creature's movement is unaffected by difficult terrain, and spells and magic can't reduce its speed or cause it to be paralyzed or restrained. It can spend 5 feet of movement to escape nonmagical restraints or a grapple, and being underwater doesn't hamper its movement or attacks."
+
+[[spells]]
+id = "giant_insect"
+name = "Giant Insect"
+level = 4
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["druid"]
+description = "Transform up to ten centipedes, three spiders, five wasps or one scorpion into giant versions for the duration. Each obeys your verbal commands and acts on your turn."
+
+[[spells]]
+id = "greater_invisibility"
+name = "Greater Invisibility"
+level = 4
+school = "illusion"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "sorcerer", "wizard"]
+description = "A creature you touch becomes invisible until the spell ends, along with anything it wears or carries. Unlike invisibility, it stays invisible when it attacks or casts spells."
+
+[[spells]]
+id = "guardian_of_faith"
+name = "Guardian of Faith"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V"
+duration = "8 hours"
+classes = ["cleric"]
+save = "dex"
+save_half = true
+damage = "20"
+damage_type = "radiant"
+area = { shape = "sphere", size = 10 }
+description = "A Large spectral guardian appears and occupies an unoccupied space, unmovable. Any hostile creature that moves within 10 feet of it for the first time on a turn makes a Dexterity save, taking 20 radiant damage on a failure or half on a success. The guardian vanishes after dealing 60 damage in total."
+
+[[spells]]
+id = "hallucinatory_terrain"
+name = "Hallucinatory Terrain"
+level = 4
+school = "illusion"
+casting_time = "10 minutes"
+range = "300 feet"
+components = "V, S, M (a stone, a twig and a bit of green plant)"
+duration = "24 hours"
+classes = ["bard", "druid", "warlock", "wizard"]
+area = { shape = "cube", size = 150 }
+description = "Natural terrain in a 150-foot cube looks, sounds and smells like another sort of natural terrain (a field looks like a swamp, a road like a ravine). Structures and creatures aren't changed. Physical interaction reveals it; an Investigation check against your spell save DC sees through it."
+
+[[spells]]
+id = "ice_storm"
+name = "Ice Storm"
+level = 4
+school = "evocation"
+casting_time = "1 action"
+range = "300 feet"
+components = "V, S, M (a pinch of dust and a few drops of water)"
+duration = "Instantaneous"
+classes = ["druid", "sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "2d8 + 4d6"
+damage_type = "bludgeoning and cold"
+upcast = "1d8"
+area = { shape = "cylinder", size = 20 }
+description = "Hailstones pound a 20-foot-radius, 40-foot-high cylinder. Each creature there makes a Dexterity save, taking 2d8 bludgeoning and 4d6 cold damage on a failure or half on a success. The area becomes difficult terrain until the end of your next turn."
+higher_levels = "+1d8 bludgeoning damage for each slot level above 4th."
+
+[[spells]]
+id = "locate_creature"
+name = "Locate Creature"
+level = 4
+school = "divination"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a bit of fur from a bloodhound)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "cleric", "druid", "paladin", "ranger", "wizard"]
+description = "Describe or name a creature familiar to you. You sense the direction to its location if it is within 1,000 feet, or to the nearest creature of a kind you name if you have seen one up close. Running water 10 feet wide blocks it, and it can't find a creature in a different form, such as polymorphed."
+
+[[spells]]
+id = "phantasmal_killer"
+name = "Phantasmal Killer"
+level = 4
+school = "illusion"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["wizard"]
+save = "wis"
+damage = "4d10"
+damage_type = "psychic"
+upcast = "1d10"
+description = "Tap into a creature's deepest fears. It makes a Wisdom save or is frightened for the duration. At the end of each of its turns it repeats the save, taking 4d10 psychic damage on a failure; on a success the spell ends."
+higher_levels = "+1d10 damage for each slot level above 4th."
+
+[[spells]]
+id = "polymorph"
+name = "Polymorph"
+level = 4
+school = "transmutation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a caterpillar cocoon)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "druid", "sorcerer", "wizard"]
+save = "wis"
+description = "Transform a creature you can see into a new form (an unwilling creature makes a Wisdom save; shapechangers and creatures at 0 hit points are unaffected). The new form is a beast with a CR no higher than the target's CR or level. It uses the beast's statistics and hit points; when those drop to 0 it reverts, carrying over excess damage. It is limited by the new form's abilities."
+
+[[spells]]
+id = "private_sanctum"
+name = "Private Sanctum"
+level = 4
+school = "abjuration"
+casting_time = "10 minutes"
+range = "120 feet"
+components = "V, S, M (a thin sheet of lead, a piece of opaque glass, a wad of cotton or cloth, and powdered chrysolite)"
+duration = "24 hours"
+classes = ["wizard"]
+area = { shape = "cube", size = 100 }
+description = "Make an area up to a 100-foot cube magically secure. Choose any of: sound can't pass the edge; the barrier is dark and foggy from outside; sensors from divination can't enter or appear; creatures inside can't be targeted by divination; nothing can teleport in or out; planar travel is blocked. Casting it on the same spot every day for a year makes it permanent."
+higher_levels = "The cube can be 100 feet larger per side for each slot level above 4th."
+
+[[spells]]
+id = "resilient_sphere"
+name = "Resilient Sphere"
+level = 4
+school = "evocation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a hemispherical piece of clear crystal and a matching hemisphere of gum arabic)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["wizard"]
+save = "dex"
+description = "A sphere of shimmering force encloses a Large or smaller creature or object (an unwilling creature makes a Dexterity save). Nothing physical or magical passes through the sphere, inward or outward. The creature inside can roll it at half speed; others can push it. Disintegrate destroys it."
+
+[[spells]]
+id = "secret_chest"
+name = "Secret Chest"
+level = 4
+school = "conjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (an exquisite chest, 3 feet by 2 feet by 2 feet, worth at least 5,000 gp, and a Tiny replica of the chest worth at least 50 gp)"
+duration = "Instantaneous"
+classes = ["wizard"]
+description = "Hide a chest and its contents (up to 12 cubic feet) on the Ethereal Plane. Recall it as an action while touching the replica. After 60 days there is a cumulative 5% chance per day that the spell ends and the chest is lost."
+
+[[spells]]
+id = "stone_shape"
+name = "Stone Shape"
+level = 4
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (soft clay, which must be worked into roughly the desired shape of the stone object)"
+duration = "Instantaneous"
+classes = ["cleric", "druid", "wizard"]
+description = "Shape a Medium or smaller stone object, or a section of stone no more than 5 feet in any dimension, into any shape: a weapon, an idol, a coffer, a passage, a sealed door. Fine detail and moving parts are beyond it."
+
+[[spells]]
+id = "stoneskin"
+name = "Stoneskin"
+level = 4
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (diamond dust worth 100 gp, which the spell consumes)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "ranger", "sorcerer", "wizard"]
+description = "A willing creature's flesh becomes hard as stone: it has resistance to nonmagical bludgeoning, piercing and slashing damage until the spell ends."
+
+[[spells]]
+id = "wall_of_fire"
+name = "Wall of Fire"
+level = 4
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S, M (a small piece of phosphorus)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "sorcerer", "wizard", "fiend"]
+save = "dex"
+save_half = true
+damage = "5d8"
+damage_type = "fire"
+upcast = "1d8"
+area = { shape = "line", size = 60, width = 1 }
+description = "A wall of fire up to 60 feet long, 20 feet high and 1 foot thick appears (or a ring 20 feet across). It is opaque. Creatures in it when it appears make a Dexterity save, taking 5d8 fire damage on a failure or half on a success. One side (your choice) deals 5d8 fire damage to a creature ending its turn within 10 feet of it or inside the wall."
+higher_levels = "+1d8 damage for each slot level above 4th."

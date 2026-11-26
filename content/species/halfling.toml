@@ -3,7 +3,7 @@ name = "Halfling (Lightfoot)"
 size = "Small"
 speed = 25
 languages = ["Common", "Halfling"]
-description = "Small, cheerful and lucky; lightfoots are stealthy and easily hidden."
+description = "Small, cheerful and lucky; lightfoots are stealthy, easily hidden and tend to get along with everyone."
 
 [[modifiers]]
 target = "ability.dex"
@@ -19,7 +19,7 @@ description = "When you roll a 1 on an attack roll, ability check or saving thro
 [[traits]]
 name = "Brave"
 description = "You have advantage on saving throws against being frightened."
-modifiers = [{ target = "save.wis", op = "advantage", note = "vs. being frightened" }]
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being frightened" }]
 
 [[traits]]
 name = "Halfling Nimbleness"

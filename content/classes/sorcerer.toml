@@ -1,0 +1,47 @@
+id = "sorcerer"
+name = "Sorcerer"
+hit_die = 6
+primary_abilities = ["cha"]
+saving_throws = ["con", "cha"]
+armor_proficiencies = []
+weapon_proficiencies = ["dagger", "dart", "sling", "quarterstaff", "light_crossbow"]
+subclass_level = 1
+subclass_label = "Sorcerous Origin"
+multiclass_prerequisite = "Charisma 13"
+starting_equipment = ["light_crossbow + 20 bolts or simple weapon", "component pouch or arcane focus", "dungeoneer's pack or explorer's pack", "two daggers"]
+description = "A spellcaster who draws on inherent magic from a gift or bloodline."
+
+[skill_choices]
+count = 2
+from = ["arcana", "deception", "insight", "intimidation", "persuasion", "religion"]
+
+[spellcasting]
+ability = "cha"
+progression = "full"
+cantrips_known = [4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+spells_known = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15]
+focus = "arcane focus"
+
+[[features]]
+name = "Spellcasting"
+level = 1
+description = "Charisma is your spellcasting ability. You know a fixed number of sorcerer spells; when you gain a level you can replace one with another sorcerer spell of a level you can cast. You can use an arcane focus."
+
+[[features]]
+name = "Font of Magic"
+level = 2
+description = "You have sorcery points equal to your sorcerer level. Flexible Casting: as a bonus action, spend points to create a spell slot (1st = 2 points, 2nd = 3, 3rd = 5, 4th = 6, 5th = 7; no slot above 5th) or expend a slot to gain points equal to its level. Created slots vanish after a long rest."
+uses = "class.sorcerer.level"
+recharge = "long_rest"
+
+[[features]]
+name = "Metamagic"
+level = 3
+description = "Twist your spells to suit your needs. Pick two Metamagic options, a third at 10th level and a fourth at 17th. Only one option per spell unless an option says otherwise."
+options = "metamagic"
+choose = "if(class.sorcerer.level >= 17, 4, if(class.sorcerer.level >= 10, 3, 2))"
+
+[[features]]
+name = "Sorcerous Restoration"
+level = 20
+description = "You regain 4 expended sorcery points whenever you finish a short rest."

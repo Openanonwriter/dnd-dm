@@ -1,0 +1,610 @@
+# 3rd-level spells.
+
+[[spells]]
+id = "animate_dead"
+name = "Animate Dead"
+level = 3
+school = "necromancy"
+casting_time = "1 minute"
+range = "10 feet"
+components = "V, S, M (a drop of blood, a piece of flesh and a pinch of bone dust)"
+duration = "Instantaneous"
+classes = ["cleric", "wizard"]
+description = "Raise a pile of bones or a corpse of a Medium or Small humanoid as a skeleton or zombie under your control. As a bonus action you command any you made within 60 feet. Control lasts 24 hours; recast to reassert control over up to four of them instead of making a new one."
+higher_levels = "Two additional undead for each slot level above 3rd."
+
+[[spells]]
+id = "beacon_of_hope"
+name = "Beacon of Hope"
+level = 3
+school = "abjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric"]
+description = "Any number of creatures you choose have advantage on Wisdom saving throws and death saving throws, and regain the maximum number of hit points possible from any healing."
+
+[[spells]]
+id = "bestow_curse"
+name = "Bestow Curse"
+level = 3
+school = "necromancy"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "cleric", "wizard"]
+save = "wis"
+description = "Touch a creature; it makes a Wisdom save or is cursed. Choose: disadvantage on checks and saves with one ability; disadvantage on attack rolls against you; a Wisdom save each turn or waste its action; or your attacks and spells deal an extra 1d8 necrotic damage to it. Remove curse ends it."
+higher_levels = "4th-level slot: 10 minutes. 5th: 8 hours. 7th: 24 hours. 9th: until dispelled. With a 5th-level or higher slot it needs no concentration."
+
+[[spells]]
+id = "blink"
+name = "Blink"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V, S"
+duration = "1 minute"
+classes = ["sorcerer", "wizard"]
+description = "Roll a d20 at the end of each of your turns: on 11 or higher you vanish into the Ethereal Plane until the start of your next turn, then return to a space you choose within 10 feet of where you vanished. While ethereal you can only affect and be affected by other ethereal things."
+
+[[spells]]
+id = "call_lightning"
+name = "Call Lightning"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["druid"]
+save = "dex"
+save_half = true
+damage = "3d10"
+damage_type = "lightning"
+upcast = "1d10"
+area = { shape = "sphere", size = 5 }
+description = "A storm cloud appears 100 feet above a point you can see (60-foot radius). Choose a point under it: a bolt strikes, and each creature within 5 feet makes a Dexterity save, taking 3d10 lightning damage on a failure or half on a success. Repeat as an action on each of your turns. Outdoors in a storm, +1d10 damage."
+higher_levels = "+1d10 damage for each slot level above 3rd."
+
+[[spells]]
+id = "clairvoyance"
+name = "Clairvoyance"
+level = 3
+school = "divination"
+casting_time = "10 minutes"
+range = "1 mile"
+components = "V, S, M (a focus worth at least 100 gp, either a jeweled horn for hearing or a glass eye for seeing)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["bard", "cleric", "sorcerer", "wizard"]
+description = "Create an invisible sensor at a location you know within range. Choose seeing or hearing; you can switch as an action. A creature that can see the sensor sees a luminous orb the size of your fist."
+
+[[spells]]
+id = "conjure_animals"
+name = "Conjure Animals"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "ranger"]
+description = "Summon fey spirits as beasts: one of CR 2, two of CR 1, four of CR 1/2 or eight of CR 1/4. They are friendly, act on their own initiative, and obey your verbal commands; they vanish at 0 hit points or when the spell ends."
+higher_levels = "Twice as many with a 5th-level slot, three times with 7th, four times with 9th."
+
+[[spells]]
+id = "counterspell"
+name = "Counterspell"
+level = 3
+school = "abjuration"
+casting_time = "1 reaction, when you see a creature within 60 feet casting a spell"
+range = "60 feet"
+components = "S"
+duration = "Instantaneous"
+classes = ["sorcerer", "warlock", "wizard"]
+description = "Interrupt a creature casting a spell. A spell of 3rd level or lower fails. For a higher-level spell, make an ability check with your spellcasting ability against DC 10 + the spell's level; on a success it fails."
+higher_levels = "The spell automatically fails if its level is no higher than the slot you use."
+
+[[spells]]
+id = "create_food_and_water"
+name = "Create Food and Water"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric", "paladin"]
+description = "Create 45 pounds of bland but nourishing food and 30 gallons of fresh water — enough for fifteen humanoids or five steeds for 24 hours. The food spoils after 24 hours if uneaten."
+
+[[spells]]
+id = "daylight"
+name = "Daylight"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "1 hour"
+classes = ["cleric", "druid", "paladin", "ranger", "sorcerer"]
+area = { shape = "sphere", size = 60 }
+description = "A 60-foot-radius sphere of bright light spreads from a point or an object, with dim light 60 feet beyond. Covering the object blocks the light. It dispels magical darkness of 3rd level or lower it overlaps."
+
+[[spells]]
+id = "dispel_magic"
+name = "Dispel Magic"
+level = 3
+school = "abjuration"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["bard", "cleric", "druid", "paladin", "sorcerer", "warlock", "wizard"]
+description = "Choose a creature, object or magical effect. Any spell of 3rd level or lower on it ends. For each higher-level spell, make an ability check with your spellcasting ability against DC 10 + the spell's level; on a success it ends."
+higher_levels = "Spells of a level no higher than the slot you use end automatically."
+
+[[spells]]
+id = "fear"
+name = "Fear"
+level = 3
+school = "illusion"
+casting_time = "1 action"
+range = "Self (30-foot cone)"
+components = "V, S, M (a white feather or the heart of a hen)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "wis"
+area = { shape = "cone", size = 30 }
+description = "Each creature in a 30-foot cone makes a Wisdom save or drops what it is holding and is frightened. A frightened creature must Dash away from you by the safest route on each of its turns. If it ends its turn out of your line of sight, it repeats the save, ending the effect on a success."
+
+[[spells]]
+id = "feign_death"
+name = "Feign Death"
+level = 3
+school = "necromancy"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a pinch of graveyard dirt)"
+duration = "1 hour"
+ritual = true
+classes = ["bard", "cleric", "druid", "wizard"]
+description = "A willing creature you touch enters a cataleptic state indistinguishable from death. It is blinded and incapacitated, its speed drops to 0, and it has resistance to all damage except psychic. Diseases and poisons affecting it are paused until the spell ends. You can end it early with an action."
+
+[[spells]]
+id = "fireball"
+name = "Fireball"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (a tiny ball of bat guano and sulfur)"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard", "fiend"]
+save = "dex"
+save_half = true
+damage = "8d6"
+damage_type = "fire"
+upcast = "1d6"
+area = { shape = "sphere", size = 20 }
+description = "A bright streak blossoms into an explosion of flame. Each creature in a 20-foot-radius sphere makes a Dexterity save, taking 8d6 fire damage on a failure or half on a success. The fire spreads around corners and ignites unattended flammable objects."
+higher_levels = "+1d6 damage for each slot level above 3rd."
+
+[[spells]]
+id = "fly"
+name = "Fly"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a wing feather from any bird)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["sorcerer", "warlock", "wizard"]
+description = "A willing creature you touch gains a flying speed of 60 feet. When the spell ends it falls if it is still aloft, unless it can stop the fall."
+higher_levels = "One additional creature for each slot level above 3rd."
+
+[[spells]]
+id = "gaseous_form"
+name = "Gaseous Form"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a bit of gauze and a wisp of smoke)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["sorcerer", "warlock", "wizard"]
+description = "A willing creature and what it wears and carries turns into a misty cloud. It can fly at 10 feet, enter others' spaces, pass through small cracks, and resists nonmagical damage, with advantage on Str, Dex and Con saves. It can't talk, manipulate objects, attack or cast spells, and can't fall."
+
+[[spells]]
+id = "glyph_of_warding"
+name = "Glyph of Warding"
+level = 3
+school = "abjuration"
+casting_time = "1 hour"
+range = "Touch"
+components = "V, S, M (incense and powdered diamond worth at least 200 gp, which the spell consumes)"
+duration = "Until dispelled or triggered"
+classes = ["bard", "cleric", "wizard"]
+save = "dex"
+save_half = true
+damage = "5d8"
+damage_type = "acid, cold, fire, lightning or thunder (chosen when cast)"
+upcast = "1d8"
+area = { shape = "sphere", size = 20 }
+description = "Inscribe a nearly invisible glyph on a surface or inside a closed object, with a trigger you set. Explosive runes: each creature within 20 feet makes a Dexterity save, taking 5d8 damage of the chosen type on a failure or half on a success. Spell glyph: store a prepared spell of 3rd level or lower that goes off when triggered. Finding it needs an Investigation check against your spell save DC."
+higher_levels = "+1d8 explosive-rune damage for each slot level above 3rd; a spell glyph can hold a spell up to the slot's level."
+
+[[spells]]
+id = "haste"
+name = "Haste"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a shaving of licorice root)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+description = "A willing creature's speed doubles, it gains +2 AC and advantage on Dexterity saves, and it gets an extra action each turn (only Attack with one weapon attack, Dash, Disengage, Hide or Use an Object). When the spell ends, it can't move or act until after its next turn."
+
+[[spells]]
+id = "hypnotic_pattern"
+name = "Hypnotic Pattern"
+level = 3
+school = "illusion"
+casting_time = "1 action"
+range = "120 feet"
+components = "S, M (a glowing stick of incense or a crystal vial filled with phosphorescent material)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+save = "wis"
+area = { shape = "cube", size = 30 }
+description = "A twisting pattern of colors weaves through a 30-foot cube. Each creature there that sees it makes a Wisdom save or is charmed: it is incapacitated and has speed 0. It ends for a creature that takes damage or is shaken awake by someone using an action."
+
+[[spells]]
+id = "lightning_bolt"
+name = "Lightning Bolt"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "Self (100-foot line)"
+components = "V, S, M (a bit of fur and a rod of amber, crystal or glass)"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "8d6"
+damage_type = "lightning"
+upcast = "1d6"
+area = { shape = "line", size = 100, width = 5 }
+description = "A stroke of lightning forms a line 100 feet long and 5 feet wide from you. Each creature in the line makes a Dexterity save, taking 8d6 lightning damage on a failure or half on a success. It ignites unattended flammable objects."
+higher_levels = "+1d6 damage for each slot level above 3rd."
+
+[[spells]]
+id = "magic_circle"
+name = "Magic Circle"
+level = 3
+school = "abjuration"
+casting_time = "1 minute"
+range = "10 feet"
+components = "V, S, M (holy water or powdered silver and iron worth at least 100 gp, which the spell consumes)"
+duration = "1 hour"
+classes = ["cleric", "paladin", "warlock", "wizard"]
+area = { shape = "cylinder", size = 10 }
+description = "A 10-foot-radius, 20-foot-tall cylinder of magical energy wards against celestials, elementals, fey, fiends or undead (choose). They can't willingly enter it by nonmagical means, have disadvantage attacking targets inside, and targets inside can't be charmed, frightened or possessed by them. You can reverse it to trap such a creature inside instead."
+higher_levels = "+1 hour duration for each slot level above 3rd."
+
+[[spells]]
+id = "major_image"
+name = "Major Image"
+level = 3
+school = "illusion"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S, M (a bit of fleece)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+description = "Create the image of an object, creature or phenomenon no larger than a 20-foot cube that seems real, including sound, smell and temperature (not strong enough to deal damage). You can move it and change its sounds with your action. Physical interaction reveals it; an Investigation check against your spell save DC sees through it."
+higher_levels = "With a 6th-level or higher slot it lasts until dispelled, without concentration."
+
+[[spells]]
+id = "mass_healing_word"
+name = "Mass Healing Word"
+level = 3
+school = "evocation"
+casting_time = "1 bonus action"
+range = "60 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["cleric"]
+heal = "1d4 + mod"
+upcast = "1d4"
+description = "Up to six creatures of your choice that you can see each regain hit points equal to 1d4 + your spellcasting ability modifier. No effect on undead or constructs."
+higher_levels = "+1d4 healing for each slot level above 3rd."
+
+[[spells]]
+id = "meld_into_stone"
+name = "Meld into Stone"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "8 hours"
+ritual = true
+classes = ["cleric", "druid"]
+description = "Step into a stone object or surface large enough to hold you, merging with it and your gear. You can't see outside, have disadvantage on Perception checks, can cast spells on yourself only, and can't move except to step out. Minor damage doesn't harm you; if the stone is destroyed you are expelled and take damage."
+
+[[spells]]
+id = "nondetection"
+name = "Nondetection"
+level = 3
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (a pinch of diamond dust worth 25 gp sprinkled over the target, which the spell consumes)"
+duration = "8 hours"
+classes = ["bard", "ranger", "wizard"]
+description = "Hide a willing creature, a place or an object (no larger than 10 feet) from divination magic. It can't be targeted by divination or perceived through magical scrying sensors."
+
+[[spells]]
+id = "phantom_steed"
+name = "Phantom Steed"
+level = 3
+school = "illusion"
+casting_time = "1 minute"
+range = "30 feet"
+components = "V, S"
+duration = "1 hour"
+ritual = true
+classes = ["wizard"]
+description = "A Large quasi-real horse-like creature appears, with a saddle, bit and bridle. It has a speed of 100 feet and can travel 10 miles in an hour (13 at a fast pace). It vanishes when the spell ends or it takes any damage, letting the rider dismount."
+
+[[spells]]
+id = "plant_growth"
+name = "Plant Growth"
+level = 3
+school = "transmutation"
+casting_time = "1 action or 8 hours"
+range = "150 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["bard", "druid", "ranger"]
+area = { shape = "sphere", size = 100 }
+description = "Cast as an action: plants within 100 feet of a point become thick and overgrown; moving through costs 4 feet per foot (you can exclude areas). Cast over 8 hours: plants within half a mile become enriched and yield twice the normal food for a year."
+
+[[spells]]
+id = "protection_from_energy"
+name = "Protection from Energy"
+level = 3
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["cleric", "druid", "ranger", "sorcerer", "wizard"]
+description = "A willing creature you touch has resistance to one damage type of your choice — acid, cold, fire, lightning or thunder — for the duration."
+
+[[spells]]
+id = "remove_curse"
+name = "Remove Curse"
+level = 3
+school = "abjuration"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric", "paladin", "warlock", "wizard"]
+description = "All curses affecting one creature or object end. A cursed magic item keeps its curse, but the spell breaks its owner's attunement so it can be removed or discarded."
+
+[[spells]]
+id = "revivify"
+name = "Revivify"
+level = 3
+school = "necromancy"
+casting_time = "1 action"
+range = "Touch"
+components = "V, S, M (diamonds worth 300 gp, which the spell consumes)"
+duration = "Instantaneous"
+classes = ["cleric", "paladin"]
+description = "Touch a creature that has died within the last minute. It returns to life with 1 hit point. It can't restore a creature that died of old age or replace missing body parts."
+
+[[spells]]
+id = "sending"
+name = "Sending"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "Unlimited"
+components = "V, S, M (a short piece of fine copper wire)"
+duration = "1 round"
+classes = ["bard", "cleric", "wizard"]
+description = "Send a message of 25 words or fewer to a creature you are familiar with. It hears the message in its mind, recognizes you, and can answer the same way right away. Creatures with Intelligence 1 understand you. Across planes there is a 5% chance it doesn't arrive."
+
+[[spells]]
+id = "sleet_storm"
+name = "Sleet Storm"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "150 feet"
+components = "V, S, M (a pinch of dust and a few drops of water)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "sorcerer", "wizard"]
+save = "dex"
+area = { shape = "cylinder", size = 40 }
+description = "Freezing rain and sleet fall in a 20-foot-tall, 40-foot-radius cylinder. The area is heavily obscured, difficult terrain, and exposed flames go out. A creature entering or starting its turn there makes a Dexterity save or falls prone; a concentrating creature must make a Constitution save or lose concentration."
+
+[[spells]]
+id = "slow"
+name = "Slow"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S, M (a drop of molasses)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["sorcerer", "wizard"]
+save = "wis"
+area = { shape = "cube", size = 40 }
+description = "Up to six creatures in a 40-foot cube make Wisdom saves. Each that fails has its speed halved, -2 to AC and Dexterity saves, no reactions, and only an action or a bonus action on its turn (not both), with one attack at most; its spells may be delayed. It repeats the save at the end of each of its turns."
+
+[[spells]]
+id = "speak_with_dead"
+name = "Speak with Dead"
+level = 3
+school = "necromancy"
+casting_time = "1 action"
+range = "10 feet"
+components = "V, S, M (burning incense)"
+duration = "10 minutes"
+classes = ["bard", "cleric"]
+description = "Grant the semblance of life to a corpse with a mouth that isn't undead, letting it answer up to five questions. It knows only what it knew in life, isn't compelled to be truthful, and answers briefly. It can't be used on the same corpse again within 10 days."
+
+[[spells]]
+id = "speak_with_plants"
+name = "Speak with Plants"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "Self (30-foot radius)"
+components = "V, S"
+duration = "10 minutes"
+classes = ["bard", "druid", "ranger"]
+description = "Plants within 30 feet gain limited sentience, letting you communicate with them and give simple commands. They can tell you about events in the last day, and you can turn difficult terrain from plants into ordinary terrain or the reverse. Plant creatures can understand you."
+
+[[spells]]
+id = "spirit_guardians"
+name = "Spirit Guardians"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "Self (15-foot radius)"
+components = "V, S, M (a holy symbol)"
+duration = "Concentration, up to 10 minutes"
+concentration = true
+classes = ["cleric"]
+save = "wis"
+save_half = true
+damage = "3d8"
+damage_type = "radiant"
+upcast = "1d8"
+area = { shape = "sphere", size = 15 }
+description = "Spirits surround you to a radius of 15 feet. Creatures of your choice in the area have their speed halved, and when a creature enters the area for the first time on a turn or starts its turn there it makes a Wisdom saving throw, taking 3d8 radiant (or necrotic, if you are evil) damage on a failure or half on a success."
+higher_levels = "+1d8 damage for each slot level above 3rd."
+
+[[spells]]
+id = "stinking_cloud"
+name = "Stinking Cloud"
+level = 3
+school = "conjuration"
+casting_time = "1 action"
+range = "90 feet"
+components = "V, S, M (a rotten egg or several skunk cabbage leaves)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["bard", "sorcerer", "wizard", "fiend"]
+save = "con"
+area = { shape = "sphere", size = 20 }
+description = "A 20-foot-radius sphere of nauseating yellow gas spreads around corners and heavily obscures the area. Each creature starting its turn in it makes a Constitution save against poison or spends its action retching. Creatures that don't need to breathe or are immune to poison succeed automatically. A moderate wind disperses it."
+
+[[spells]]
+id = "tiny_hut"
+name = "Tiny Hut"
+level = 3
+school = "evocation"
+casting_time = "1 minute"
+range = "Self (10-foot-radius hemisphere)"
+components = "V, S, M (a small crystal bead)"
+duration = "8 hours"
+ritual = true
+classes = ["bard", "wizard"]
+description = "A 10-foot-radius immobile dome of force appears around you and holds up to nine Medium creatures. Creatures and objects inside when cast can move freely through it; others can't. Spells can't extend through it, and the atmosphere inside is comfortable. It ends if you leave."
+
+[[spells]]
+id = "tongues"
+name = "Tongues"
+level = 3
+school = "divination"
+casting_time = "1 action"
+range = "Touch"
+components = "V, M (a small clay model of a ziggurat)"
+duration = "1 hour"
+classes = ["bard", "cleric", "sorcerer", "warlock", "wizard"]
+description = "A creature you touch understands any spoken language it hears, and when it speaks, any creature that knows at least one language and can hear it understands what it says."
+
+[[spells]]
+id = "vampiric_touch"
+name = "Vampiric Touch"
+level = 3
+school = "necromancy"
+casting_time = "1 action"
+range = "Self"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["warlock", "wizard"]
+attack = true
+damage = "3d6"
+damage_type = "necrotic"
+upcast = "1d6"
+description = "Your touch drains life force. Make a melee spell attack against a creature in reach: on a hit, 3d6 necrotic damage, and you regain hit points equal to half the damage dealt. Until the spell ends you can repeat the attack as an action on each of your turns."
+higher_levels = "+1d6 damage for each slot level above 3rd."
+
+[[spells]]
+id = "water_breathing"
+name = "Water Breathing"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a short reed or piece of straw)"
+duration = "24 hours"
+ritual = true
+classes = ["druid", "ranger", "sorcerer", "wizard"]
+description = "Up to ten willing creatures you can see can breathe underwater until the spell ends, keeping their normal breathing too."
+
+[[spells]]
+id = "water_walk"
+name = "Water Walk"
+level = 3
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a piece of cork)"
+duration = "1 hour"
+ritual = true
+classes = ["cleric", "druid", "ranger", "sorcerer"]
+description = "Up to ten willing creatures can move across any liquid surface — water, acid, mud, snow, quicksand or lava — as if it were harmless solid ground (molten lava can still hurt them). A submerged target rises to the surface at 60 feet per round."
+
+[[spells]]
+id = "wind_wall"
+name = "Wind Wall"
+level = 3
+school = "evocation"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S, M (a tiny fan and a feather of exotic origin)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid", "ranger"]
+save = "str"
+save_half = true
+damage = "3d8"
+damage_type = "bludgeoning"
+description = "A wall of strong wind up to 50 feet long, 15 feet high and 1 foot thick rises from the ground. Each creature in it when it appears makes a Strength save, taking 3d8 bludgeoning damage on a failure or half on a success. It keeps fog, smoke and gases at bay, Small or smaller flyers can't pass, and arrows, bolts and other ordinary missiles miss automatically."

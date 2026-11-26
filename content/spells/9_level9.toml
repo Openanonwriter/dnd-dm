@@ -1,0 +1,202 @@
+# 9th-level spells.
+
+[[spells]]
+id = "astral_projection"
+name = "Astral Projection"
+level = 9
+school = "necromancy"
+casting_time = "1 hour"
+range = "10 feet"
+components = "V, S, M (for each creature, one jacinth worth at least 1,000 gp and one ornately carved bar of silver worth at least 100 gp, all consumed)"
+duration = "Special"
+classes = ["cleric", "warlock", "wizard"]
+description = "You and up to eight willing creatures project your astral bodies into the Astral Plane, leaving your physical bodies in suspended animation. Each astral body is tethered by a silvery cord; if it is cut, the body and form both die. Entering another plane forms a new body there. The spell ends for everyone when you end it or your body is harmed."
+
+[[spells]]
+id = "foresight"
+name = "Foresight"
+level = 9
+school = "divination"
+casting_time = "1 minute"
+range = "Touch"
+components = "V, S, M (a hummingbird feather)"
+duration = "8 hours"
+classes = ["bard", "druid", "warlock", "wizard"]
+description = "A willing creature you touch gains a limited ability to see into the immediate future: it can't be surprised, has advantage on attack rolls, ability checks and saving throws, and other creatures have disadvantage on attack rolls against it for the duration."
+
+[[spells]]
+id = "gate"
+name = "Gate"
+level = 9
+school = "conjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S, M (a diamond worth at least 5,000 gp)"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["cleric", "sorcerer", "wizard"]
+description = "Open a portal 5 to 20 feet across linking your space to a precise location on another plane. Anything can travel through it from the front. You can instead name a specific creature: the portal opens beside it and draws it through to you (gods and demiplane rulers can prevent this). The creature isn't compelled to obey you."
+
+[[spells]]
+id = "imprisonment"
+name = "Imprisonment"
+level = 9
+school = "abjuration"
+casting_time = "1 minute"
+range = "30 feet"
+components = "V, S, M (a vellum depiction or carved statuette of the target, plus a special component worth at least 500 gp per Hit Die of the target)"
+duration = "Until dispelled"
+classes = ["warlock", "wizard"]
+save = "wis"
+description = "A creature you can see makes a Wisdom save or is bound in one of these ways: Burial (deep underground in a sphere of force), Chaining (heavy chains hold it in place), Hedged Prison (a tiny demiplane), Minimus Containment (shrunk inside a gemstone) or Slumber (asleep). It doesn't age or need food while imprisoned. You set a condition that frees it."
+
+[[spells]]
+id = "mass_heal"
+name = "Mass Heal"
+level = 9
+school = "evocation"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["cleric"]
+heal = "700"
+description = "A flood of healing energy restores up to 700 hit points, divided as you choose among any number of creatures you can see. It also cures blindness, deafness and diseases on them. No effect on undead or constructs."
+
+[[spells]]
+id = "meteor_swarm"
+name = "Meteor Swarm"
+level = 9
+school = "evocation"
+casting_time = "1 action"
+range = "1 mile"
+components = "V, S"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard"]
+save = "dex"
+save_half = true
+damage = "20d6 + 20d6"
+damage_type = "fire and bludgeoning"
+area = { shape = "sphere", size = 40 }
+description = "Blazing orbs of fire plummet to four points you can see, each exploding in a 40-foot-radius sphere. Each creature in a sphere makes a Dexterity save, taking 20d6 fire and 20d6 bludgeoning damage on a failure or half on a success. A creature in more than one sphere is affected only once. It ignites unattended flammable objects."
+
+[[spells]]
+id = "power_word_kill"
+name = "Power Word Kill"
+level = 9
+school = "enchantment"
+casting_time = "1 action"
+range = "60 feet"
+components = "V"
+duration = "Instantaneous"
+classes = ["bard", "sorcerer", "warlock", "wizard"]
+description = "Speak a word of power at a creature you can see. If it has 100 hit points or fewer, it dies; otherwise the spell has no effect."
+
+[[spells]]
+id = "prismatic_wall"
+name = "Prismatic Wall"
+level = 9
+school = "abjuration"
+casting_time = "1 action"
+range = "60 feet"
+components = "V, S"
+duration = "10 minutes"
+classes = ["sorcerer", "wizard"]
+description = "A shimmering, multicolored plane of light forms a vertical wall up to 90 feet long and 30 feet high, or a globe up to 30 feet across. Creatures you choose pass safely. Others who come within 20 feet are blinded (Constitution save), and passing through means facing seven layers — red fire, orange acid, yellow lightning, green poison, blue cold (10d6 each), indigo petrification, violet banishment — each destroyed by a specific means."
+
+[[spells]]
+id = "shapechange"
+name = "Shapechange"
+level = 9
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V, S, M (a jade circlet worth at least 1,500 gp, which you must place on your head before you cast the spell)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["druid", "wizard"]
+description = "Assume the form of a creature you have seen whose CR is no higher than your level (not a construct or undead). You gain its statistics and hit points but keep your alignment, personality, Intelligence, Wisdom and Charisma, proficiencies and the ability to cast spells if the form allows. As an action you can change into another form."
+
+[[spells]]
+id = "storm_of_vengeance"
+name = "Storm of Vengeance"
+level = 9
+school = "conjuration"
+casting_time = "1 action"
+range = "Sight"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["druid"]
+save = "con"
+damage = "2d6"
+damage_type = "thunder"
+area = { shape = "sphere", size = 360 }
+description = "A churning storm cloud forms, 360 feet in radius. On casting, each creature under it makes a Constitution save or takes 2d6 thunder damage and is deafened. Each later turn brings a new effect: acidic rain (1d6 acid), six lightning bolts (10d6 lightning, Dexterity save for half), hailstones (2d6 bludgeoning), then freezing rain and gusts making ranged attacks impossible and the area heavily obscured."
+
+[[spells]]
+id = "time_stop"
+name = "Time Stop"
+level = 9
+school = "transmutation"
+casting_time = "1 action"
+range = "Self"
+components = "V"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard"]
+description = "Time stops for everyone but you: you take 1d4 + 1 turns in a row, using actions and moving as normal. The spell ends if anything you do affects a creature other than you or an object someone else wears or carries, or if you move more than 1,000 feet from where you cast it."
+
+[[spells]]
+id = "true_polymorph"
+name = "True Polymorph"
+level = 9
+school = "transmutation"
+casting_time = "1 action"
+range = "30 feet"
+components = "V, S, M (a drop of mercury, a dollop of gum arabic and a wisp of smoke)"
+duration = "Concentration, up to 1 hour"
+concentration = true
+classes = ["bard", "warlock", "wizard"]
+save = "wis"
+description = "Transform a creature or nonmagical object you can see into a different creature or object (an unwilling creature makes a Wisdom save). Creature to creature: a CR up to the target's CR or level. Object to creature or creature to object are also possible. If you keep concentration for the full hour, the transformation is permanent until dispelled."
+
+[[spells]]
+id = "true_resurrection"
+name = "True Resurrection"
+level = 9
+school = "necromancy"
+casting_time = "1 hour"
+range = "Touch"
+components = "V, S, M (a sprinkle of holy water and diamonds worth at least 25,000 gp, which the spell consumes)"
+duration = "Instantaneous"
+classes = ["cleric", "druid"]
+description = "Restore a creature dead no longer than 200 years (not of old age) to life with all its hit points, if its soul is free and willing. It cures diseases and poisons, lifts curses, restores missing parts and can even create a new body if the old one no longer exists (name the creature). An undead creature returns to its living form."
+
+[[spells]]
+id = "weird"
+name = "Weird"
+level = 9
+school = "illusion"
+casting_time = "1 action"
+range = "120 feet"
+components = "V, S"
+duration = "Concentration, up to 1 minute"
+concentration = true
+classes = ["wizard"]
+save = "wis"
+damage = "4d10"
+damage_type = "psychic"
+area = { shape = "sphere", size = 30 }
+description = "Draw on the deepest fears of a group: each creature of your choice in a 30-foot-radius sphere makes a Wisdom save or is frightened. At the end of each of its turns it repeats the save, taking 4d10 psychic damage on a failure; on a success the spell ends for it."
+
+[[spells]]
+id = "wish"
+name = "Wish"
+level = 9
+school = "conjuration"
+casting_time = "1 action"
+range = "Self"
+components = "V"
+duration = "Instantaneous"
+classes = ["sorcerer", "wizard"]
+description = "The mightiest spell a mortal can cast. The basic use duplicates any spell of 8th level or lower with no requirements or costly components. Or ask for something else — create an object, heal and restore creatures, grant resistance, reroll an event — at the DM's discretion and with risk. Anything beyond duplicating a spell leaves you weakened, with a 33% chance of never casting wish again."

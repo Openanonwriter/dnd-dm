@@ -1,0 +1,114 @@
+id = "monk"
+name = "Monk"
+hit_die = 8
+primary_abilities = ["dex", "wis"]
+saving_throws = ["str", "dex"]
+armor_proficiencies = []
+weapon_proficiencies = ["simple", "shortsword"]
+tool_proficiencies = ["one type of artisan's tools or one musical instrument"]
+subclass_level = 3
+subclass_label = "Monastic Tradition"
+multiclass_prerequisite = "Dexterity 13 and Wisdom 13"
+starting_equipment = ["shortsword or simple weapon", "dungeoneer's pack or explorer's pack", "ten darts"]
+description = "A master of martial arts, harnessing the power of the body in pursuit of physical and spiritual perfection."
+
+[skill_choices]
+count = 2
+from = ["acrobatics", "athletics", "history", "insight", "religion", "stealth"]
+
+[[features]]
+name = "Unarmored Defense"
+level = 1
+description = "While you wear no armor and carry no shield, your AC is 10 + Dexterity modifier + Wisdom modifier."
+modifiers = [{ target = "ac.base", op = "max", value = "10 + dex_mod + wis_mod", condition = "!armored && !shield" }]
+
+[[features]]
+name = "Martial Arts"
+level = 1
+description = "While unarmed or wielding only monk weapons (shortswords and simple melee weapons without the two-handed or heavy property) and not wearing armor or a shield: use Dexterity instead of Strength for their attack and damage rolls; roll a d4 in place of their normal damage (d6 at 5th level, d8 at 11th, d10 at 17th); and after taking the Attack action you can make one unarmed strike as a bonus action."
+
+[[features]]
+name = "Ki"
+level = 2
+description = "You have ki points equal to your monk level. Ki save DC = 8 + proficiency bonus + Wisdom modifier. Flurry of Blows: after the Attack action, spend 1 ki for two unarmed strikes as a bonus action. Patient Defense: 1 ki to Dodge as a bonus action. Step of the Wind: 1 ki to Disengage or Dash as a bonus action; your jump distance doubles for the turn. You need to meditate for 30 minutes of a rest to regain ki."
+uses = "class.monk.level"
+recharge = "short_rest"
+
+[[features]]
+name = "Unarmored Movement"
+level = 2
+description = "Your speed increases while you wear no armor and carry no shield: +10 feet, rising to +15 at 6th level, +20 at 10th, +25 at 14th and +30 at 18th. From 9th level you can move along vertical surfaces and across liquids on your turn without falling."
+modifiers = [{ target = "speed", op = "add", value = "if(class.monk.level >= 18, 30, if(class.monk.level >= 14, 25, if(class.monk.level >= 10, 20, if(class.monk.level >= 6, 15, 10))))", condition = "!armored && !shield" }]
+
+[[features]]
+name = "Deflect Missiles"
+level = 3
+description = "Reaction when hit by a ranged weapon attack: reduce the damage by 1d10 + Dexterity modifier + monk level. If that makes it 0 and you have a free hand, you catch the missile and can spend 1 ki to throw it back as a monk weapon attack (range 20/60)."
+
+[[features]]
+name = "Slow Fall"
+level = 4
+description = "Reaction when you fall: reduce the falling damage by five times your monk level."
+
+[[features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+
+[[features]]
+name = "Stunning Strike"
+level = 5
+description = "When you hit with a melee weapon attack, spend 1 ki: the target makes a Constitution save or is stunned until the end of your next turn."
+
+[[features]]
+name = "Ki-Empowered Strikes"
+level = 6
+description = "Your unarmed strikes count as magical for overcoming resistance and immunity to nonmagical attacks and damage."
+
+[[features]]
+name = "Evasion"
+level = 7
+description = "When an effect allows a Dexterity save for half damage, you take none on a success and half on a failure."
+
+[[features]]
+name = "Stillness of Mind"
+level = 7
+description = "Action: end one effect on yourself that is causing you to be charmed or frightened."
+
+[[features]]
+name = "Purity of Body"
+level = 10
+description = "You are immune to disease and poison."
+
+[[features]]
+name = "Tongue of the Sun and Moon"
+level = 13
+description = "You understand all spoken languages, and any creature that understands a language can understand what you say."
+
+[[features]]
+name = "Diamond Soul"
+level = 14
+description = "You gain proficiency in all saving throws. When you fail a save, you can spend 1 ki to reroll it and take the second result."
+modifiers = [
+  { target = "proficiency.save.str", op = "grant" },
+  { target = "proficiency.save.dex", op = "grant" },
+  { target = "proficiency.save.con", op = "grant" },
+  { target = "proficiency.save.int", op = "grant" },
+  { target = "proficiency.save.wis", op = "grant" },
+  { target = "proficiency.save.cha", op = "grant" },
+]
+
+[[features]]
+name = "Timeless Body"
+level = 15
+description = "You suffer none of the frailty of old age, can't be aged magically, and no longer need food or water."
+
+[[features]]
+name = "Empty Body"
+level = 18
+description = "Action, 4 ki: become invisible for 1 minute and resist all damage except force. Or 8 ki: cast astral projection without material components (only you)."
+
+[[features]]
+name = "Perfect Self"
+level = 20
+description = "When you roll initiative with no ki points left, you regain 4 ki points."

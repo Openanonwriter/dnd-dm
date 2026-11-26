@@ -1,0 +1,58 @@
+id = "druid"
+name = "Druid"
+hit_die = 8
+primary_abilities = ["wis"]
+saving_throws = ["int", "wis"]
+armor_proficiencies = ["light", "medium", "shields"]
+weapon_proficiencies = ["club", "dagger", "dart", "javelin", "mace", "quarterstaff", "scimitar", "sickle", "sling", "spear"]
+tool_proficiencies = ["herbalism kit"]
+subclass_level = 2
+subclass_label = "Druid Circle"
+multiclass_prerequisite = "Wisdom 13"
+starting_equipment = ["shield or simple weapon", "scimitar or simple melee weapon", "leather_armor + explorer's pack + druidic focus"]
+description = "A priest of the Old Faith, wielding the powers of nature and adopting animal forms. Druids won't wear armor or use shields made of metal."
+
+[skill_choices]
+count = 2
+from = ["arcana", "animal_handling", "insight", "medicine", "nature", "perception", "religion", "survival"]
+
+[spellcasting]
+ability = "wis"
+progression = "full"
+prepared = "max(1, wis_mod + class.druid.level)"
+cantrips_known = [2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+ritual_casting = true
+focus = "druidic focus"
+
+[[features]]
+name = "Druidic"
+level = 1
+description = "You know Druidic, the secret language of druids, and can leave hidden messages in it. Others spot such a message with a DC 15 Perception check but can't decipher it without magic."
+modifiers = [{ target = "proficiency.language.druidic", op = "grant" }]
+
+[[features]]
+name = "Spellcasting"
+level = 1
+description = "Wisdom is your spellcasting ability. After a long rest, prepare Wisdom modifier + druid level spells from the whole druid list. You can cast prepared ritual spells as rituals and use a druidic focus."
+
+[[features]]
+name = "Wild Shape"
+level = 2
+description = "Action: magically take the shape of a beast you have seen, for up to half your druid level in hours. Max CR 1/4 and no flying or swimming speed at 2nd level; CR 1/2 and no flying at 4th; CR 1 at 8th. You use the beast's game statistics but keep your mind, alignment, skills and saving throw proficiencies (using the better bonus); you gain its hit points, and when they drop to 0 you revert, carrying any excess damage over. You can't cast spells in beast form."
+uses = "2"
+recharge = "short_rest"
+
+[[features]]
+name = "Timeless Body"
+level = 18
+description = "You age only one year for every ten that pass."
+
+[[features]]
+name = "Beast Spells"
+level = 18
+description = "You can cast many of your druid spells in any shape you take using Wild Shape, performing their somatic and verbal components in beast form (but not material components)."
+
+[[features]]
+name = "Archdruid"
+level = 20
+description = "You can use Wild Shape an unlimited number of times, and you can ignore the verbal, somatic and non-costly material components of your druid spells."

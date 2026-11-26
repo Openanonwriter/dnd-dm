@@ -1,0 +1,29 @@
+id = "half_orc"
+name = "Half-Orc"
+size = "Medium"
+speed = 30
+darkvision = 60
+languages = ["Common", "Orc"]
+description = "Strong, tough and fierce, half-orcs carry the blood of orcs and humans."
+
+[[modifiers]]
+target = "ability.str"
+value = "2"
+[[modifiers]]
+target = "ability.con"
+value = "1"
+
+[[traits]]
+name = "Menacing"
+description = "You gain proficiency in the Intimidation skill."
+modifiers = [{ target = "proficiency.skill.intimidation", op = "grant" }]
+
+[[traits]]
+name = "Relentless Endurance"
+description = "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead."
+uses = "1"
+recharge = "long_rest"
+
+[[traits]]
+name = "Savage Attacks"
+description = "When you score a critical hit with a melee weapon attack, roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."

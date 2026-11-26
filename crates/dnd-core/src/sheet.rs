@@ -57,6 +57,10 @@ pub struct SpellcastingBlock {
     /// Highest spell level this class can cast now.
     #[serde(default)]
     pub max_spell_level: u32,
+    /// Extra spell lists this block may draw from besides its class: the
+    /// subclass id (warlock patron spells) and the class's `spell_lists`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub lists: Vec<String>,
     #[serde(default)]
     pub ability_mod: i32,
 }
@@ -69,6 +73,14 @@ pub struct FeatureLine {
     pub description: String,
     pub uses: Option<i64>,
     pub recharge: String,
+    /// For a feature that offers a choice: the feat tag of its options,
+    /// how many to pick, and the feat ids picked so far.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub options: String,
+    #[serde(default)]
+    pub picks: u32,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub chosen: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
@@ -154,6 +166,10 @@ pub struct Sheet {
     pub currency: Currency,
     pub spells_known: Vec<String>,
     pub spells_prepared: Vec<String>,
+    /// Spells granted by features and feats (domain spells, racial magic):
+    /// always prepared and never counted against the limits.
+    #[serde(default)]
+    pub spells_granted: Vec<String>,
     /// Targets the engine does not know; homebrew can read them.
     pub other: BTreeMap<String, f64>,
     /// Advantage / disadvantage / notes keyed by target.
@@ -244,9 +260,35 @@ impl<'a> Engine<'a> {
         }
     }
 
+    fn grant_spells(&mut self, spells: &[String]) {
+        for s in spells {
+            if !self.sheet.spells_granted.contains(s) {
+                self.sheet.spells_granted.push(s.clone());
+            }
+        }
+    }
+
     fn push_feature(&mut self, f: &Feature, source: &str) {
+        let ch = self.ch;
+        let lib = self.lib;
         self.push_mods(&f.modifiers, &format!("{source}: {}", f.name));
+        self.grant_spells(&f.spells);
         self.features.push((source.to_string(), f.clone()));
+        if f.options.is_empty() {
+            return;
+        }
+        // the picks for a choice: feats carrying the option tag
+        for id in ch.choices.get(&f.name).map(|v| v.as_slice()).unwrap_or(&[]) {
+            match lib.feats.get(id) {
+                Some(feat) if feat.tags.iter().any(|t| t == &f.options) => {
+                    let name = format!("{}: {}", f.name, feat.name);
+                    self.push_mods(&feat.modifiers, &name);
+                    self.grant_spells(&feat.spells);
+                    self.features.push((source.to_string(), Feature { name, level: f.level, description: feat.description.clone(), ..Default::default() }));
+                }
+                _ => self.sheet.warnings.push(format!("{}: '{id}' is not one of its options", f.name)),
+            }
+        }
     }
 
     /// Gather every modifier & feature from the character's choices.
@@ -255,7 +297,8 @@ impl<'a> Engine<'a> {
         let lib = self.lib;
         if let Some(sp) = lib.species.get(&ch.species) {
             self.push_mods(&sp.modifiers, &sp.name);
-            for t in &sp.traits {
+            // species traits can unlock at a character level (tiefling magic)
+            for t in sp.traits.iter().filter(|t| t.level <= ch.total_level()) {
                 self.push_feature(t, &sp.name);
             }
         } else if !ch.species.is_empty() {
@@ -295,6 +338,7 @@ impl<'a> Engine<'a> {
             match lib.feats.get(&feat_id) {
                 Some(feat) => {
                     self.push_mods(&feat.modifiers, &feat.name);
+                    self.grant_spells(&feat.spells);
                     self.features.push((
                         "Feat".into(),
                         Feature { name: feat.name.clone(), level: 1, description: feat.description.clone(), ..Default::default() },
@@ -728,6 +772,26 @@ impl<'a> Engine<'a> {
                     }
                 }
             };
+            let (picks, chosen) = if f.options.is_empty() {
+                (0, Vec::new())
+            } else {
+                let n = if f.choose.trim().is_empty() {
+                    1
+                } else {
+                    match expr::eval_int(&f.choose, &self.env) {
+                        Ok(v) => v.max(0) as u32,
+                        Err(e) => {
+                            self.sheet.warnings.push(format!("{}: choose formula: {e}", f.name));
+                            1
+                        }
+                    }
+                };
+                let chosen = ch.choices.get(&f.name).cloned().unwrap_or_default();
+                if chosen.len() as u32 > n {
+                    self.sheet.warnings.push(format!("{}: {} picked, {n} allowed", f.name, chosen.len()));
+                }
+                (n, chosen)
+            };
             self.sheet.features.push(FeatureLine {
                 name: f.name.clone(),
                 source,
@@ -735,6 +799,9 @@ impl<'a> Engine<'a> {
                 description: f.description.clone(),
                 uses,
                 recharge: f.recharge.clone(),
+                options: f.options.clone(),
+                picks,
+                chosen,
             });
         }
 
@@ -880,6 +947,16 @@ impl<'a> Engine<'a> {
                 spell_limit,
                 max_spell_level,
                 ability_mod: amod,
+                lists: {
+                    let mut l = sc.spell_lists.clone();
+                    if let Some(s) = sub {
+                        l.push(s.id.clone());
+                        if let Some(ssc) = &s.spellcasting {
+                            l.extend(ssc.spell_lists.iter().cloned());
+                        }
+                    }
+                    l
+                },
             });
         }
         self.sheet.spell_slots = rules.full_caster_slots(caster_level);

@@ -27,6 +27,18 @@ pub fn builder_options(lib: &Library, start_level: u32) -> BuilderOptions {
     }
 }
 
+/// Class options (fighting styles, invocations, metamagic, ancestries...)
+/// are feats tagged `option`: they are picked through the feature that
+/// offers them, never as a general feat at an ability score improvement.
+pub fn is_option_feat(f: &Feat) -> bool {
+    f.tags.iter().any(|t| t == "option")
+}
+
+/// The feats a feature's choice may pick from.
+pub fn feature_options<'a>(lib: &'a Library, tag: &str) -> Vec<&'a Feat> {
+    lib.feats.values().filter(|f| !f.hidden && f.tags.iter().any(|t| t == tag)).collect()
+}
+
 /// Visible items, id -> name.
 pub fn item_names(lib: &Library) -> BTreeMap<String, String> {
     lib.items.values().filter(|i| !i.hidden).map(|i| (i.id.clone(), i.name.clone())).collect()
@@ -318,7 +330,7 @@ pub fn prepare_player_character(lib: &Library, campaign: &Campaign, player: &str
         }
         let adv = match &a.feat {
             Some(f) => {
-                let feat = lib.feats.get(f).filter(|x| !x.hidden).ok_or("that feat is not available")?;
+                let feat = lib.feats.get(f).filter(|x| !x.hidden && !is_option_feat(x)).ok_or("that feat is not available")?;
                 if !a.ability_increases.is_empty() {
                     return Err(format!("level {}: take the feat or the ability increase, not both", a.level));
                 }
@@ -360,6 +372,27 @@ pub fn prepare_player_character(lib: &Library, campaign: &Campaign, player: &str
     ch.ability_method = up.ability_method.clone();
     ch.skill_proficiencies = skills;
     ch.advancements = advancements;
+    // choices: only for features this character has, only from that
+    // feature's own options, and no more picks than it allows
+    let sheet = crate::sheet::derive(&ch, lib);
+    for f in sheet.features.iter().filter(|f| !f.options.is_empty()) {
+        let mut picked: Vec<String> = Vec::new();
+        for id in up.choices.get(&f.name).map(|v| v.as_slice()).unwrap_or(&[]) {
+            let ok = lib.feats.get(id).map(|x| !x.hidden && x.tags.iter().any(|t| t == &f.options)).unwrap_or(false);
+            if !ok {
+                return Err(format!("{}: '{id}' is not one of its options", f.name));
+            }
+            if !picked.contains(id) {
+                picked.push(id.clone());
+            }
+        }
+        if picked.len() as u32 > f.picks {
+            return Err(format!("{}: pick at most {}", f.name, f.picks));
+        }
+        if !picked.is_empty() {
+            ch.choices.insert(f.name.clone(), picked);
+        }
+    }
     ch.xp = lib.rules.xp_thresholds.get(level as usize - 1).copied().unwrap_or(0);
     let (inventory, currency) = starting_gear(&gear_lines(class, background), cx.gear, &item_names(lib));
     ch.inventory = inventory;
@@ -456,6 +489,33 @@ mod tests {
         assert_eq!(prepare_player_character(&lib, &camp, "Kim", &upload(), &cx(1)).unwrap().id, "thia_moonwhisper_2");
         let again = UploadContext { start_level: 1, replacing: Some("thia_moonwhisper"), ..Default::default() };
         assert_eq!(prepare_player_character(&lib, &camp, "Sam", &upload(), &again).unwrap().id, "thia_moonwhisper");
+    }
+
+    #[test]
+    fn feature_choices_are_checked() {
+        let mut lib = lib();
+        let mut rogue = lib.classes.get("rogue").unwrap().clone();
+        rogue.features.push(Feature { name: "Knack".into(), level: 1, options: "knack".into(), choose: "1".into(), ..Default::default() });
+        lib.insert(Entry::Class(rogue), None);
+        let tagged = |id: &str| Feat { id: id.into(), name: id.into(), tags: vec!["option".into(), "knack".into()], ..Default::default() };
+        lib.insert(Entry::Feat(tagged("quick")), None);
+        lib.insert(Entry::Feat(tagged("sly")), None);
+        let camp = Campaign::new("T");
+        let with = |picks: &[&str]| {
+            let mut up = upload();
+            up.choices.insert("Knack".into(), picks.iter().map(|s| s.to_string()).collect());
+            up.choices.insert("Not a feature".into(), vec!["quick".into()]);
+            prepare_player_character(&lib, &camp, "Sam", &up, &cx(1))
+        };
+        let ch = with(&["quick"]).unwrap();
+        assert_eq!(ch.choices.get("Knack"), Some(&vec!["quick".to_string()]));
+        assert!(!ch.choices.contains_key("Not a feature"), "picks for features the character lacks are dropped");
+        assert!(with(&["quick", "sly"]).is_err(), "too many picks");
+        assert!(with(&["lucky"]).is_err(), "a feat without the tag is not an option");
+        // an option feat can't be taken as a general feat at an improvement
+        let mut up = upload();
+        up.advancements = vec![Advancement { level: 4, feat: Some("quick".into()), ..Default::default() }];
+        assert!(prepare_player_character(&lib, &camp, "Sam", &up, &cx(4)).is_err());
     }
 
     #[test]

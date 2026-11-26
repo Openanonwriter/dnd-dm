@@ -1,0 +1,70 @@
+id = "elf_drow"
+name = "Elf (Drow)"
+size = "Medium"
+speed = 30
+darkvision = 120
+languages = ["Common", "Elvish"]
+description = "Dark elves of the Underdark, with superior darkvision and innate magic, but sensitive to sunlight."
+
+[[modifiers]]
+target = "ability.dex"
+value = "2"
+[[modifiers]]
+target = "ability.cha"
+value = "1"
+
+[[traits]]
+name = "Keen Senses"
+description = "You have proficiency in the Perception skill."
+modifiers = [{ target = "proficiency.skill.perception", op = "grant" }]
+
+[[traits]]
+name = "Fey Ancestry"
+description = "You have advantage on saving throws against being charmed, and magic can't put you to sleep."
+modifiers = [{ target = "save.all", op = "advantage", note = "vs. being charmed" }]
+
+[[traits]]
+name = "Trance"
+description = "You don't need to sleep. You meditate deeply for 4 hours a day and gain the benefit of a long rest."
+
+[[traits]]
+name = "Superior Darkvision"
+description = "Your darkvision has a radius of 120 feet."
+
+[[traits]]
+name = "Sunlight Sensitivity"
+description = "Disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight when you, the target, or what you are trying to perceive is in direct sunlight."
+modifiers = [
+  { target = "attack.all", op = "disadvantage", note = "in direct sunlight" },
+  { target = "skill.perception", op = "disadvantage", note = "sight, in direct sunlight" },
+]
+
+[[traits]]
+name = "Drow Magic"
+description = "You know the dancing lights cantrip. Charisma is your spellcasting ability for these spells."
+spells = ["dancing_lights"]
+
+[[traits]]
+name = "Drow Magic: Faerie Fire"
+level = 3
+description = "From 3rd character level you can cast faerie fire once, regaining the use on a long rest."
+uses = "1"
+recharge = "long_rest"
+spells = ["faerie_fire"]
+
+[[traits]]
+name = "Drow Magic: Darkness"
+level = 5
+description = "From 5th character level you can cast darkness once, regaining the use on a long rest."
+uses = "1"
+recharge = "long_rest"
+spells = ["darkness"]
+
+[[traits]]
+name = "Drow Weapon Training"
+description = "Proficiency with rapiers, shortswords and hand crossbows."
+modifiers = [
+  { target = "proficiency.weapon.rapier", op = "grant" },
+  { target = "proficiency.weapon.shortsword", op = "grant" },
+  { target = "proficiency.weapon.hand_crossbow", op = "grant" },
+]

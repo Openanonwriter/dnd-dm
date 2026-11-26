@@ -94,3 +94,28 @@ kind = "gear"
 cost = "50 gp"
 weight = 3.0
 description = "100 blank vellum pages."
+
+[[items]]
+id = "component_pouch"
+name = "Component pouch"
+kind = "gear"
+cost = "25 gp"
+weight = 2.0
+description = "Holds the material components a spell needs, except ones with a listed cost."
+
+[[items]]
+id = "druidic_focus"
+name = "Druidic focus"
+kind = "gear"
+cost = "1 gp"
+weight = 0.0
+description = "A sprig of mistletoe, totem, wooden staff or yew wand a druid casts through."
+
+[[items]]
+id = "lute"
+name = "Lute"
+kind = "tool"
+cost = "35 gp"
+weight = 2.0
+description = "A musical instrument; a bard can use it as a spellcasting focus."
+

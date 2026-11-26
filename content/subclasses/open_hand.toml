@@ -1,0 +1,26 @@
+id = "open_hand"
+name = "Way of the Open Hand"
+class = "monk"
+description = "Monks of the Way of the Open Hand are the ultimate masters of martial arts combat, armed or unarmed."
+
+[[features]]
+name = "Open Hand Technique"
+level = 3
+description = "Whenever you hit a creature with a Flurry of Blows attack, impose one effect: it makes a Dexterity save or is knocked prone; it makes a Strength save or is pushed up to 15 feet away; or it can't take reactions until the end of your next turn."
+
+[[features]]
+name = "Wholeness of Body"
+level = 6
+description = "Action: regain hit points equal to three times your monk level."
+uses = "1"
+recharge = "long_rest"
+
+[[features]]
+name = "Tranquility"
+level = 11
+description = "At the end of a long rest you gain the effect of a sanctuary spell (save DC = your ki save DC) that lasts until your next long rest or until it ends normally."
+
+[[features]]
+name = "Quivering Palm"
+level = 17
+description = "When you hit a creature with an unarmed strike, spend 3 ki to set up lethal vibrations that last a number of days equal to your monk level. Later, as an action, end them: the creature makes a Constitution save, dropping to 0 hit points on a failure or taking 10d10 necrotic damage on a success. Only one creature at a time."

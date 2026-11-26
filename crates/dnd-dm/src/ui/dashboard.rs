@@ -123,15 +123,11 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
     let frame = if live { theme::card_hi() } else { theme::card() };
     frame.show(ui, |ui| {
         ui.horizontal(|ui| {
-            ui.vertical(|ui| {
-                if live {
-                    ui.label(egui::RichText::new("⏺ Game in progress").color(theme::GOOD).strong().size(15.0));
-                    ui.label(theme::muted("Players can't make new characters now. Give anyone without one a character below.").small());
-                } else {
-                    ui.label(egui::RichText::new("○ Between sessions").strong().size(15.0));
-                    ui.label(theme::muted("Players can build a character in their app and upload it; it becomes theirs automatically.").small());
-                }
-            });
+            if live {
+                ui.label(egui::RichText::new("⏺ Game in progress").color(theme::GOOD).strong().size(15.0));
+            } else {
+                ui.label(egui::RichText::new("○ Between sessions").strong().size(15.0));
+            }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if !live {
                     let mut lvl = start_level;
@@ -151,6 +147,8 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
             });
         });
+        // under the buttons, so it wraps in a narrow column instead of running beneath them
+        ui.label(theme::muted(if live { "Players can't make new characters now. Give anyone without one a character below." } else { "Players can build a character in their app and upload it; it becomes theirs automatically." }).small());
     });
 
     ui.horizontal_wrapped(|ui| {
@@ -351,7 +349,9 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             theme::stat(ui, "Log entries", &log_len.to_string(), if join.is_empty() { "no join code" } else { "join code set" });
         });
 
-        ui.columns(2, |cols| {
+        // two columns side by side, or one under the other in a narrow window
+        let n_cols = if ui.available_width() < 820.0 { 1 } else { 2 };
+        ui.columns(n_cols, |cols| {
             // ---------------- campaigns
             let ui = &mut cols[0];
             section(ui, "Campaigns");
@@ -387,7 +387,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 load_campaign(app, &dir, None);
             }
             ui.add_space(6.0);
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.add(egui::TextEdit::singleline(&mut app.campaign.new_name).hint_text("new campaign name").desired_width(200.0));
                 if ui.button("➕ New campaign").clicked() && !app.campaign.new_name.trim().is_empty() {
                     crate::ui::content::flush(app);
@@ -410,7 +410,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 
             // ---------------- server
             section(ui, "Players connect to");
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 if app.server.is_some() {
                     if ui.button("⏹ Stop server").clicked() {
                         app.stop_server();
@@ -442,7 +442,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             if app.server.is_some() {
                 for ip in &app.ips {
                     let addr = ip.split(' ').next().unwrap_or(ip);
-                    ui.horizontal(|ui| {
+                    ui.horizontal_wrapped(|ui| {
                         ui.label(egui::RichText::new(format!("http://{addr}:{port}")).monospace().color(theme::ORANGE));
                         ui.label(theme::muted(ip.split(' ').skip(1).collect::<Vec<_>>().join(" ")).small());
                         if ui.small_button("copy").clicked() {
@@ -462,7 +462,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 (w.library.packs.clone(), w.library.warnings.clone())
             };
             for p in &packs {
-                ui.horizontal(|ui| {
+                ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new(&p.name).strong());
                     ui.label(theme::muted(p.path.display().to_string()).small());
                     if ui.small_button("folder").clicked() {
@@ -488,10 +488,10 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
 
             // ---------------- characters (all campaigns)
-            let ui = &mut cols[1];
+            let ui = &mut cols[n_cols - 1];
             players_section(app, ui);
             section(ui, "All characters (every campaign)");
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label(theme::accent("🔍"));
                 ui.add(egui::TextEdit::singleline(&mut app.dashboard.filter).desired_width(200.0).hint_text("name, player, class, campaign"));
                 if ui.button("Open Characters tab").clicked() {

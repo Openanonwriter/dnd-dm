@@ -15,6 +15,7 @@ pub const MUTED: Color32 = Color32::from_rgb(150, 144, 134);
 pub const GOOD: Color32 = Color32::from_rgb(120, 190, 90);
 pub const BAD: Color32 = Color32::from_rgb(230, 80, 70);
 pub const PC_BLUE: Color32 = Color32::from_rgb(90, 150, 240);
+pub const CONDITION: Color32 = Color32::from_rgb(200, 140, 255);
 
 pub fn apply(ctx: &egui::Context) {
     let mut v = egui::Visuals::dark();
@@ -88,14 +89,28 @@ pub fn card_hi() -> egui::Frame {
 
 /// Big number tile.
 pub fn stat(ui: &mut egui::Ui, label: &str, value: &str, sub: &str) {
-    card().show(ui, |ui| {
-        ui.set_min_width(110.0);
-        ui.vertical_centered(|ui| {
-            ui.label(egui::RichText::new(label.to_uppercase()).color(MUTED).size(10.5));
-            ui.label(egui::RichText::new(value).color(ORANGE).strong().size(22.0));
-            if !sub.is_empty() {
-                ui.label(egui::RichText::new(sub).color(MUTED).size(11.0));
-            }
+    let label = egui::RichText::new(label.to_uppercase()).color(MUTED).size(10.5);
+    let value = egui::RichText::new(value).color(ORANGE).strong().size(22.0);
+    let sub = (!sub.is_empty()).then(|| egui::RichText::new(sub).color(MUTED).size(11.0));
+    // A centred layout takes all the width it is offered, so the tile is
+    // measured first and given exactly that much room; otherwise one tile
+    // fills the row and pushes the rest of the page past the edge of the
+    // window. Asking for the room up front also lets a row of tiles wrap.
+    let measure = |t: &egui::RichText| egui::WidgetText::from(t.clone()).into_galley(ui, Some(egui::TextWrapMode::Extend), f32::INFINITY, egui::TextStyle::Body).size();
+    let sizes: Vec<egui::Vec2> = [Some(&label), Some(&value), sub.as_ref()].into_iter().flatten().map(measure).collect();
+    let width = sizes.iter().map(|s| s.x).fold(110.0, f32::max).ceil();
+    let height = sizes.iter().map(|s| s.y).sum::<f32>() + ui.spacing().item_spacing.y * (sizes.len() as f32 - 1.0);
+    let margin = 2.0 * 10.0 + 2.0; // card padding and border, both sides
+    ui.allocate_ui(egui::vec2(width + margin, height.ceil() + margin), |ui| {
+        card().show(ui, |ui| {
+            ui.set_width(width);
+            ui.vertical_centered(|ui| {
+                ui.label(label);
+                ui.label(value);
+                if let Some(sub) = sub {
+                    ui.label(sub);
+                }
+            });
         });
     });
 }

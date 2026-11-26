@@ -261,39 +261,44 @@ impl DmApp {
             .exact_width(160.0)
             .frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin::symmetric(8, 10)))
             .show(ctx, |ui| {
-                for v in View::ALL {
-                    let selected = self.view == v;
-                    let text = egui::RichText::new(v.label()).size(15.0).color(if selected { egui::Color32::BLACK } else { theme::TEXT });
-                    let btn = egui::Button::new(text)
-                        .fill(if selected { theme::ORANGE } else { egui::Color32::TRANSPARENT })
-                        .min_size(egui::vec2(144.0, 34.0));
-                    if ui.add(btn).clicked() {
-                        self.view = v;
-                    }
-                }
-                ui.add_space(12.0);
-                theme::section(ui, "Library");
-                let counts: Vec<(Kind, usize)> = {
-                    let w = self.world.read().unwrap();
-                    Kind::ALL.iter().map(|k| (*k, w.library.count(*k))).collect()
-                };
-                for (k, n) in counts {
-                    ui.horizontal(|ui| {
-                        ui.label(theme::muted(k.label()));
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.label(theme::accent(n.to_string()));
-                        });
+                // footer first, so the list above scrolls instead of running under it in a short window
+                egui::TopBottomPanel::bottom("nav_foot").frame(egui::Frame::new().fill(theme::BG)).show_separator_line(false).show_inside(ui, |ui| {
+                    ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
+                        ui.add_space(6.0);
+                        ui.label(theme::muted(format!("v{}", env!("CARGO_PKG_VERSION"))).small());
+                        ui.checkbox(&mut self.autosave, "Autosave").on_hover_text("Save the campaign ~1 s after every change");
+                        if !self.dice_log.is_empty() {
+                            ui.collapsing("Roll history", |ui| {
+                                for l in &self.dice_log {
+                                    ui.label(egui::RichText::new(l).small().monospace());
+                                }
+                            });
+                        }
                     });
-                }
-                ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                    ui.add_space(6.0);
-                    ui.label(theme::muted(format!("v{}", env!("CARGO_PKG_VERSION"))).small());
-                    ui.checkbox(&mut self.autosave, "Autosave").on_hover_text("Save the campaign ~1 s after every change");
-                    if !self.dice_log.is_empty() {
-                        ui.collapsing("Roll history", |ui| {
-                            for l in &self.dice_log {
-                                ui.label(egui::RichText::new(l).small().monospace());
-                            }
+                });
+                egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+                    for v in View::ALL {
+                        let selected = self.view == v;
+                        let text = egui::RichText::new(v.label()).size(15.0).color(if selected { egui::Color32::BLACK } else { theme::TEXT });
+                        let btn = egui::Button::new(text)
+                            .fill(if selected { theme::ORANGE } else { egui::Color32::TRANSPARENT })
+                            .min_size(egui::vec2(144.0, 34.0));
+                        if ui.add(btn).clicked() {
+                            self.view = v;
+                        }
+                    }
+                    ui.add_space(12.0);
+                    theme::section(ui, "Library");
+                    let counts: Vec<(Kind, usize)> = {
+                        let w = self.world.read().unwrap();
+                        Kind::ALL.iter().map(|k| (*k, w.library.count(*k))).collect()
+                    };
+                    for (k, n) in counts {
+                        ui.horizontal(|ui| {
+                            ui.label(theme::muted(k.label()));
+                            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                ui.label(theme::accent(n.to_string()));
+                            });
                         });
                     }
                 });

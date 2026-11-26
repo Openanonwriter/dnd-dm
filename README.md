@@ -79,10 +79,13 @@ git. The complete SRD ships in the box.
     <td><sub><b>Sheet</b></sub></td>
     <td><sub><b>Combat</b></sub></td>
     <td><sub><b>Spells</b></sub></td>
-    <td><sub><b>Map</b>: you only see what your character sees</sub></td>
-    <td><sub><b>Make a character</b> between sessions</sub></td>
+    <td><sub><b>Map</b></sub></td>
+    <td><sub><b>Builder</b></sub></td>
   </tr>
 </table>
+
+Each player's map shows only what their character can see, and players can
+build their own characters between sessions and send them to the DM.
 
 ## Features
 

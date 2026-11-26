@@ -17,6 +17,40 @@ pub struct MapUi {
     /// Map we last centred on our own token for (None = not yet).
     pub centred: Option<String>,
     pub last_walk: String,
+    /// Squares our character can still walk to this turn, and what they
+    /// were worked out for.
+    pub reach_cells: Vec<(i32, i32)>,
+    pub reach_key: String,
+}
+
+/// Squares the token can walk to with `feet` of movement, going round
+/// walls, rock and closed doors (worked out from what the player may see).
+fn reachable(view: &MapView, me: &dnd_core::view::TokenView, feet: u32) -> Vec<(i32, i32)> {
+    use dnd_core::grid::Pos;
+    use dnd_core::model::tile;
+    let n = (feet / view.feet_per_square.max(1)) as i32;
+    if n <= 0 {
+        return Vec::new();
+    }
+    let mut m = dnd_core::model::MapState::new("", view.width, view.height);
+    m.cells = view.cells.clone();
+    m.walls = view.walls.clone();
+    m.feet_per_square = view.feet_per_square;
+    let mut out = Vec::new();
+    for y in me.y - n..=me.y + n {
+        for x in me.x - n..=me.x + n {
+            if (x, y) == (me.x, me.y) || view.seen_at(x, y) == 0 || matches!(view.tile(x, y), tile::ROCK | tile::UNKNOWN) {
+                continue;
+            }
+            if view.tokens.iter().any(|t| t.id != me.id && (t.x, t.y) == (x, y)) {
+                continue;
+            }
+            if dnd_core::vision::find_path(&m, Pos::new(me.x, me.y), Pos::new(x, y), me.size.max(1), n as u32).is_some() {
+                out.push((x, y));
+            }
+        }
+    }
+    out
 }
 
 fn turn_strip(app: &PlayerApp, ui: &mut egui::Ui) {
@@ -130,8 +164,17 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
         }
     }
 
+    // in a fight, on our turn: tint the squares we can still walk to
+    let key = format!("{:?}|{:?}|{}|{}", view.move_left, me.map(|t| (t.x, t.y)), view.walls.iter().filter(|w| w.open).count(), view.tokens.len());
+    if st.reach_key != key {
+        st.reach_cells = match (me.filter(|t| t.mine), view.move_left) {
+            (Some(t), Some(left)) => reachable(&view, t, left),
+            _ => Vec::new(),
+        };
+        st.reach_key = key;
+    }
     let held = st.held.as_ref().map(|(id, at)| (id.as_str(), *at));
-    let opts = DrawOpts { grid: true, selected: target.as_deref(), held, highlight: &[], highlight_color: None, solid_fog: true };
+    let opts = DrawOpts { grid: true, selected: target.as_deref(), held, highlight: &st.reach_cells, highlight_color: Some(egui::Color32::from_rgba_unmultiplied(255, 150, 20, 16)), solid_fog: true };
     dnd_mapview::draw(&painter, rect, &cam, &view, &mut st.anim, time, &opts);
 
     // "find me" button, top right of the map
@@ -161,7 +204,8 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
     };
     if my_turn || target.is_some() {
         // the action bar: what you can do to the creature you tapped
-        let attacks: Vec<(usize, String)> = app.sheet.as_ref().map(|s| s.attacks.iter().enumerate().map(|(i, a)| (i, a.name.clone())).collect()).unwrap_or_default();
+        let attacks: Vec<(usize, String, dnd_core::range::Reach)> = app.sheet.as_ref().map(|s| s.attacks.iter().enumerate().map(|(i, a)| (i, a.name.clone(), a.reach)).collect()).unwrap_or_default();
+        let dist = me.and_then(|m| target.as_ref().and_then(|t| view.distance_ft(&m.id, t)));
         let target_name = target.as_ref().and_then(|t| view.tokens.iter().find(|k| &k.id == t)).map(|t| t.name.clone());
         let mut todo: Option<Cmd> = None;
         let mut clear = false;
@@ -171,10 +215,25 @@ pub fn show(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 if my_turn && ui.add(theme::primary("End turn")).clicked() {
                     todo = Some(Cmd::Do { action: "end_turn".into(), arg: String::new() });
                 }
+                if my_turn {
+                    if let Some(left) = view.move_left {
+                        ui.label(theme::muted(format!("{left} ft to move")).small());
+                        if ui.button("Dash").on_hover_text("Use your action to move twice as far this turn").clicked() {
+                            todo = Some(Cmd::Do { action: "dash".into(), arg: String::new() });
+                        }
+                    }
+                }
                 if let (Some(t), Some(name)) = (&target, &target_name) {
-                    ui.label(theme::accent(format!("◎ {name}")));
-                    for (i, a) in &attacks {
-                        if ui.button(format!("⚔ {a}")).clicked() {
+                    ui.label(theme::accent(match dist {
+                        Some(d) => format!("◎ {name} · {d} ft"),
+                        None => format!("◎ {name}"),
+                    }));
+                    for (i, a, reach) in &attacks {
+                        // an attack with no numbers (an old cached sheet) is left to the DM's machine
+                        let ok = *reach == dnd_core::range::Reach::default() || dist.map(|d| reach.judge(d).is_some()).unwrap_or(true);
+                        let long = dist.map(|d| reach.judge(d) == Some(dnd_core::range::InRange::Long)).unwrap_or(false);
+                        let label = if long { format!("⚔ {a} (far)") } else { format!("⚔ {a}") };
+                        if ui.add_enabled(ok, egui::Button::new(label)).on_disabled_hover_text(format!("Out of range: reaches {}", reach.describe())).clicked() {
                             todo = Some(Cmd::Attack { attack: *i, target: t.clone(), mode: app.mode });
                         }
                     }

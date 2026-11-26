@@ -90,6 +90,24 @@ pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
     }
     let list: Vec<(String, String, bool)> = enc.combatants.iter().map(|c| (c.id.clone(), c.name.clone(), c.is_pc)).collect();
     app.targets.retain(|t| list.iter().any(|c| &c.0 == t));
+    let me = app.my_token();
+    let feet = |id: &String| -> Option<u32> {
+        let m = me.as_ref()?;
+        if m == id {
+            return None;
+        }
+        app.map.as_ref()?.distance_ft(m, id)
+    };
+    let list: Vec<(String, String, bool)> = list
+        .into_iter()
+        .map(|(id, name, pc)| {
+            let label = match feet(&id) {
+                Some(d) => format!("{name} · {d} ft"),
+                None => name,
+            };
+            (id, label, pc)
+        })
+        .collect();
     ui.horizontal_wrapped(|ui| {
         ui.label(theme::muted("Target"));
         for (id, name, pc) in &list {

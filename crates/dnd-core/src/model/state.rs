@@ -58,6 +58,12 @@ pub struct Combatant {
     /// Sees this far in the dark, in feet.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub darkvision: u32,
+    /// Feet walked so far this turn (in a fight).
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub moved: u32,
+    /// Took the Dash action this turn: twice the movement.
+    #[serde(default, skip_serializing_if = "is_no")]
+    pub dashed: bool,
     /// Remaining legendary actions / uses, keyed by feature name.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub uses: BTreeMap<String, u32>,
@@ -65,6 +71,9 @@ pub struct Combatant {
 
 fn is_zero(v: &u32) -> bool {
     *v == 0
+}
+fn is_no(v: &bool) -> bool {
+    !*v
 }
 fn medium() -> String {
     "Medium".into()
@@ -233,6 +242,10 @@ pub struct CampaignSettings {
     /// hit points straight away (off = they only roll; the DM applies it).
     #[serde(default = "yes")]
     pub players_apply_damage: bool,
+    /// Attacks and spells must be in reach or range with a clear line, and
+    /// a turn's movement is limited by speed (off = the DM referees it).
+    #[serde(default = "yes")]
+    pub enforce_range: bool,
 }
 
 fn default_start_level() -> u32 {
@@ -257,6 +270,7 @@ impl Default for CampaignSettings {
             players_move_tokens: true,
             player_move_limit: 0,
             players_apply_damage: true,
+            enforce_range: true,
         }
     }
 }

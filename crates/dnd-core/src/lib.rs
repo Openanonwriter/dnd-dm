@@ -17,6 +17,7 @@ pub mod library;
 pub mod mapgen;
 pub mod model;
 pub mod play;
+pub mod range;
 pub mod rng;
 pub mod save;
 pub mod sheet;

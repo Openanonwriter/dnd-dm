@@ -77,9 +77,22 @@ pub struct MapView {
     pub start: Option<Pos>,
     pub encounter_active: bool,
     pub round: u32,
+    /// Feet the viewer's own character can still walk this turn (only in a
+    /// fight, on their turn).
+    #[serde(default)]
+    pub move_left: Option<u32>,
 }
 
 impl MapView {
+    /// Feet between two tokens, edge to edge, counting diagonals as one
+    /// square (two tokens side by side are 5 ft apart).
+    pub fn distance_ft(&self, a: &str, b: &str) -> Option<u32> {
+        let find = |id: &str| self.tokens.iter().find(|t| t.id == id);
+        let (a, b) = (find(a)?, find(b)?);
+        let gap = |a0: i32, asz: u32, b0: i32, bsz: u32| (a0 - (b0 + bsz as i32 - 1)).max(b0 - (a0 + asz as i32 - 1)).max(0);
+        let squares = gap(a.x, a.size, b.x, b.size).max(gap(a.y, a.size, b.y, b.size)).max(if a.id == b.id { 0 } else { 1 });
+        Some(squares as u32 * self.feet_per_square.max(1))
+    }
     pub fn tile(&self, x: i32, y: i32) -> char {
         if x < 0 || y < 0 {
             return tile::ROCK;
@@ -287,6 +300,7 @@ impl World {
             start: if dm { map.start } else { None },
             encounter_active: enc.active,
             round: enc.round,
+            move_left: own_pc.and_then(|id| self.pc_combatant(id)).and_then(|cid| self.move_budget(&cid)),
         }
     }
 

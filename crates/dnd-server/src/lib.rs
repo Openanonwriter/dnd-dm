@@ -736,21 +736,7 @@ async fn player_map_move(State(st): State<AppState>, headers: HeaderMap, Query(q
         Err(r) => return r,
     };
     w.seen(&req.device_id);
-    if !w.campaign.settings.players_move_tokens {
-        return err(StatusCode::FORBIDDEN, "the DM moves the tokens in this game");
-    }
-    let enc = &w.campaign.encounter;
-    let in_fight = enc.active;
-    if in_fight && enc.current().map(|c| c.id != token).unwrap_or(true) {
-        return err(StatusCode::FORBIDDEN, "wait for your turn");
-    }
-    let speed = match w.campaign.settings.player_move_limit {
-        0 => w.sheet(&ch).map(|s| s.speed.max(5) as u32).unwrap_or(30),
-        n => n,
-    };
-    // in a fight: one move. Exploring: a good stretch at a time.
-    let squares = speed / w.campaign.map.feet_per_square.max(1) * if in_fight { 1 } else { 4 };
-    match w.move_token(&token, dnd_core::grid::Pos::new(req.x, req.y), true, squares.max(1)) {
+    match w.player_walk(&token, dnd_core::grid::Pos::new(req.x, req.y)) {
         Ok(feet) => Json(MapMoved { feet, map: w.map_view(&Viewer::Character(ch)) }).into_response(),
         Err(e) => err(StatusCode::CONFLICT, e),
     }
@@ -895,6 +881,7 @@ async fn player_do(State(st): State<AppState>, headers: HeaderMap, Query(q): Que
         "long_rest" => w.rest(&id, true).and_then(|_| done("long rest")),
         "hit_die" => w.spend_hit_die(&id, &req.arg),
         "death_save" => w.death_save(&id),
+        "dash" => w.dash(&id).and_then(|_| done("dash")),
         _ => Err(format!("unknown action '{}'", req.action)),
     };
     played(r)

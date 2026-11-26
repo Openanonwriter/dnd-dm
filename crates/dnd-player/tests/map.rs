@@ -87,10 +87,17 @@ fn player_sees_walks_and_opens_doors() {
 
     // walk up to it, open it, and the far room with its rat and chest appears
     ann.tx.send(Cmd::MapMove { x: 2, y: 2 }).unwrap();
-    assert_eq!(next_map(&ann).tokens[0].x, 2);
+    // (a background refresh may deliver an older picture of the map first)
+    wait_for(&ann, "the map with Ann moved", |e| match e {
+        Evt::Map(m) if m.tokens[0].x == 2 => Some(()),
+        _ => None,
+    });
     assert_eq!(wait_for(&ann, "walked", |e| if let Evt::Walked(f) = e { Some(f) } else { None }), 5);
     ann.tx.send(Cmd::MapDoor { x: 3.0, y: 2.5 }).unwrap();
-    let v = next_map(&ann);
+    let v = wait_for(&ann, "the map with the door open", |e| match e {
+        Evt::Map(m) if m.walls.first().map(|w| w.open).unwrap_or(false) => Some(*m),
+        _ => None,
+    });
     assert!(v.walls[0].open);
     assert_eq!(v.tile(5, 2), tile::FLOOR);
     assert!(v.tokens.iter().any(|t| t.id == "rat" && !t.mine));

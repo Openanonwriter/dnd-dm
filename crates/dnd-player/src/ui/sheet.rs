@@ -324,7 +324,9 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if let Some(t) = &target {
-                        if ui.add(theme::primary("Attack")).clicked() {
+                        let dist = app.my_token().and_then(|m| app.map.as_ref().and_then(|v| v.distance_ft(&m, t)));
+                        let ok = a.reach == dnd_core::range::Reach::default() || dist.map(|d| a.reach.judge(d).is_some()).unwrap_or(true);
+                        if ui.add_enabled(ok, theme::primary("Attack")).on_disabled_hover_text(format!("Out of range: reaches {}", a.reach.describe())).clicked() {
                             let mode = app.mode;
                             app.act(Cmd::Attack { attack: i, target: t.clone(), mode });
                         }

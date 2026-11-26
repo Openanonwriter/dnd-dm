@@ -88,6 +88,9 @@ set → add → mul → max → min.
 | `attack.melee`, `attack.ranged`, `attack.all` | weapon attack rolls |
 | `damage.melee`, `damage.ranged`, `damage.all` | weapon damage (dice allowed; shown as a note) |
 | `spell.attack`, `spell.dc` | |
+| `attack.reach` | melee reach in feet (base 5, or 10 with the reach property): `add 5` for long arms |
+| `attack.range` | weapon range in percent (base 100): `mul 2` or `set 200` doubles normal and long range |
+| `spell.range` | spell range in percent (base 100), for ranges given in feet |
 | `proficiency.save.<k>`, `proficiency.skill.<k>`, `proficiency.armor.<x>`, `proficiency.weapon.<item id or category>`, `proficiency.tool.<x>`, `proficiency.language.<x>` | with `op = "grant"` |
 | `carrying_capacity` | |
 | anything else | collected under "Other" on the sheet — invent your own |

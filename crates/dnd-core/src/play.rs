@@ -6,6 +6,7 @@
 use crate::expr::{self, Env};
 use crate::library::Library;
 use crate::model::*;
+use crate::range::{InRange, Reach};
 use crate::sheet::{Sheet, SpellcastingBlock};
 use crate::World;
 use serde::{Deserialize, Serialize};
@@ -63,6 +64,24 @@ pub fn mul_dice(formula: &str, k: u32) -> String {
         }
     }
     out
+}
+
+/// How far a spell reaches for this caster: its own range, stretched by
+/// what the sheet says, and far enough to catch the edge of its area.
+pub fn spell_reach(spell: &Spell, percent: u32) -> Reach {
+    let mut r = Reach::parse(&spell.range);
+    let from_self = spell.range.trim().to_lowercase().starts_with("self");
+    if from_self {
+        if let (true, Some(a)) = (r.self_only, &spell.area) {
+            r = Reach { normal: a.size, long: a.size, ..Default::default() };
+        }
+        return r;
+    }
+    r = r.scaled(if percent == 0 { 100 } else { percent });
+    match &spell.area {
+        Some(a) => r.widened(a.size),
+        None => r,
+    }
 }
 
 /// How many times a cantrip's dice are rolled at this character level.
@@ -296,14 +315,221 @@ impl World {
         Ok((c.name.clone(), c.ac))
     }
 
+    /// A combatant that is out cold or held cannot attack or cast.
+    fn can_act(&self, cid: &str) -> Result<(), String> {
+        let Some(c) = self.campaign.encounter.find(cid) else { return Ok(()) };
+        if c.hp <= 0 && c.hp_max > 0 {
+            return Err(format!("{} is down", c.name));
+        }
+        for bad in ["incapacitated", "paralyzed", "petrified", "stunned", "unconscious"] {
+            if c.conditions.iter().any(|x| x.eq_ignore_ascii_case(bad)) {
+                return Err(format!("{} is {bad} and cannot act", c.name));
+            }
+        }
+        Ok(())
+    }
+
+    /// Walking speed of a combatant in feet, as things stand right now.
+    pub fn speed_of(&self, cid: &str) -> u32 {
+        let Some(c) = self.campaign.encounter.find(cid) else { return 30 };
+        for held in ["grappled", "restrained", "paralyzed", "petrified", "stunned", "unconscious"] {
+            if c.conditions.iter().any(|x| x.eq_ignore_ascii_case(held)) {
+                return 0;
+            }
+        }
+        match &c.kind {
+            // a sheet with no species yet has no speed: walk like anyone else
+            CombatantKind::Pc { id } => self.sheet(id).map(|s| s.speed.max(0) as u32).filter(|s| *s > 0).unwrap_or(30),
+            // a creature that only flies or swims moves at its best speed
+            CombatantKind::Creature { template } => {
+                self.library.creatures.get(template).and_then(|cr| cr.speed.get("walk").copied().filter(|s| *s > 0).or(cr.speed.values().copied().max())).filter(|s| *s > 0).unwrap_or(30)
+            }
+            CombatantKind::Custom => 30,
+        }
+    }
+
+    /// Feet a combatant can still walk this turn; None when it is not its
+    /// turn in a fight (no budget applies).
+    pub fn move_budget(&self, cid: &str) -> Option<u32> {
+        let e = &self.campaign.encounter;
+        if !e.active {
+            return None;
+        }
+        let c = e.current().filter(|c| c.id == cid)?;
+        Some((self.speed_of(cid) * if c.dashed { 2 } else { 1 }).saturating_sub(c.moved))
+    }
+
+    /// A player walks their own token: on their turn in a fight, as far as
+    /// the movement they have left; a good stretch at a time otherwise.
+    pub fn player_walk(&mut self, cid: &str, to: crate::grid::Pos) -> Result<u32, String> {
+        if !self.campaign.settings.players_move_tokens {
+            return Err("the DM moves the tokens in this game".into());
+        }
+        let fps = self.campaign.map.feet_per_square.max(1);
+        let in_fight = self.campaign.encounter.active;
+        let enforce = self.campaign.settings.enforce_range;
+        let budget = if in_fight {
+            if self.campaign.encounter.current().map(|c| c.id != cid).unwrap_or(true) {
+                return Err("wait for your turn".into());
+            }
+            if enforce {
+                self.move_budget(cid).unwrap_or(0)
+            } else {
+                self.speed_of(cid).max(fps)
+            }
+        } else {
+            match self.campaign.settings.player_move_limit {
+                0 => self.speed_of(cid) * 4,
+                n => n,
+            }
+        };
+        if budget < fps {
+            return Err(if self.speed_of(cid) == 0 { "you cannot move right now".to_string() } else { "no movement left this turn (Dash gives more)".to_string() });
+        }
+        let feet = self.move_token(cid, to, true, budget / fps).map_err(|e| if in_fight && e.contains("cannot get there") { format!("too far or blocked: you have {budget} ft of movement left") } else { e })?;
+        if in_fight {
+            if let Some(c) = self.campaign.encounter.find_mut(cid) {
+                c.moved += feet;
+            }
+        }
+        Ok(feet)
+    }
+
+    /// The Dash action: twice the movement this turn.
+    pub fn dash(&mut self, character_id: &str) -> Result<(), String> {
+        let cid = self.pc_combatant(character_id).ok_or("you are not in the fight")?;
+        if !self.campaign.encounter.active || self.campaign.encounter.current().map(|c| c.id != cid).unwrap_or(true) {
+            return Err("it is not your turn".into());
+        }
+        self.can_act(&cid)?;
+        let c = self.campaign.encounter.find_mut(&cid).unwrap();
+        if c.dashed {
+            return Err("you already dashed this turn".into());
+        }
+        c.dashed = true;
+        let name = c.name.clone();
+        self.campaign.say(&name, "dashes", "turn");
+        self.touch();
+        Ok(())
+    }
+
+    fn fresh_turn(&mut self) {
+        let turn = self.campaign.encounter.turn;
+        if let Some(c) = self.campaign.encounter.combatants.get_mut(turn) {
+            c.moved = 0;
+            c.dashed = false;
+        }
+    }
+
+    /// Can `attacker` reach `target` with this, and how does the d20 go?
+    /// Checks distance (reach, normal and long range), walls in the way,
+    /// an enemy next to a ranged attacker, and the conditions on both.
+    /// Returns the roll mode to use, a note for the table, and whether a
+    /// hit is an automatic critical. Without positions on the map only the
+    /// conditions count.
+    pub fn engage(&self, attacker: &str, target: &str, reach: &Reach, what: &str, is_attack: bool, mode: RollMode) -> Result<(RollMode, String, bool), String> {
+        self.can_act(attacker)?;
+        let e = &self.campaign.encounter;
+        let (Some(a), Some(t)) = (e.find(attacker), e.find(target)) else { return Ok((mode, String::new(), false)) };
+        let rules = &self.library.rules;
+        let rule = self.campaign.settings.distance_rule;
+        let own = attacker == target;
+        let dist = if own { Some(0) } else { crate::grid::combatant_distance_ft(a, t, rules, rule) };
+        let has = |c: &Combatant, k: &str| c.conditions.iter().any(|x| x.eq_ignore_ascii_case(k));
+        let (mut adv, mut dis): (Vec<String>, Vec<String>) = (Vec::new(), Vec::new());
+        let mut melee = reach.melee > 0 && reach.normal == 0;
+        if let (Some(d), true, false) = (dist, self.campaign.settings.enforce_range, own) {
+            if reach.self_only {
+                return Err(format!("{what} only affects {}", a.name));
+            }
+            match reach.judge(d.max(0) as u32) {
+                None => return Err(format!("{} is {d} ft away; {what} reaches {}", t.name, reach.describe())),
+                Some(InRange::Melee) => melee = true,
+                Some(InRange::Ranged) => melee = false,
+                Some(InRange::Long) => {
+                    melee = false;
+                    if is_attack {
+                        dis.push("long range".into());
+                    }
+                }
+            }
+            let map = &self.campaign.map;
+            let centre = |c: &Combatant| c.pos.map(|p| (p.x as f32 + rules.size_squares(&c.size).max(1) as f32 / 2.0, p.y as f32 + rules.size_squares(&c.size).max(1) as f32 / 2.0));
+            if map.width > 0 && !map.cells.is_empty() {
+                if let (Some(p), Some(q)) = (centre(a), centre(t)) {
+                    if !crate::vision::los(p, q, &map.sight_blockers()) {
+                        return Err(format!("there is no clear line from {} to {}", a.name, t.name));
+                    }
+                }
+            }
+            if is_attack && !melee {
+                let pc = |c: &Combatant| matches!(c.kind, CombatantKind::Pc { .. });
+                let crowded = e.combatants.iter().any(|o| {
+                    o.id != a.id && o.hp > 0 && o.visible && pc(o) != pc(a) && !has(o, "incapacitated") && !has(o, "unconscious") && crate::grid::combatant_distance_ft(a, o, rules, rule).map(|x| x <= 5).unwrap_or(false)
+                });
+                if crowded {
+                    dis.push("an enemy within 5 ft".into());
+                }
+            }
+        }
+        let mut auto_crit = false;
+        if is_attack && !own {
+            let close = dist.map(|d| d <= 5).unwrap_or(melee);
+            for k in ["blinded", "poisoned", "frightened", "restrained", "prone"] {
+                if has(a, k) {
+                    dis.push(k.to_string());
+                }
+            }
+            if has(a, "invisible") {
+                adv.push("unseen attacker".into());
+            }
+            for k in ["blinded", "paralyzed", "petrified", "restrained", "stunned", "unconscious"] {
+                if has(t, k) {
+                    adv.push(format!("target {k}"));
+                }
+            }
+            if has(t, "invisible") {
+                dis.push("target invisible".into());
+            }
+            if has(t, "prone") {
+                if close {
+                    adv.push("target prone".into());
+                } else {
+                    dis.push("target prone, at a distance".into());
+                }
+            }
+            auto_crit = close && (has(t, "paralyzed") || has(t, "unconscious"));
+        }
+        let mut note = String::new();
+        if !adv.is_empty() {
+            note.push_str(&format!(" (advantage: {})", adv.join(", ")));
+        }
+        if !dis.is_empty() {
+            note.push_str(&format!(" (disadvantage: {})", dis.join(", ")));
+        }
+        let up = !adv.is_empty() || mode == RollMode::Advantage;
+        let down = !dis.is_empty() || mode == RollMode::Disadvantage;
+        let mode = match (up, down) {
+            (true, false) => RollMode::Advantage,
+            (false, true) => RollMode::Disadvantage,
+            _ => RollMode::Normal,
+        };
+        Ok((mode, note, auto_crit))
+    }
+
     /// One attack roll against a combatant's armor class, damage included.
-    fn resolve_attack(&mut self, what: &str, bonus: i32, damage: &str, damage_type: &str, target: &str, mode: RollMode, env: &Env, apply: bool) -> Result<ActionResult, String> {
+    #[allow(clippy::too_many_arguments)]
+    fn resolve_attack(&mut self, attacker: Option<&str>, reach: &Reach, what: &str, bonus: i32, damage: &str, damage_type: &str, target: &str, mode: RollMode, env: &Env, apply: bool) -> Result<ActionResult, String> {
         let (tname, ac) = self.target_name(target)?;
+        let (mode, note, auto_crit) = match attacker {
+            Some(a) => self.engage(a, target, reach, what, true, mode)?,
+            None => (mode, String::new(), false),
+        };
         let (d, dtext) = self.d20(mode);
         let total = d + bonus;
-        let crit = d == 20;
-        let hit = crit || (d != 1 && total >= ac);
-        let mut text = format!("{what} at {tname}: {dtext} {} = {total}", expr::fmt_bonus(bonus as i64));
+        let hit = d == 20 || (d != 1 && total >= ac);
+        let crit = d == 20 || (hit && auto_crit);
+        let mut text = format!("{what} at {tname}: {dtext} {} = {total}{note}", expr::fmt_bonus(bonus as i64));
         let mut dealt = 0;
         if hit {
             let formula = if crit { mul_dice(damage, 2) } else { damage.to_string() };
@@ -350,7 +576,9 @@ impl World {
             return Err("you cannot see that target".into());
         }
         let apply = self.campaign.settings.players_apply_damage;
-        let r = self.resolve_attack(&a.name, a.bonus, &a.damage, &a.damage_type, target, mode, &Env::new(), apply)?;
+        let me = self.pc_combatant(character_id);
+        let reach = if a.reach == Reach::default() { Reach::parse(&a.range) } else { a.reach };
+        let r = self.resolve_attack(me.as_deref(), &reach, &a.name, a.bonus, &a.damage, &a.damage_type, target, mode, &Env::new(), apply)?;
         self.campaign.say(&sheet.name, r.text.clone(), "attack");
         self.touch();
         Ok(r)
@@ -363,7 +591,7 @@ impl World {
         let cr = self.library.creatures.get(template).ok_or("creature not in the library")?;
         let act = cr.actions.get(action).ok_or("no such action")?.clone();
         let atk = act.attack.ok_or("that action is not an attack")?;
-        let r = self.resolve_attack(&act.name, atk.to_hit, &atk.damage, &atk.damage_type, target, mode, &Env::new(), true)?;
+        let r = self.resolve_attack(Some(attacker), &Reach::parse(&atk.reach), &act.name, atk.to_hit, &atk.damage, &atk.damage_type, target, mode, &Env::new(), true)?;
         let who = if c.visible { c.name.clone() } else { "Something unseen".to_string() };
         self.campaign.say(&who, r.text.clone(), "attack");
         self.touch();
@@ -391,9 +619,18 @@ impl World {
                 return Err(format!("{} is not prepared", spell.name));
             }
         }
+        let me = self.pc_combatant(character_id);
+        let reach = spell_reach(&spell, sheet.spell_range_pct);
+        if let Some(a) = &me {
+            self.can_act(a)?;
+        }
         for t in targets {
             if !self.campaign.encounter.find(t).map(|c| c.visible).unwrap_or(false) {
                 return Err("you cannot see one of those targets".into());
+            }
+            // out of range or behind a wall: say so before a slot is spent
+            if let Some(a) = &me {
+                self.engage(a, t, &reach, &spell.name, spell.attack, mode)?;
             }
         }
         // ---- pay for it
@@ -474,7 +711,7 @@ impl World {
                 parts.push(line);
             }
             for t in targets {
-                let r = self.resolve_attack("spell attack", block.attack_bonus, &damage, &spell.damage_type, t, mode, &env, apply)?;
+                let r = self.resolve_attack(me.as_deref(), &reach, "spell attack", block.attack_bonus, &damage, &spell.damage_type, t, mode, &env, apply)?;
                 total_damage += r.damage;
                 any_hit = Some(any_hit.unwrap_or(false) || r.hit.unwrap_or(false));
                 parts.push(r.text);
@@ -567,6 +804,7 @@ impl World {
     /// Start the fight: sort by initiative, round 1.
     pub fn start_encounter(&mut self) {
         self.campaign.encounter.start();
+        self.fresh_turn();
         self.campaign.say("", "Roll for initiative! The fight begins.", "turn");
         self.announce_turn();
         self.touch();
@@ -583,6 +821,7 @@ impl World {
                 break;
             }
         }
+        self.fresh_turn();
         self.announce_turn();
         self.touch();
     }
@@ -756,6 +995,92 @@ mod tests {
     }
 
     #[test]
+    fn range_walls_conditions_and_movement() {
+        use crate::grid::Pos;
+        let mut w = world();
+        let mut m = MapState::new("Hall", 30, 3);
+        m.cells = vec![".".repeat(30); 3];
+        w.campaign.map = m;
+        let put = |w: &mut World, id: &str, x: i32| w.campaign.encounter.find_mut(id).unwrap().pos = Some(Pos::new(x, 1));
+        put(&mut w, "wiz", 1);
+        put(&mut w, "troll", 2);
+        put(&mut w, "cle", 28);
+        // fists reach the troll next to her, and nothing further
+        assert!(w.pc_attack("wiz", 0, "troll", RollMode::Normal).is_ok());
+        put(&mut w, "troll", 8);
+        let no = w.pc_attack("wiz", 0, "troll", RollMode::Normal).unwrap_err();
+        assert!(no.contains("35 ft away") && no.contains("5 ft"), "{no}");
+        // a thrown dagger: fine at 20, disadvantage to 60, impossible beyond
+        let dagger = Reach::parse("reach 5 ft. or range 20/60 ft.");
+        let (mode, note, _) = w.engage("wiz", "troll", &dagger, "Dagger", true, RollMode::Normal).unwrap();
+        assert_eq!(mode, RollMode::Disadvantage);
+        assert!(note.contains("long range"), "{note}");
+        let (mode, _, _) = w.engage("wiz", "troll", &dagger, "Dagger", true, RollMode::Advantage).unwrap();
+        assert_eq!(mode, RollMode::Normal, "advantage and disadvantage cancel");
+        put(&mut w, "troll", 20);
+        assert!(w.engage("wiz", "troll", &dagger, "Dagger", true, RollMode::Normal).is_err());
+        // a bow with an enemy in her face
+        let bow = Reach::parse("range 80/320 ft.");
+        put(&mut w, "troll", 2);
+        let (mode, note, _) = w.engage("wiz", "troll", &bow, "Longbow", true, RollMode::Normal).unwrap();
+        assert_eq!(mode, RollMode::Disadvantage);
+        assert!(note.contains("enemy within 5 ft"), "{note}");
+        // conditions: a restrained target is easier, a prone one far away harder
+        put(&mut w, "troll", 8);
+        w.campaign.encounter.find_mut("troll").unwrap().conditions = vec!["restrained".into()];
+        assert_eq!(w.engage("wiz", "troll", &bow, "Longbow", true, RollMode::Normal).unwrap().0, RollMode::Advantage);
+        w.campaign.encounter.find_mut("troll").unwrap().conditions = vec!["prone".into()];
+        assert_eq!(w.engage("wiz", "troll", &bow, "Longbow", true, RollMode::Normal).unwrap().0, RollMode::Disadvantage);
+        put(&mut w, "troll", 2);
+        w.campaign.encounter.find_mut("troll").unwrap().conditions = vec!["paralyzed".into()];
+        let (mode, _, crit) = w.engage("wiz", "troll", &Reach::melee(5), "Fist", true, RollMode::Normal).unwrap();
+        assert!(mode == RollMode::Advantage && crit, "a hit on a paralyzed creature next to you is a critical");
+        w.campaign.encounter.find_mut("troll").unwrap().conditions.clear();
+        // a wall between them stops arrows and spells alike
+        put(&mut w, "troll", 8);
+        w.campaign.map.walls.push(Wall { x1: 5.0, y1: 0.0, x2: 5.0, y2: 3.0, ..Default::default() });
+        assert!(w.engage("wiz", "troll", &bow, "Longbow", true, RollMode::Normal).unwrap_err().contains("no clear line"));
+        w.campaign.map.walls.clear();
+        // spells: touch needs to be next to the friend, and no slot is lost finding out
+        w.campaign.character_mut("cle").unwrap().spells.prepared = vec!["cure_wounds".into()];
+        w.library.spells.get_mut("cure_wounds").unwrap().range = "Touch".into();
+        assert!(w.pc_cast("cle", "cure_wounds", 1, &["wiz".into()], RollMode::Normal).unwrap_err().contains("ft away"));
+        assert!(w.campaign.character("cle").unwrap().spells.slots_used.iter().all(|u| *u == 0));
+        assert_eq!(spell_reach(&Spell { range: "150 feet".into(), area: Some(Area { shape: "sphere".into(), size: 20, width: None }), ..Default::default() }, 100).long, 170);
+        assert_eq!(spell_reach(&Spell { range: "120 feet".into(), ..Default::default() }, 200).normal, 240);
+        // someone who cannot act cannot attack
+        w.campaign.encounter.find_mut("wiz").unwrap().conditions = vec!["stunned".into()];
+        assert!(w.pc_attack("wiz", 0, "troll", RollMode::Normal).unwrap_err().contains("stunned"));
+        w.campaign.encounter.find_mut("wiz").unwrap().conditions.clear();
+        // turning the rule off hands it back to the DM
+        w.campaign.settings.enforce_range = false;
+        assert!(w.pc_attack("wiz", 0, "troll", RollMode::Normal).is_ok());
+        w.campaign.settings.enforce_range = true;
+
+        // ---- movement: speed per turn, twice with a dash, none while held
+        for c in &mut w.campaign.encounter.combatants {
+            c.initiative = if c.id == "wiz" { 20 } else { 1 };
+        }
+        w.start_encounter();
+        let speed = w.move_budget("wiz").unwrap();
+        assert!(speed >= 25, "{speed}");
+        assert!(w.move_budget("troll").is_none(), "not the troll's turn");
+        assert!(w.player_walk("troll", Pos::new(9, 1)).is_err());
+        let far = 1 + (speed / 5) as i32 + 1;
+        assert!(w.player_walk("wiz", Pos::new(far, 0)).unwrap_err().contains("movement left"));
+        assert_eq!(w.player_walk("wiz", Pos::new(far - 1, 0)).unwrap(), speed);
+        assert_eq!(w.move_budget("wiz"), Some(0));
+        assert!(w.player_walk("wiz", Pos::new(far, 0)).is_err());
+        w.dash("wiz").unwrap();
+        assert_eq!(w.move_budget("wiz"), Some(speed));
+        assert!(w.dash("wiz").is_err());
+        w.campaign.encounter.find_mut("wiz").unwrap().conditions = vec!["grappled".into()];
+        assert_eq!(w.move_budget("wiz"), Some(0));
+        w.next_turn();
+        assert_eq!(w.campaign.encounter.find("wiz").unwrap().dashed, true, "kept until her next turn starts");
+    }
+
+    #[test]
     fn choosing_spells_follows_the_class() {
         let mut w = world();
         let lib = std::mem::take(&mut w.library);
@@ -801,6 +1126,8 @@ mod tests {
         assert_eq!(r.hit, Some(true));
         assert_eq!(w.campaign.character("cle").unwrap().hp.current, 0, "the sheet follows the token");
         w.campaign.character_mut("cle").unwrap().spells.prepared = vec!["cure_wounds".into()];
+        assert!(w.pc_cast("cle", "cure_wounds", 1, &["cle".into()], RollMode::Normal).unwrap_err().contains("down"), "no casting at 0 hit points");
+        w.heal("cle", 1);
         w.pc_cast("cle", "cure_wounds", 1, &["cle".into()], RollMode::Normal).unwrap();
         assert!(w.campaign.character("cle").unwrap().hp.current > 0);
         w.rest("cle", true).unwrap();

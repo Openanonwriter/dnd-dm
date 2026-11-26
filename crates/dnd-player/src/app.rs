@@ -160,7 +160,7 @@ impl PlayerApp {
             ui_state: Default::default(),
             table: Vec::new(),
             mode: Default::default(),
-            targets: Vec::new(),
+            targets: std::env::var("DND_PLAYER_TARGET").ok().into_iter().collect(),
             shot: crate::shot::Shot::from_env(),
             start_tab: std::env::var("DND_PLAYER_TAB").ok().and_then(|t| Tab::ALL.into_iter().find(|x| x.label().eq_ignore_ascii_case(&t))),
         };

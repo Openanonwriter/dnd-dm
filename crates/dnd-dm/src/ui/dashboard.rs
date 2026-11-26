@@ -182,6 +182,16 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
             w.campaign.settings.players_apply_damage = hurt;
             w.touch();
         }
+        let mut ranges = app.world.read().unwrap().campaign.settings.enforce_range;
+        if ui
+            .checkbox(&mut ranges, "Enforce reach, range and movement")
+            .on_hover_text("On: an attack or spell must be within its reach or range with no wall in the way (long range and an enemy next to an archer give disadvantage), and a turn's walking is limited by speed. Off: you referee it.")
+            .changed()
+        {
+            let mut w = app.world.write().unwrap();
+            w.campaign.settings.enforce_range = ranges;
+            w.touch();
+        }
         for (label, long) in [("🌙 Long rest (party)", true), ("☕ Short rest (party)", false)] {
             if ui.button(label).on_hover_text("Every character: hit points, spell slots and features come back as the rules say").clicked() {
                 let mut w = app.world.write().unwrap();

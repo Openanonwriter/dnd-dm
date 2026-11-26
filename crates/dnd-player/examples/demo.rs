@@ -104,8 +104,12 @@ fn world() -> World {
     let _ = w.creature_attack("goblin_1", 1, "borin", RollMode::Normal);
     w.next_turn();
     let _ = w.pc_attack("borin", 0, "goblin_1", RollMode::Normal);
-    w.next_turn();
-    w.next_turn();
+    for _ in 0..8 {
+        w.next_turn();
+        if w.campaign.encounter.current().map(|c| c.id == "thia").unwrap_or(false) {
+            break;
+        }
+    }
     w
 }
 

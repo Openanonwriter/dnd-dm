@@ -48,6 +48,37 @@ everything (dice, hits, damage); phones only ask.
 Dashboard → *Players' attacks change hit points*: turn this off and attacks
 and spells are only rolled and announced; the DM applies the numbers.
 
+## Reach, range and movement
+
+With Dashboard → *Enforce reach, range and movement* on (the default), the
+DM's PC checks every attack and spell against the map:
+
+- **Melee** reaches 5 ft, 10 ft with a reach weapon. **Thrown** weapons work
+  in melee and out to their range. **Ranged** weapons and spells have a
+  normal range and, for weapons, a long range (a longbow is 150/600).
+- Past normal range the roll has **disadvantage**; past long range it is
+  refused. A ranged attack with an enemy within 5 ft has disadvantage.
+- **Walls and closed doors** block attacks and spells: there must be a clear
+  line between the two tokens.
+- **Spells**: *Touch* means next to the target, *Self (15-foot cone)* means
+  within 15 ft, an area spell reaches its range plus its radius. A spell that
+  cannot reach is refused before a slot is spent.
+- **Conditions** change the roll by themselves: a blinded, poisoned,
+  frightened, restrained or prone attacker has disadvantage; a blinded,
+  paralyzed, restrained, stunned or unconscious target gives advantage; a
+  prone target gives advantage up close and disadvantage from afar; a hit on
+  a paralyzed or unconscious creature within 5 ft is a critical. Someone
+  stunned, paralyzed, unconscious or at 0 hit points cannot attack or cast.
+- **Movement** in a fight is the character's speed per turn (the squares in
+  reach are tinted on the phone's map). *Dash* doubles it. Grappled,
+  restrained, stunned or paralyzed means no movement.
+
+The phone shows the distance to each target and greys out attacks that
+cannot reach. Every number comes from the sheet, so anything that changes
+speed, reach or range there (a level, a feat, an item, a DM modifier with
+target `speed`, `attack.reach`, `attack.range` or `spell.range`) changes
+what is allowed. Tokens that are not on the map are not checked.
+
 ## Resting and levelling
 
 - Combat tab → *Spend a d8* (a hit die: rolled, plus Constitution),

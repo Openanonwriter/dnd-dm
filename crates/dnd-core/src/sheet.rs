@@ -37,6 +37,10 @@ pub struct AttackLine {
     pub range: String,
     pub properties: Vec<String>,
     pub notes: Vec<String>,
+    /// The same range in numbers, after every modifier (`attack.reach` in
+    /// feet, `attack.range` in percent); this is what the table enforces.
+    #[serde(default)]
+    pub reach: crate::range::Reach,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
@@ -170,6 +174,10 @@ pub struct Sheet {
     /// always prepared and never counted against the limits.
     #[serde(default)]
     pub spells_granted: Vec<String>,
+    /// Spell ranges in percent of what the spell says (target `spell.range`,
+    /// e.g. a feat that doubles them sets 200).
+    #[serde(default)]
+    pub spell_range_pct: u32,
     /// Targets the engine does not know; homebrew can read them.
     pub other: BTreeMap<String, f64>,
     /// Advantage / disadvantage / notes keyed by target.
@@ -757,6 +765,7 @@ impl<'a> Engine<'a> {
 
         // ---- attacks
         self.attacks(pb, &weapons);
+        self.sheet.spell_range_pct = self.num("spell.range", 100).max(0) as u32;
 
         // ---- features
         let feats = std::mem::take(&mut self.features);
@@ -1030,29 +1039,37 @@ impl<'a> Engine<'a> {
             notes.extend(dmg_text(&self.resolved, "damage.all"));
             notes.extend(self.notes_for(if ranged { "attack.ranged" } else { "attack.melee" }));
             notes.extend(self.notes_for("attack.all"));
+            let mut reach = crate::range::Reach::default();
+            if !ranged {
+                reach.melee = self.num("attack.reach", if props.iter().any(|p| p == "reach") { 10 } else { 5 }).max(0) as u32;
+            }
+            if !w.range.is_empty() {
+                let r = crate::range::Reach::parse(&format!("range {}", w.range)).scaled(self.num("attack.range", 100).max(0) as u32);
+                reach.normal = r.normal;
+                reach.long = r.long;
+            }
             let name = if inv.name.is_empty() { item.name.clone() } else { inv.name.clone() };
             self.sheet.attacks.push(AttackLine {
                 name,
                 bonus,
                 damage,
                 damage_type: w.damage_type.clone(),
-                range: if w.range.is_empty() {
-                    if props.iter().any(|p| p == "reach") { "10 ft.".into() } else { "5 ft.".into() }
-                } else {
-                    format!("{} ft.", w.range)
-                },
+                range: reach.describe(),
+                reach,
                 properties: w.properties.clone(),
                 notes,
             });
         }
         // Unarmed strike is always available.
         let unarmed_dmg = 1 + str_mod + dmg_melee;
+        let unarmed_reach = crate::range::Reach::melee(self.num("attack.reach", 5).max(0) as u32);
         self.sheet.attacks.push(AttackLine {
             name: "Unarmed Strike".into(),
             bonus: str_mod + pb + atk_melee,
             damage: unarmed_dmg.max(1).to_string(),
             damage_type: "bludgeoning".into(),
-            range: "5 ft.".into(),
+            range: unarmed_reach.describe(),
+            reach: unarmed_reach,
             properties: vec![],
             notes: vec![],
         });

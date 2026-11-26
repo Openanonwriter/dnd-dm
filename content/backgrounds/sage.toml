@@ -2,9 +2,65 @@ id = "sage"
 name = "Sage"
 skill_proficiencies = ["arcana", "history"]
 language_choices = 2
-starting_equipment = ["bottle of black ink", "quill", "small knife", "letter from a dead colleague", "common clothes", "10 gp"]
-description = "You spent years learning the lore of the multiverse."
+starting_equipment = ["bottle of black ink", "quill", "small knife", "letter from a dead colleague with an unanswered question", "common clothes", "pouch", "10 gp"]
+description = "You spent years learning the lore of the multiverse, in libraries, universities and the company of scholars."
 
 [feature]
 name = "Researcher"
-description = "When you fail to recall a piece of lore, you often know where and from whom it can be obtained."
+description = "When you can't recall a piece of lore, you usually know where and from whom you could learn it: a library, a scriptorium, a university, or a sage or other learned creature. The DM may rule that some knowledge is lost or hidden."
+
+[[suggestions]]
+name = "Specialty"
+fills = "backstory"
+options = ["Alchemist", "Stargazer", "Expelled scholar", "Archivist", "Lecturer", "Field researcher", "Wizard's apprentice", "Copyist"]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "I carry a notebook everywhere and write down anything odd.",
+  "I correct people's facts, even when nobody asked.",
+  "I get so excited about an idea that I forget to eat.",
+  "I name my pets, tools and weapons after famous scholars.",
+  "I collect strange trinkets and can tell you the history of each one.",
+  "I talk to myself while I think, sometimes in other languages.",
+  "Ink stains my fingers, my sleeves and usually my face.",
+  "I sniff old books, and I'm not ashamed of it.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Understanding. Every mystery solved makes the world less frightening. (Neutral)",
+  "Teaching. Knowledge kept to yourself is wasted. (Good)",
+  "Method. Careful study beats guesswork every time. (Lawful)",
+  "Forbidden doors. No question should be off-limits. (Chaotic)",
+  "Leverage. Knowing what others don't is the best weapon. (Evil)",
+  "Legacy. I want my name in the books future scholars read. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "The letter from my dead colleague asks a question I must answer.",
+  "My old school is in danger of closing, and I want to save it.",
+  "A rival scholar stole my work and the credit for it.",
+  "I'm the last person who can read a dying language.",
+  "My mentor vanished while chasing a discovery, and I'm following their trail.",
+  "I'm writing an encyclopedia, and every adventure adds a chapter.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "A new book or a strange ruin will make me abandon any plan.",
+  "I look down on people who can't read.",
+  "I'll poke something dangerous just to see what it does.",
+  "I'd rather be right than kind.",
+  "I panic when I'm faced with something no book prepared me for.",
+  "I borrow books and never give them back.",
+]

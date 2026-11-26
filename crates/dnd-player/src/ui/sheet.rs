@@ -163,6 +163,7 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.label(if sk.expertise { theme::accent("★") } else if sk.proficient { theme::accent("⏺") } else { theme::muted("○") });
             let r = ui.add(egui::Label::new(format!("{}  {}", sk.name, theme_dim(&sk.ability))).sense(egui::Sense::click()));
+            dnd_mapview::help::term(ui, &sk.key);
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.small_button(egui::RichText::new(bonus(sk.bonus)).strong()).clicked() || r.clicked() {
                     app.roll(&format!("1d20 {}", signed(sk.bonus)), &sk.name);
@@ -173,7 +174,10 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             });
         });
     }
-    ui.label(theme::muted(format!("Passive Perception {} · Investigation {} · Insight {}", s.passive_perception, s.passive_investigation, s.passive_insight)).small());
+    ui.horizontal_wrapped(|ui| {
+        ui.label(theme::muted(format!("Passive Perception {} · Investigation {} · Insight {}", s.passive_perception, s.passive_investigation, s.passive_insight)).small());
+        dnd_mapview::help::term(ui, "passive_perception");
+    });
 
     section(ui, "Proficiencies & languages");
     ui.label(format!("Armor: {}", s.proficiencies.armor.join(", ")));
@@ -201,15 +205,26 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let hp_max = app.sheet.as_ref().map(|s| s.hp_max).unwrap_or(1);
     let mut death_save = false;
     let Some(ch) = app.character.as_mut() else { return };
+    let dead = ch.is_dead();
     theme::card_hi().show(ui, |ui| {
         ui.set_width(ui.available_width());
+        // nothing on this card can bring the dead back
+        if dead {
+            ui.disable();
+        }
         ui.horizontal(|ui| {
             ui.vertical(|ui| {
-                ui.label(theme::muted("HIT POINTS").small());
+                ui.horizontal(|ui| {
+                    ui.label(theme::muted("HIT POINTS").small());
+                    dnd_mapview::help::term(ui, "hit_points");
+                });
                 let col = if ch.hp.current <= hp_max / 4 { theme::BAD } else if ch.hp.current <= hp_max / 2 { theme::ORANGE } else { theme::GOOD };
                 ui.label(egui::RichText::new(format!("{} / {}", ch.hp.current, hp_max)).color(col).strong().size(30.0));
                 if ch.hp.temp > 0 {
-                    ui.label(theme::muted(format!("+{} temp", ch.hp.temp)).small());
+                    ui.horizontal(|ui| {
+                        ui.label(theme::muted(format!("+{} temp", ch.hp.temp)).small());
+                        dnd_mapview::help::term(ui, "temp_hp");
+                    });
                 }
             });
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -245,10 +260,13 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
             if ui.button("Temp").clicked() {
                 ch.hp.temp = ch.hp.temp.max(app.ui_state.damage_amount);
             }
+            dnd_mapview::help::term(ui, "temp_hp");
         });
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing.x = 3.0;
             ui.label(theme::muted("Death saves"));
+            dnd_mapview::help::term(ui, "death_saves");
+            ui.end_row();
             ui.label(egui::RichText::new("pass").small().color(theme::GOOD));
             for i in 0..3 {
                 let mut on = ch.death_saves.successes > i;
@@ -266,7 +284,15 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
         });
         ui.horizontal_wrapped(|ui| {
             ui.checkbox(&mut ch.inspiration, "Inspiration");
+            dnd_mapview::help::term(ui, "inspiration");
         });
+        if ch.is_dead() {
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new("Your character has died.").color(theme::BAD).strong());
+                dnd_mapview::help::term(ui, "dead");
+            });
+            ui.label(theme::muted("Only magic such as revivify or raise dead can bring them back. Talk to your DM.").small());
+        }
         if ch.hp.current <= 0 && ch.death_saves.failures < 3 {
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new("You are down.").color(theme::BAD).strong());
@@ -297,6 +323,7 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
+                dnd_mapview::help::term(ui, "turn");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui.add(theme::primary("End turn")).clicked() {
                         app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
@@ -321,6 +348,14 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                     ui.set_max_width((ui.available_width() - 150.0).max(120.0));
                     ui.label(egui::RichText::new(&a.name).strong().size(17.0));
                     ui.label(theme::muted(format!("{} to hit · {} {} · {}{}", bonus(a.bonus), a.damage, a.damage_type, a.range, if a.notes.is_empty() { String::new() } else { format!(" · {}", a.notes.join("; ")) })).small());
+                    // weapon properties, each with its (i)
+                    if !a.properties.is_empty() {
+                        ui.horizontal_wrapped(|ui| {
+                            for p in &a.properties {
+                                dnd_mapview::help::label_term(ui, theme::muted(p.replace('_', "-")).small(), p);
+                            }
+                        });
+                    }
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if let Some(t) = &target {
@@ -380,7 +415,9 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ui.horizontal_wrapped(|ui| {
             for c in known {
                 let mut on = ch.conditions.iter().any(|x| x == c);
-                if ui.toggle_value(&mut on, c).changed() {
+                let changed = ui.toggle_value(&mut on, c).changed();
+                dnd_mapview::help::term(ui, c);
+                if changed {
                     if on {
                         ch.conditions.push(c.to_string());
                     } else {
@@ -389,6 +426,7 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 }
             }
             ui.label(theme::muted("Exhaustion"));
+            dnd_mapview::help::term(ui, "exhaustion");
             ui.add(egui::DragValue::new(&mut ch.exhaustion).range(0..=6));
         });
     }
@@ -401,19 +439,29 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             for (d, n) in &s.hit_dice {
                 let used = ch.hp.hit_dice_used.get(d).copied().unwrap_or(0);
                 ui.label(format!("{d} hit dice: {} of {n}", n.saturating_sub(used)));
+                dnd_mapview::help::term(ui, "hit_dice");
                 if ui.add_enabled(online && used < *n && ch.hp.current < s.hp_max, egui::Button::new(format!("Spend a {d}"))).on_hover_text("During a short rest: roll it, add Constitution, heal that much").clicked() {
                     todo = Some(("hit_die", d.clone()));
                 }
             }
         });
+        // the dead can't rest, and a long rest needs at least 1 hit point
+        let dead = ch.is_dead();
+        let down = ch.hp.current <= 0;
         ui.horizontal(|ui| {
-            if ui.add_enabled(online, egui::Button::new("☕ Short rest")).clicked() {
+            dnd_mapview::help::term(ui, "short_rest");
+            if ui.add_enabled(online && !dead, egui::Button::new("☕ Short rest")).clicked() {
                 todo = Some(("short_rest", String::new()));
             }
-            if ui.add_enabled(online, egui::Button::new("🌙 Long rest")).on_hover_text("Full hit points, all spell slots, half your hit dice").clicked() {
+            if ui.add_enabled(online && !down, egui::Button::new("🌙 Long rest")).on_hover_text("Full hit points, all spell slots, half your hit dice").clicked() {
                 todo = Some(("long_rest", String::new()));
             }
         });
+        if dead {
+            ui.label(egui::RichText::new("The dead can't rest. Resting won't bring your character back.").color(theme::BAD).small());
+        } else if down {
+            ui.label(theme::muted("You need at least 1 hit point to benefit from a long rest.").small());
+        }
         if !online {
             ui.label(theme::muted("Rests are taken with the DM: connect first.").small());
         }
@@ -434,6 +482,7 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ("Gold", s.currency.gp.to_string(), format!("{} sp · {} cp", s.currency.sp, s.currency.cp)),
         ],
     );
+    let lib = app.builder_lib.as_ref();
     let Some(ch) = app.character.as_mut() else { return };
     section(ui, "Inventory");
     let names: std::collections::HashMap<String, (String, String)> = s.inventory.iter().map(|l| (l.item.clone(), (l.name.clone(), l.kind.clone()))).collect();
@@ -444,7 +493,12 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
-                    ui.label(egui::RichText::new(&name).strong());
+                    ui.horizontal_wrapped(|ui| {
+                        ui.label(egui::RichText::new(&name).strong());
+                        if let (Some(lib), false) = (lib, inv.custom) {
+                            dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Item, &inv.item);
+                        }
+                    });
                     ui.label(theme::muted(format!("{kind}{}", if inv.notes.is_empty() { String::new() } else { format!(" · {}", inv.notes) })).small());
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -453,8 +507,10 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                     }
                     ui.add(egui::DragValue::new(&mut inv.qty).range(0..=999));
                     ui.label(theme::muted("×"));
+                    dnd_mapview::help::term(ui, "equipped");
                     ui.toggle_value(&mut inv.equipped, "equipped");
                     if inv.attuned || kind == "wondrous" {
+                        dnd_mapview::help::term(ui, "attuned");
                         ui.toggle_value(&mut inv.attuned, "attuned");
                     }
                 });
@@ -517,12 +573,13 @@ fn theme_sub(source: &str, uses: Option<i64>, recharge: &str) -> String {
 fn dice_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     section(ui, "Roll");
     ui.horizontal(|ui| {
-        let r = ui.add(egui::TextEdit::singleline(&mut app.dice_formula).desired_width(ui.available_width() - 90.0).font(egui::TextStyle::Heading));
+        let r = ui.add(egui::TextEdit::singleline(&mut app.dice_formula).desired_width(ui.available_width() - 116.0).font(egui::TextStyle::Heading));
         let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if ui.add(theme::primary("Roll")).clicked() || enter {
             let f = app.dice_formula.clone();
             app.roll(&f, "");
         }
+        dnd_mapview::help::term(ui, "dice_notation");
     });
     ui.horizontal_wrapped(|ui| {
         for d in ["d20", "d12", "d10", "d8", "d6", "d4", "d100", "2d20kh1", "2d20kl1", "4d6kh3"] {
@@ -532,6 +589,7 @@ fn dice_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         }
     });
     ui.horizontal(|ui| {
+        dnd_mapview::help::term(ui, "advantage");
         if ui.button("Advantage").clicked() {
             let f = app.dice_formula.replacen("1d20", "2d20kh1", 1).replacen("d20", "2d20kh1", 1);
             app.roll(&f, "advantage");

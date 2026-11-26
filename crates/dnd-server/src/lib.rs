@@ -625,6 +625,7 @@ fn seat_of(w: &World, device_id: &str) -> Seat {
         made_character: made,
         rolled: dev.map(|d| d.rolled.clone()).unwrap_or_default(),
         start_level: w.campaign.settings.player_start_level.clamp(1, 20),
+        allow_rule_breaks: w.campaign.settings.allow_rule_breaks || ch.map(|c| c.allow_rule_breaks).unwrap_or(false),
     }
 }
 
@@ -822,9 +823,12 @@ async fn player_spells_choose(State(st): State<AppState>, headers: HeaderMap, Qu
     };
     let w = &mut *w;
     let live = w.campaign.settings.game_live;
+    let global_free = w.campaign.settings.allow_rule_breaks;
     let Some(ch) = w.campaign.characters.iter_mut().find(|c| c.id == id) else { return err(StatusCode::NOT_FOUND, "no such character") };
     let before = ch.spells.known.len();
-    if let Err(e) = dnd_core::play::choose_spells(&w.library, ch, &req.known, live) {
+    // only spells the character qualifies for, unless the DM allows rule breaks
+    let free = global_free || ch.allow_rule_breaks;
+    if let Err(e) = dnd_core::play::choose_spells(&w.library, ch, &req.known, live, free) {
         return err(StatusCode::CONFLICT, e);
     }
     let view = ch.player_view();

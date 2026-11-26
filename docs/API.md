@@ -65,13 +65,16 @@ is live, uploads are refused and the DM assigns characters instead.
 
 `Seat` carries what the app needs to know: `game_live`, `start_level`,
 `rolled` (the ability scores the server rolled for this device, empty until
-asked), `made_character` (the assigned character is one this player built)
-and `can_create` (no game running, and either nothing assigned or the
-assigned character is the player's own, which they may rebuild).
+asked), `made_character` (the assigned character is one this player built),
+`can_create` (no game running, and either nothing assigned or the
+assigned character is the player's own, which they may rebuild) and
+`allow_rule_breaks` (the DM lets this device pick options its character
+doesn't qualify for: campaign-wide `settings.allow_rule_breaks`, or the
+character's own `allow_rule_breaks`).
 
 | method | path | notes |
 |--------|------|-------|
-| GET | `/api/player/builder` | → `{species, classes, subclasses, backgrounds, feats, items, rules, start_level}`: every non-hidden choice, item names (id → name) and the rules tables, enough to build and preview a character offline. |
+| GET | `/api/player/builder` | → `{species, classes, subclasses, backgrounds, feats, items, item_entries, rules, start_level, spells}`: every non-hidden choice, item names (id → name) and the full item entries, the rules tables and every visible spell, enough to build and preview a character offline and to explain every pick. |
 | POST | `/api/player/abilities/roll` | body `{device_id}`. The server rolls 4d6-drop-lowest six times, stores the set on the device, writes it to the campaign log and returns the `Seat`. Calling again returns the same set until the DM clears it (↻ on the device's row). 403 while the game is live. |
 | POST | `/api/player/characters` | body `{device_id, character, gear}`; needs the join code and a registered device. 403 while the game is live, 409 if the DM assigned this device its character, 400 with a readable reason if a choice is not legal. Returns 201 and the new `Seat`; the character is assigned to the device. If the device already plays a character it made, that one is replaced. |
 
@@ -79,7 +82,12 @@ The server keeps only what a player may choose: name, species, one class at
 the campaign's start level, the subclass (required once the class has
 reached its subclass level), background, base ability scores, class skill
 picks, one improvement per ASI level reached (`advancements`: +2 to one
-ability, +1 to two, or a feat) and the free-text fields. `ability_method`
+ability, +1 to two, or a feat), `choices` (fighting style, invocations and
+other class options, each checked against its feature's option list and
+count), known and prepared spells, and the free-text fields. A pick the
+character doesn't qualify for (a feat or option whose `requires` fails, a
+spell too high to cast) is refused with the reason unless the DM allows rule
+breaks for the campaign or for the character being rebuilt. `ability_method`
 must be `standard_array`, `point_buy` or `rolled`; rolled scores must be
 exactly the set the server rolled for that device. Modifiers, extra items,
 XP, HP overrides and DM notes in the upload are dropped.
@@ -134,12 +142,14 @@ line to the table feed; a refusal is 409 with the reason.
 |--------|------|-------|
 | GET | `/api/player/table` | → the last 60 `TableEntry` `{seq, time, who, text, kind}`: what everyone at the table has seen happen. `kind` is `roll`, `attack`, `spell`, `turn` or `rest`. |
 | GET | `/api/player/spells` | → every spell players may read. |
-| POST | `/api/player/spells` | body `{device_id, known: [ids]}`. Sets the spells the character knows, within what its class allows (see `docs/PLAYING.md`). While a game is live, spells can be added but not dropped. → the character. |
+| POST | `/api/player/spells` | body `{device_id, known: [ids]}`. Sets the spells the character knows, within what its class allows (see `docs/PLAYING.md`); with rule breaks allowed, any visible spell on the class list. While a game is live, spells can be added but not dropped. → the character. |
 | POST | `/api/player/roll` | body `{device_id, formula, label, mode}`. A roll the whole table sees. |
 | POST | `/api/player/attack` | body `{device_id, attack, target, mode}`; `attack` is an index into the sheet's `attacks`, `target` a combatant id. Rolled against the target's armor class; damage is applied unless the campaign setting `players_apply_damage` is off. |
 | POST | `/api/player/cast` | body `{device_id, spell, slot, targets: [ids], mode}`. `slot` 0 = cantrip or ritual. Spends the slot, then attack roll / saving throws / healing per target as the spell says. |
-| POST | `/api/player/do` | body `{device_id, action, arg}` with `action` = `end_turn`, `short_rest`, `long_rest`, `hit_die` (`arg` = `"d8"`) or `death_save`. |
+| POST | `/api/player/do` | body `{device_id, action, arg}` with `action` = `end_turn`, `short_rest`, `long_rest`, `hit_die` (`arg` = `"d8"`) or `death_save`. A dead character (0 HP, three failed death saves) gets 409 for all but `end_turn`; a long rest also needs at least 1 HP. |
 
 `PATCH /api/player/characters/{id}` can no longer change which spells are
 known (only `prepared`, `slots_used`), and now also takes `uses` (uses spent
-of limited features, by feature name).
+of limited features, by feature name). For a dead character the patch's
+`hp.current` and `death_saves` are ignored: only a revival spell
+(`/api/player/cast` with revivify, raise dead…) or the DM brings them back.

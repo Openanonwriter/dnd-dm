@@ -2,9 +2,60 @@ id = "acolyte"
 name = "Acolyte"
 skill_proficiencies = ["insight", "religion"]
 language_choices = 2
-starting_equipment = ["holy symbol", "prayer book", "5 sticks of incense", "vestments", "common clothes", "15 gp"]
+starting_equipment = ["holy symbol", "prayer book", "5 sticks of incense", "vestments", "common clothes", "pouch", "15 gp"]
 description = "You have spent your life in the service of a temple, acting as an intermediary between the holy and the mortal."
 
 [feature]
 name = "Shelter of the Faithful"
-description = "You and your companions can receive free healing and care at a temple of your faith, and you can call on priests for (non-dangerous) assistance."
+description = "You and your companions can receive free healing and care at a temple of your faith (you supply costly spell components), and you can call on its priests for help that doesn't put them in danger. You have ties to one temple in particular where you can lodge."
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "I measure every choice against the life of a saint I admire, and I bring them up constantly.",
+  "I look for common ground between enemies; peace is always worth one more conversation.",
+  "Birds taking flight, a candle guttering: I read small events as messages from the gods.",
+  "However grim things get, I'm sure the light will win in the end.",
+  "I have a scripture or proverb for every occasion, even when I get it slightly wrong.",
+  "I'm curious about other faiths and ask their followers endless questions.",
+  "Temple life spoiled me with good food and soft beds; sleeping on the ground is a trial.",
+  "I spent so long behind temple walls that ordinary social customs baffle me.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Tradition. The old rites keep the world in order, and I will see them kept. (Lawful)",
+  "Mercy. Whoever is in need deserves my help, whatever it costs me. (Good)",
+  "Renewal. The gods are always remaking the world, and I want to help them. (Chaotic)",
+  "Ascent. One day I will lead my faith. (Lawful)",
+  "Trust. If I do the work, my god will see me through. (Lawful)",
+  "Worthiness. I want my deeds to prove I deserve my god's favor. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "A holy relic of my faith was lost long ago; I will find it or die trying.",
+  "The temple leaders who cast me out as a heretic will answer for their corruption.",
+  "The priest who raised me after my parents died is the reason I'm alive.",
+  "Everything I do is for ordinary people who need someone on their side.",
+  "My old temple is my home, and I'll defend it against anything.",
+  "I guard a sacred text that my enemies want to burn.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "I hold others to impossible standards, and myself to worse ones.",
+  "I trust anyone with a title in my temple far more than I should.",
+  "Anyone who claims to share my faith gets my blind trust.",
+  "Once I've made up my mind, nothing changes it.",
+  "I assume strangers are up to no good.",
+  "When I set a goal I chase it obsessively, ignoring everything else.",
+]

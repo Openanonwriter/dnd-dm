@@ -1,0 +1,77 @@
+id = "guild_artisan"
+name = "Guild Artisan"
+skill_proficiencies = ["insight", "persuasion"]
+tool_proficiencies = ["one type of artisan's tools"]
+language_choices = 1
+starting_equipment = ["artisan's tools", "letter of introduction from your guild", "traveler's clothes", "pouch", "15 gp"]
+description = "You learned a craft as a member of an artisans' guild, with all the connections and obligations that come with it."
+
+[feature]
+name = "Guild Membership"
+description = "Your guild gives you lodging and food if needed, and pays for your funeral. It can help with legal trouble and connect you to powerful people, as long as you stay in good standing and pay dues of 5 gp a month."
+
+[[variants]]
+name = "Guild Merchant"
+description = "You belong to a guild of traders, caravan masters or shopkeepers instead of crafters. You may take navigator's tools or another language instead of artisan's tools, and a mule and cart instead of the tools."
+
+[[suggestions]]
+name = "Guild business"
+fills = "backstory"
+options = [
+  "Alchemy and medicines", "Armor and locks", "Brewing and wine", "Scribing and calligraphy",
+  "Carpentry and roofing", "Mapmaking and surveying", "Shoemaking", "Cooking and baking",
+  "Glassblowing", "Jewelry and gem cutting", "Leatherwork and tanning", "Masonry and stonecutting",
+  "Painting and sign-making", "Pottery and tiles", "Shipbuilding and sails", "Smithing",
+  "Tinkering and metal casting", "Wagons and wheels", "Weaving and dyeing", "Woodcarving and bowmaking",
+]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "If a job's worth doing, it's worth doing perfectly.",
+  "Shoddy work offends me, and I let people know.",
+  "I take things apart to see how they work, and people too.",
+  "I've got a saying from the workshop for every situation.",
+  "Lazy people get no patience from me.",
+  "Ask me about my craft and I'll talk your ear off.",
+  "I haggle over every copper.",
+  "I'm proud of my reputation and sulk when strangers haven't heard of me.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Community. A town works when everyone looks out for each other. (Lawful)",
+  "Generosity. My skills are a gift meant to help others. (Good)",
+  "Independence. Everyone should be free to earn a living their own way. (Chaotic)",
+  "Wealth. I work for coin, plain and simple. (Evil)",
+  "Loyalty. I care about my people more than any principle. (Neutral)",
+  "Mastery. I'll be the finest in my craft. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "The workshop where I trained is the most important place in the world to me.",
+  "I made a masterpiece for a patron who didn't deserve it; I'm looking for someone who does.",
+  "My guild made me who I am, and I owe it everything.",
+  "I chase wealth to win the heart of someone I love.",
+  "One day I'll go back to my guild as the greatest artisan it has ever known.",
+  "Whoever burned down my workshop will pay for it.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "I'll go to any lengths to get something rare or one of a kind.",
+  "I'm quick to suspect people are cheating me.",
+  "Nobody can find out I once dipped into the guild's coffers.",
+  "Whatever I have, I want more.",
+  "I'd do anything for a noble title.",
+  "Anyone whose work is better than mine makes me burn with envy.",
+]

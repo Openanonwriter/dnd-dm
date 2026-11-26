@@ -24,6 +24,7 @@ pub fn builder_options(lib: &Library, start_level: u32) -> BuilderOptions {
         rules: lib.rules.clone(),
         start_level: start_level.clamp(1, 20),
         spells: lib.spells.values().filter(|s| !s.hidden).cloned().collect(),
+        item_entries: lib.items.values().filter(|i| !i.hidden).cloned().collect(),
     }
 }
 
@@ -37,6 +38,53 @@ pub fn is_option_feat(f: &Feat) -> bool {
 /// The feats a feature's choice may pick from.
 pub fn feature_options<'a>(lib: &'a Library, tag: &str) -> Vec<&'a Feat> {
     lib.feats.values().filter(|f| !f.hidden && f.tags.iter().any(|t| t == tag)).collect()
+}
+
+/// The character text field a background suggestion table fills.
+pub fn suggestion_field<'a>(ch: &'a mut Character, fills: &str) -> Option<&'a mut String> {
+    Some(match fills {
+        "personality" => &mut ch.personality,
+        "ideals" => &mut ch.ideals,
+        "bonds" => &mut ch.bonds,
+        "flaws" => &mut ch.flaws,
+        "backstory" => &mut ch.backstory,
+        "notes" => &mut ch.notes,
+        _ => return None,
+    })
+}
+
+/// Friendly name of a suggestion target field.
+pub fn suggestion_field_label(fills: &str) -> &'static str {
+    match fills {
+        "personality" => "Personality",
+        "ideals" => "Ideals",
+        "bonds" => "Bonds",
+        "flaws" => "Flaws",
+        "backstory" => "Backstory",
+        "notes" => "Notes",
+        _ => "",
+    }
+}
+
+/// True when the field already holds this suggestion (one per line).
+pub fn has_suggestion(ch: &Character, fills: &str, line: &str) -> bool {
+    let mut c = ch.clone();
+    suggestion_field(&mut c, fills).map(|f| f.lines().any(|l| l.trim() == line.trim())).unwrap_or(false)
+}
+
+/// Add a suggestion to its field on a new line, or take it out again if
+/// it's already there.
+pub fn toggle_suggestion(ch: &mut Character, fills: &str, line: &str) {
+    let Some(field) = suggestion_field(ch, fills) else { return };
+    let line = line.trim();
+    if field.lines().any(|l| l.trim() == line) {
+        *field = field.lines().filter(|l| l.trim() != line).collect::<Vec<_>>().join("\n");
+    } else {
+        if !field.trim().is_empty() {
+            field.push('\n');
+        }
+        field.push_str(line);
+    }
 }
 
 /// Visible items, id -> name.
@@ -66,6 +114,9 @@ pub fn library_from_options(o: &BuilderOptions) -> Library {
     }
     for s in &o.spells {
         lib.insert(Entry::Spell(s.clone()), None);
+    }
+    for i in &o.item_entries {
+        lib.insert(Entry::Item(i.clone()), None);
     }
     lib
 }
@@ -406,8 +457,12 @@ pub fn prepare_player_character(lib: &Library, campaign: &Campaign, player: &str
     ch.backstory = clean_text(&up.backstory, TEXT_LIMIT);
     ch.notes = clean_text(&up.notes, TEXT_LIMIT);
     ch.hp.current = crate::sheet::derive(&ch, lib).hp_max;
+    // the DM may allow rule breaks for everyone, or for the character being rebuilt
+    let old = cx.replacing.and_then(|r| campaign.character(r));
+    let free = campaign.settings.allow_rule_breaks || old.map(|c| c.allow_rule_breaks).unwrap_or(false);
+    ch.allow_rule_breaks = old.map(|c| c.allow_rule_breaks).unwrap_or(false);
     // spells: the ones the class lets them learn, then what they prepared
-    crate::play::choose_spells(lib, &mut ch, &up.spells.known, false)?;
+    crate::play::choose_spells(lib, &mut ch, &up.spells.known, false, free)?;
     let sheet = crate::sheet::derive(&ch, lib);
     let available = crate::play::spells_available(lib, &ch, &sheet);
     let room: i32 = sheet.spellcasting.iter().filter_map(|b| b.prepared_max).sum();
@@ -415,6 +470,13 @@ pub fn prepare_player_character(lib: &Library, campaign: &Campaign, player: &str
         let leveled = lib.spells.get(p).map(|s| s.level > 0).unwrap_or(false);
         if leveled && available.contains(p) && !ch.spells.prepared.contains(p) && (ch.spells.prepared.len() as i32) < room {
             ch.spells.prepared.push(p.clone());
+        }
+    }
+    // a player may only take what the character qualifies for
+    if !free {
+        use crate::requirements::Area;
+        if let Some(p) = crate::requirements::check(lib, &ch).into_iter().find(|p| matches!(p.area, Area::Choice | Area::Feat | Area::Spell)) {
+            return Err(format!("{} (ask your DM to allow it)", p.message));
         }
     }
     Ok(ch)

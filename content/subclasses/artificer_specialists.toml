@@ -1,0 +1,173 @@
+# Artificer specialists (the workbook names Alchemist, Armorer, Artillerist
+# and Battle Smith). Descriptions written fresh.
+
+[[subclasses]]
+id = "alchemist"
+name = "Alchemist"
+class = "artificer"
+description = "An expert at combining reagents to produce mystical effects: healing draughts, corrosive bursts and potent elixirs."
+
+[[subclasses.features]]
+name = "Alchemist Spells"
+level = 3
+description = "Always prepared: healing word, ray of sickness (3rd); flaming sphere, acid arrow (5th); gaseous form, mass healing word (9th); blight, death ward (13th); cloudkill, raise dead (17th)."
+spells = ["healing_word", "ray_of_sickness", "flaming_sphere", "acid_arrow", "gaseous_form", "mass_healing_word", "blight", "death_ward", "cloudkill", "raise_dead"]
+
+[[subclasses.features]]
+name = "Tool Proficiency"
+level = 3
+description = "You gain proficiency with alchemist's supplies (or another artisan's tool if you already have it)."
+modifiers = [{ target = "proficiency.tool.alchemists_supplies", op = "grant" }]
+
+[[subclasses.features]]
+name = "Experimental Elixir"
+level = 3
+description = "After a long rest, produce an elixir in an empty flask and roll for its random effect: Healing (2d4 + Int mod HP), Swiftness (+10 ft speed for 1 hour), Resilience (+1 AC for 10 minutes), Boldness (+1d4 to attacks and saves for 1 minute), Flight (10 ft fly speed for 10 minutes) or Transformation (as alter self for 10 minutes). Drinking takes an action. One more elixir at 6th and 15th level; you can also make extra ones by spending a spell slot (choosing the effect)."
+uses = "if(class.artificer.level >= 15, 3, if(class.artificer.level >= 6, 2, 1))"
+recharge = "long_rest"
+
+[[subclasses.features]]
+name = "Alchemical Savant"
+level = 5
+description = "When you cast a spell through alchemist's supplies, add your Intelligence modifier (minimum +1) to one roll of its healing or of its acid, fire, necrotic or poison damage."
+
+[[subclasses.features]]
+name = "Restorative Reagents"
+level = 9
+description = "A creature that drinks your experimental elixir also gains 2d6 + Int mod temporary hit points. You can cast lesser restoration without a slot, Intelligence modifier times per long rest, using alchemist's supplies."
+
+[[subclasses.features]]
+name = "Chemical Mastery"
+level = 15
+description = "You resist acid and poison damage and are immune to being poisoned. Once per long rest each, you can cast greater restoration and heal without a slot or material components, using alchemist's supplies."
+
+[[subclasses]]
+id = "armorer"
+name = "Armorer"
+class = "artificer"
+description = "An artificer who turns a suit of armor into a second skin, empowered with magic."
+
+[[subclasses.features]]
+name = "Armorer Spells"
+level = 3
+description = "Always prepared: magic missile, thunderwave (3rd); mirror image, shatter (5th); hypnotic pattern, lightning bolt (9th); fire shield, greater invisibility (13th); passwall, wall of force (17th)."
+spells = ["magic_missile", "thunderwave", "mirror_image", "shatter", "hypnotic_pattern", "lightning_bolt", "fire_shield", "greater_invisibility", "passwall", "wall_of_force"]
+
+[[subclasses.features]]
+name = "Tools of the Trade"
+level = 3
+description = "You gain proficiency with heavy armor and smith's tools."
+modifiers = [{ target = "proficiency.armor.heavy", op = "grant" }, { target = "proficiency.tool.smiths_tools", op = "grant" }]
+
+[[subclasses.features]]
+name = "Arcane Armor"
+level = 3
+description = "Action, with smith's tools: turn the armor you wear into arcane armor. It ignores Strength requirements, can be your spellcasting focus, covers your whole body (replacing missing limbs) and can't be removed against your will. Donning or doffing it takes an action."
+
+[[subclasses.features]]
+name = "Armor Model"
+level = 3
+description = "Choose how your arcane armor works; you can switch after a short or long rest with smith's tools."
+options = "armor_model"
+choose = "1"
+
+[[subclasses.features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+
+[[subclasses.features]]
+name = "Armor Modifications"
+level = 9
+description = "Your arcane armor counts as separate items for infusions: armor, boots, helmet and the special weapon. Each can carry one infusion, and you can have two more infused items than normal as long as they are part of the armor."
+
+[[subclasses.features]]
+name = "Perfected Armor"
+level = 15
+description = "Guardian: when a Huge or smaller creature you can see ends its turn within 30 feet, use your reaction to pull it up to 30 feet toward you (Strength save) and attack it with your thunder gauntlets if it lands within 5 feet. Infiltrator: a creature hit by your lightning launcher glows, attacks against it have advantage, and the next hit deals 1d6 extra lightning damage."
+
+[[subclasses]]
+id = "artillerist"
+name = "Artillerist"
+class = "artificer"
+description = "An artificer who specializes in using magic to hurl energy, projectiles and explosions on the battlefield."
+
+[[subclasses.features]]
+name = "Artillerist Spells"
+level = 3
+description = "Always prepared: shield, thunderwave (3rd); scorching ray, shatter (5th); fireball, wind wall (9th); ice storm, wall of fire (13th); cone of cold, wall of force (17th)."
+spells = ["shield", "thunderwave", "scorching_ray", "shatter", "fireball", "wind_wall", "ice_storm", "wall_of_fire", "cone_of_cold", "wall_of_force"]
+
+[[subclasses.features]]
+name = "Tool Proficiency"
+level = 3
+description = "You gain proficiency with woodcarver's tools (or another artisan's tool if you already have it)."
+modifiers = [{ target = "proficiency.tool.woodcarvers_tools", op = "grant" }]
+
+[[subclasses.features]]
+name = "Eldritch Cannon"
+level = 3
+description = "Action, with woodcarver's or smith's tools: create a Small or Tiny magical cannon (AC 18, hit points five times your artificer level) for 1 hour. As a bonus action you make it act: Flamethrower (15-ft cone, Dexterity save, 2d8 fire), Force Ballista (ranged spell attack 120 ft, 2d8 force and push 5 ft) or Protector (it and allies within 10 ft gain 1d8 + Int mod temporary hit points). Once per long rest free, or by spending a spell slot."
+uses = "1"
+recharge = "long_rest"
+
+[[subclasses.features]]
+name = "Arcane Firearm"
+level = 5
+description = "Turn a wand, staff or rod into an arcane firearm. When you cast an artificer spell through it, add 1d8 to one of the spell's damage rolls."
+
+[[subclasses.features]]
+name = "Explosive Cannon"
+level = 9
+description = "Your cannon's damage rolls increase by 1d8. As an action you can detonate it: each creature within 20 feet makes a Dexterity save, taking 3d8 force damage on a failure or half on a success."
+
+[[subclasses.features]]
+name = "Fortified Position"
+level = 15
+description = "You and your allies have half cover while within 10 feet of a cannon you created. You can have two cannons at once and activate both with one bonus action."
+
+[[subclasses]]
+id = "battle_smith"
+name = "Battle Smith"
+class = "artificer"
+description = "A protector and medic who fights alongside a loyal steel defender."
+
+[[subclasses.features]]
+name = "Battle Smith Spells"
+level = 3
+description = "Always prepared: heroism, shield (3rd); branding smite, warding bond (5th); aura of vitality, conjure barrage (9th); aura of purity, fire shield (13th); banishing smite, mass cure wounds (17th). Spells not in this pack (the smites, auras and conjure barrage) can be added in homebrew."
+spells = ["heroism", "shield", "warding_bond", "fire_shield", "mass_cure_wounds"]
+
+[[subclasses.features]]
+name = "Tool Proficiency"
+level = 3
+description = "You gain proficiency with smith's tools (or another artisan's tool if you already have it)."
+modifiers = [{ target = "proficiency.tool.smiths_tools", op = "grant" }]
+
+[[subclasses.features]]
+name = "Battle Ready"
+level = 3
+description = "You gain proficiency with martial weapons, and you can use Intelligence instead of Strength or Dexterity for attack and damage rolls with magic weapons."
+modifiers = [{ target = "proficiency.weapon.martial", op = "grant" }]
+
+[[subclasses.features]]
+name = "Steel Defender"
+level = 3
+description = "You build a loyal Medium construct companion (AC 15, hit points 2 + Int mod + five times your artificer level). It acts on your turn; you command it with a bonus action, otherwise it Dodges. It can attack (force rend: your spell attack, 1d8 + PB force) and use its reaction to give an attacker disadvantage against a creature within 5 feet of it."
+
+[[subclasses.features]]
+name = "Extra Attack"
+level = 5
+description = "You can attack twice, instead of once, whenever you take the Attack action on your turn."
+
+[[subclasses.features]]
+name = "Arcane Jolt"
+level = 9
+description = "When you or your steel defender hits with a magic weapon attack, channel magic to deal an extra 2d6 force damage, or restore 2d6 hit points to a creature within 30 feet of the target. Intelligence modifier uses per long rest, once per turn. (4d6 at 15th level.)"
+uses = "max(1, int_mod)"
+recharge = "long_rest"
+
+[[subclasses.features]]
+name = "Improved Defender"
+level = 15
+description = "Arcane Jolt deals or heals 4d6. Your steel defender gains +2 AC, and when it blocks an attack the attacker takes 1d4 + Int mod force damage."

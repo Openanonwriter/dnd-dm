@@ -1,9 +1,9 @@
 # dnd-dm
 
 An open-source Dungeon Master toolkit for D&D 5e and homebrew, written in Rust.
-The Windows desktop app is the **server**: it holds the content library, the
-characters and the live game state, and shares them over Wi-Fi with player
-apps (Android / Windows character sheets, coming next).
+The desktop app (Windows or Linux) is the **server**: it holds the content
+library, the characters and the live game state, and shares them over Wi-Fi
+with the player app (Android phones, or a desktop window).
 
 Everything the game needs is a plain text **TOML** file you can read, write
 and version in git: species, classes, subclasses, backgrounds, items, feats,
@@ -26,10 +26,23 @@ spells, creatures, rules tables, characters and whole saved campaigns.
   `/api/player/*` endpoints strip all of it, and `/api/dm/*` lets a remote DM
   tool add, hide or remove items on a sheet.
 - **Human-writable content packs** — `content/` ships the whole SRD: all 12
-  classes (levels 1–20) with their subclass and every class choice (fighting
-  styles, invocations, metamagic…), 16 races and subraces, all 321 SRD spells
-  with class lists, and the full weapon table. `homebrew/` is yours. Later
+  classes (levels 1–20) plus the Artificer, each with its subclass and every
+  class choice (fighting styles, invocations, metamagic, infusions…), 17
+  races and subraces, 335 spells with class lists, the full weapon and armor
+  tables, adventuring gear, packs, poisons and 11 backgrounds with suggested
+  personality traits, ideals, bonds and flaws. `homebrew/` is yours. Later
   packs override earlier ones by id.
+- **Help for new players** — a small (i) next to every game term, stat,
+  skill, condition, class, spell and item explains it in plain language:
+  hover on a PC, tap on a phone. A test keeps every entry explained.
+- **Rules checks** — a subclass taken too early, an invocation without its
+  pact, a spell above the castable level, armor the character can't wear
+  well… The DM may give a character anything (it shows with a red outline and
+  the reason); players can only pick what their character qualifies for
+  unless the DM allows rule breaks, for everyone or for one character.
+- **Death is final** — three failed death saves and the character is dead:
+  no resting, no ordinary healing, no more death saves until revivify, raise
+  dead, resurrection or the DM brings them back.
 - **Rules engine** — ability modifiers, proficiency, saves, skills, expertise,
   AC (armor, shields, Unarmored-Defense-style formulas), hit points, hit dice,
   initiative, speed, attacks, spell attack / DC / slots (single and multiclass),
@@ -66,7 +79,8 @@ cargo run --release -p dnd-dm
 
 The app looks for `content/` next to the executable or in the current folder,
 creates `homebrew/`, `saves/`, `exports/` and a `dnd-dm.toml` config on first
-start.
+start. If a build fails with "Access is denied", close the running app first:
+Windows won't replace a program that is open.
 
 Run the tests (rules engine, grid math, save/load, and a check that every file
 in `content/` parses):
@@ -89,8 +103,23 @@ crates/dnd-player   egui player app: Android (NativeActivity) + desktop
 build-android.ps1   cargo-ndk + Gradle -> dist/dnd-player.apk
 docs/CONTENT_FORMAT.md   how to write every kind of file, all modifier targets
 docs/API.md              what player apps can call
-docs/MAP_RESEARCH.md     fog of war / dynamic lighting research and proposal (not built yet)
+docs/PLAYING.md          running a session: fights, spells, rests, death, levelling
+docs/PLAYER_APP.md       the phone app: build, screens, how it is put together
+docs/MAPS.md             maps, fog of war, lighting, walking and doors
+docs/LINUX.md            building on Linux
+docs/DEVELOPING.md       dev switches, screenshots, tests, editing pitfalls
+docs/MAP_RESEARCH.md     the research the map design came from
 ```
+
+## Characters
+
+The DM makes characters on the **Characters** tab, or players build their own
+in the phone app between sessions and send them in. Either way every pick
+(species, class, subclass, background, fighting style, invocations, feats,
+skills, spells, gear) is explained by an (i), and anything the character
+doesn't qualify for is outlined in red with the reason. The DM can always
+go ahead; players need the DM's say-so (Dashboard → *Players may break the
+rules*, or the checkbox on one character's Build tab).
 
 ## Writing content
 

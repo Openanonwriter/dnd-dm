@@ -1,0 +1,67 @@
+id = "outlander"
+name = "Outlander"
+skill_proficiencies = ["athletics", "survival"]
+tool_proficiencies = ["one musical instrument"]
+language_choices = 1
+starting_equipment = ["staff", "hunting trap", "trophy from an animal you killed", "traveler's clothes", "pouch", "10 gp"]
+description = "You grew up in the wilds, far from towns and their comforts, and know the land and its creatures."
+
+[feature]
+name = "Wanderer"
+description = "You remember maps and terrain well and can always recall the general layout of the land around you. You can find food and fresh water each day for yourself and up to five others, if the land offers them."
+
+[[suggestions]]
+name = "Origin"
+fills = "backstory"
+options = ["Forester", "Trapper", "Homesteader", "Wilderness guide", "Exile or outcast", "Bounty hunter", "Pilgrim", "Nomad of a wandering clan", "Hunter-gatherer", "Raider of the borderlands"]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "The horizon always calls me onward.",
+  "I fuss over my companions like a mother wolf over her cubs.",
+  "I'd run all night through the snow to warn my people of danger, and I have.",
+  "Every problem reminds me of something I've seen animals or weather do.",
+  "Fine clothes and good manners mean nothing to me; they won't stop an avalanche.",
+  "My hands are always busy whittling, fidgeting or breaking something.",
+  "I'm more at ease with beasts than with people.",
+  "I don't really understand towns, walls or why anyone lives in them.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Seasons. Everything changes, and so must we. (Chaotic)",
+  "The clan. We do whatever brings the most good to the whole group. (Good)",
+  "Honor. Shame on me is shame on all my kin. (Lawful)",
+  "The strong. The mighty are meant to lead. (Evil)",
+  "The wild. Nature matters more than anything people build. (Neutral)",
+  "Glory. I'll earn great deeds for myself and my people. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "My clan is everything to me, however far away they are.",
+  "Harm the wild lands of my home and you harm me.",
+  "The ones who burned my homeland will feel my anger.",
+  "I'm the last of my people, and I'll make sure their names are remembered.",
+  "Visions of a coming disaster haunt me, and I'll do anything to stop it.",
+  "I must carry on my people's line and traditions.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "Strong drink is my weakness.",
+  "Caution is for people who want to live small lives.",
+  "I never forget a slight and quietly hold every grudge.",
+  "I don't trust outsiders from other lands or peoples.",
+  "My first answer to a problem is my fists.",
+  "I won't risk myself for people who can't fend for themselves.",
+]

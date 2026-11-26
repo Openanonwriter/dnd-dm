@@ -10,7 +10,7 @@ range = "30 feet"
 components = "V, S, M (a tiny bell and a piece of fine silver wire)"
 duration = "8 hours"
 ritual = true
-classes = ["ranger", "wizard"]
+classes = ["ranger", "wizard", "artificer"]
 area = { shape = "cube", size = 20 }
 description = "Set an alarm against intrusion on a door, window or area no larger than a 20-foot cube. Whenever a Tiny or larger creature you didn't name touches or enters it, you get a mental ping (waking you if asleep) or an audible handbell sound for 10 seconds within 60 feet."
 
@@ -170,7 +170,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S"
 duration = "Instantaneous"
-classes = ["bard", "cleric", "druid", "paladin", "ranger"]
+classes = ["bard", "cleric", "druid", "paladin", "ranger", "artificer"]
 heal = "1d8 + mod"
 upcast = "1d8"
 description = "A creature you touch regains hit points equal to 1d8 + your spellcasting ability modifier. No effect on undead or constructs."
@@ -200,7 +200,7 @@ components = "V, S"
 duration = "Concentration, up to 10 minutes"
 concentration = true
 ritual = true
-classes = ["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "wizard"]
+classes = ["bard", "cleric", "druid", "paladin", "ranger", "sorcerer", "wizard", "artificer"]
 description = "You sense the presence of magic within 30 feet. As an action you can see a faint aura around any visible creature or object bearing magic and learn its school. Blocked like detect evil and good."
 
 [[spells]]
@@ -226,7 +226,7 @@ casting_time = "1 action"
 range = "Self"
 components = "V, S"
 duration = "1 hour"
-classes = ["bard", "sorcerer", "wizard"]
+classes = ["bard", "sorcerer", "wizard", "artificer"]
 description = "Change how you look — including clothing, armor and belongings — to seem up to a foot shorter or taller, thinner or fatter, but keeping your basic body shape. Physical inspection can reveal it; a creature can use its action and an Intelligence (Investigation) check against your spell save DC to see through it."
 
 [[spells]]
@@ -267,7 +267,7 @@ range = "Self"
 components = "V, S"
 duration = "Concentration, up to 10 minutes"
 concentration = true
-classes = ["sorcerer", "warlock", "wizard"]
+classes = ["sorcerer", "warlock", "wizard", "artificer"]
 description = "You can take the Dash action when you cast this, and as a bonus action on each of your turns until the spell ends."
 
 [[spells]]
@@ -280,7 +280,7 @@ range = "60 feet"
 components = "V"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["bard", "druid"]
+classes = ["bard", "druid", "artificer"]
 save = "dex"
 area = { shape = "cube", size = 20 }
 description = "Objects in a 20-foot cube are outlined in blue, green or violet light, and so is each creature there that fails a Dexterity save. Outlined things shed dim light 10 feet, attack rolls against them have advantage if the attacker can see them, and they can't benefit from being invisible."
@@ -294,7 +294,7 @@ casting_time = "1 action"
 range = "Self"
 components = "V, S, M (a small amount of alcohol or distilled spirits)"
 duration = "1 hour"
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "Bolster yourself with a necromantic facsimile of life: gain 1d4 + 4 temporary hit points for the duration."
 higher_levels = "+5 temporary hit points for each slot level above 1st."
 
@@ -307,7 +307,7 @@ casting_time = "1 reaction, when you or a creature within 60 feet falls"
 range = "60 feet"
 components = "V, M (a small feather or piece of down)"
 duration = "1 minute"
-classes = ["bard", "sorcerer", "wizard"]
+classes = ["bard", "sorcerer", "wizard", "artificer"]
 description = "Choose up to five falling creatures in range. Their rate of descent slows to 60 feet per round, and if one lands before the spell ends it takes no falling damage and lands on its feet."
 
 [[spells]]
@@ -372,7 +372,7 @@ casting_time = "1 action"
 range = "60 feet"
 components = "V, S, M (a bit of pork rind or butter)"
 duration = "1 minute"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 save = "dex"
 area = { shape = "cube", size = 10 }
 description = "Slick grease covers a 10-foot square, turning it into difficult terrain. Each creature standing there when you cast it, entering it, or ending its turn there must succeed on a Dexterity save or fall prone."
@@ -479,7 +479,7 @@ range = "Touch"
 components = "V, S, M (a pearl worth at least 100 gp and an owl feather)"
 duration = "Instantaneous"
 ritual = true
-classes = ["bard", "wizard"]
+classes = ["bard", "wizard", "artificer"]
 description = "Touch an object: if it is a magic item or magic-imbued object you learn its properties, how to use them, whether it requires attunement and how many charges it has, plus any spells affecting it. Touching a creature reveals the spells currently affecting it."
 
 [[spells]]
@@ -521,7 +521,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (a grasshopper's hind leg)"
 duration = "1 minute"
-classes = ["druid", "ranger", "sorcerer", "wizard"]
+classes = ["druid", "ranger", "sorcerer", "wizard", "artificer"]
 description = "The creature's jump distance is tripled until the spell ends."
 
 [[spells]]
@@ -533,7 +533,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (a pinch of dirt)"
 duration = "1 hour"
-classes = ["bard", "druid", "ranger", "wizard"]
+classes = ["bard", "druid", "ranger", "wizard", "artificer"]
 description = "The target's speed increases by 10 feet until the spell ends."
 higher_levels = "One additional creature for each slot level above 1st."
 
@@ -588,7 +588,7 @@ range = "10 feet"
 components = "V, S"
 duration = "Instantaneous"
 ritual = true
-classes = ["cleric", "druid", "paladin"]
+classes = ["cleric", "druid", "paladin", "artificer"]
 area = { shape = "sphere", size = 5 }
 description = "All nonmagical food and drink within a 5-foot-radius sphere is purified and rendered free of poison and disease."
 
@@ -618,7 +618,7 @@ casting_time = "1 bonus action"
 range = "30 feet"
 components = "V, S, M (a small silver mirror)"
 duration = "1 minute"
-classes = ["cleric"]
+classes = ["cleric", "artificer"]
 description = "Ward a creature against attack. Any creature that targets it with an attack or harmful spell must first make a Wisdom save; on a failure it must choose a new target or lose the attack or spell. It doesn't protect against area effects. It ends if the warded creature attacks, casts a spell that affects an enemy, or deals damage."
 
 [[spells]]

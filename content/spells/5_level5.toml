@@ -10,7 +10,7 @@ range = "120 feet"
 components = "V, S"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["bard", "sorcerer", "wizard"]
+classes = ["bard", "sorcerer", "wizard", "artificer"]
 description = "Up to ten nonmagical objects not worn or carried come to life under your control (a Medium counts as two, Large as four, Huge as eight). As a bonus action you command any within 500 feet. Each attacks with a slam whose bonus and damage depend on size: Tiny +8 / 1d4 + 4, Small +6 / 1d8 + 2, Medium +5 / 2d6 + 1, Large +6 / 2d10 + 2, Huge +8 / 2d12 + 4."
 higher_levels = "Two additional objects for each slot level above 5th."
 
@@ -38,7 +38,7 @@ range = "120 feet"
 components = "V, S, M (an eggshell and a snakeskin glove)"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 attack = true
 damage = "4d8"
 damage_type = "force"
@@ -172,7 +172,7 @@ casting_time = "1 minute"
 range = "30 feet"
 components = "V, S, M (a tiny piece of matter of the same type of the item you plan to create)"
 duration = "Special"
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "Pull wisps of shadow material from the Shadowfell to create a nonliving object of vegetable matter or mineral no larger than a 5-foot cube. Duration depends on the material: vegetable matter 1 day, stone or crystal 12 hours, precious metals 1 hour, gems 10 minutes, adamantine or mithral 1 minute."
 higher_levels = "The cube grows by 5 feet for each slot level above 5th."
 
@@ -263,7 +263,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (diamond dust worth at least 100 gp, which the spell consumes)"
 duration = "Instantaneous"
-classes = ["bard", "cleric", "druid"]
+classes = ["bard", "cleric", "druid", "artificer"]
 description = "Remove one debilitating effect from a creature you touch: one level of exhaustion; being charmed or petrified; one curse (including attunement to a cursed item); any reduction to one ability score; or one effect reducing its hit point maximum."
 
 [[spells]]
@@ -405,6 +405,7 @@ casting_time = "1 hour"
 range = "Touch"
 components = "V, S, M (a diamond worth at least 500 gp, which the spell consumes)"
 duration = "Instantaneous"
+revive = "1"
 classes = ["bard", "cleric", "paladin"]
 description = "Return a creature dead no longer than 10 days to life with 1 hit point, if its soul is willing. It neutralizes poisons and cures nonmagical diseases, but doesn't restore missing body parts or work on undead or those who died of old age. The creature has -4 on attack rolls, saves and ability checks, reduced by 1 each long rest."
 
@@ -417,6 +418,7 @@ casting_time = "1 hour"
 range = "Touch"
 components = "V, S, M (rare oils and unguents worth at least 1,000 gp, which the spell consumes)"
 duration = "Instantaneous"
+revive = "max"
 classes = ["druid"]
 description = "Touch a dead humanoid or piece of one, dead no longer than 10 days. If its soul is willing, a new adult body forms and the soul enters it. Roll d100 for the new body's race (dragonborn, dwarf, elf, gnome, half-elf, half-orc, halfling, human or tiefling). It keeps its mind and class features."
 
@@ -521,6 +523,6 @@ range = "120 feet"
 components = "V, S, M (a small block of granite)"
 duration = "Concentration, up to 10 minutes"
 concentration = true
-classes = ["druid", "sorcerer", "wizard"]
+classes = ["druid", "sorcerer", "wizard", "artificer"]
 save = "dex"
 description = "A nonmagical wall of solid stone appears: ten 10-by-10-foot panels, 6 inches thick (or 10-by-20 panels 3 inches thick). A creature in its path makes a Dexterity save or is pushed to one side. Each panel has AC 15 and 30 hit points per inch of thickness. If you keep concentration for the full duration, the wall becomes permanent."

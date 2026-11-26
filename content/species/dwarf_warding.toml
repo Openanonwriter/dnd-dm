@@ -1,0 +1,63 @@
+# From the DM's "Ultimate 5e" workbook (version 0.1 of this app);
+# descriptions written fresh.
+id = "dwarf_warding"
+name = "Dwarf (Mark of Warding)"
+size = "Medium"
+speed = 25
+darkvision = 60
+languages = ["Common", "Dwarvish"]
+description = "Dwarves carrying the dragonmark of warding: born locksmiths, guards and makers of vaults, with a gift for protective magic."
+
+[[modifiers]]
+target = "ability.con"
+value = "2"
+[[modifiers]]
+target = "ability.int"
+value = "1"
+
+[[traits]]
+name = "Dwarven Resilience"
+description = "Advantage on saving throws against poison, and resistance to poison damage."
+modifiers = [{ target = "save.con", op = "advantage", note = "vs. poison" }]
+
+[[traits]]
+name = "Dwarven Combat Training"
+description = "Proficiency with the battleaxe, handaxe, light hammer and warhammer."
+modifiers = [
+  { target = "proficiency.weapon.battleaxe", op = "grant" },
+  { target = "proficiency.weapon.handaxe", op = "grant" },
+  { target = "proficiency.weapon.light_hammer", op = "grant" },
+  { target = "proficiency.weapon.warhammer", op = "grant" },
+]
+
+[[traits]]
+name = "Tool Proficiency"
+description = "Proficiency with one artisan's tool of your choice: smith's tools, brewer's supplies or mason's tools."
+
+[[traits]]
+name = "Stonecunning"
+description = "Intelligence (History) checks about the origin of stonework count as proficient and add double your proficiency bonus."
+
+[[traits]]
+name = "Warder's Intuition"
+description = "When you make an Intelligence (Investigation) check or an ability check with thieves' tools, roll a d4 and add it to the total."
+modifiers = [{ target = "skill.investigation", op = "note", note = "+1d4 (Warder's Intuition)" }]
+
+[[traits]]
+name = "Wards and Seals"
+description = "You can cast alarm and mage armor once each per long rest without material components (Intelligence is your spellcasting ability). From 3rd character level, arcane lock too."
+spells = ["alarm", "mage_armor"]
+uses = "2"
+recharge = "long_rest"
+
+[[traits]]
+name = "Wards and Seals: Arcane Lock"
+level = 3
+description = "From 3rd character level you can also cast arcane lock once per long rest this way."
+spells = ["arcane_lock"]
+uses = "1"
+recharge = "long_rest"
+
+[[traits]]
+name = "Spells of the Mark"
+description = "If you can cast spells from a class, these are added to that class's spell list for you: alarm, armor of Agathys (1st); arcane lock, knock (2nd); glyph of warding, magic circle (3rd); secret chest, faithful hound (4th); antilife shell (5th). Ask the DM to add them to your known or prepared spells."

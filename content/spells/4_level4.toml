@@ -10,7 +10,7 @@ range = "30 feet"
 components = "V, S, M (a bit of bat fur)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["cleric", "wizard"]
+classes = ["cleric", "wizard", "artificer"]
 description = "Create an invisible, floating magical eye with darkvision 30 feet. You receive its visual information and can look in any direction. As an action move it up to 30 feet in any direction; it can pass through openings an inch across but solid barriers block it."
 
 [[spells]]
@@ -197,7 +197,7 @@ casting_time = "10 minutes"
 range = "120 feet"
 components = "V, S"
 duration = "Instantaneous"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 description = "Convert raw materials into products of the same material: a wooden bridge from a clump of trees, a rope from hemp, clothes from flax or wool. Up to a Large object (in a 10-foot cube), or Medium for mineral material. Quality depends on materials; items needing high craftsmanship require proficiency with the right artisan's tools."
 
 [[spells]]
@@ -211,7 +211,7 @@ components = "V, S, M (a tiny silver whistle, a piece of bone and a thread)"
 duration = "8 hours"
 damage = "4d8"
 damage_type = "piercing"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 description = "An invisible phantom watchdog guards a spot. It sees invisible creatures and into the Ethereal Plane and ignores illusions. When a hostile Small or larger creature comes within 30 feet without your password, it barks loudly. At the start of each of your turns it bites one hostile creature within 5 feet: your spell attack bonus to hit, 4d8 piercing damage."
 
 [[spells]]
@@ -237,7 +237,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (a leather strap, bound around the arm or a similar appendage)"
 duration = "1 hour"
-classes = ["bard", "cleric", "druid", "ranger"]
+classes = ["bard", "cleric", "druid", "ranger", "artificer"]
 description = "A willing creature's movement is unaffected by difficult terrain, and spells and magic can't reduce its speed or cause it to be paralyzed or restrained. It can spend 5 feet of movement to escape nonmagical restraints or a grapple, and being underwater doesn't hamper its movement or attacks."
 
 [[spells]]
@@ -369,7 +369,7 @@ casting_time = "10 minutes"
 range = "120 feet"
 components = "V, S, M (a thin sheet of lead, a piece of opaque glass, a wad of cotton or cloth, and powdered chrysolite)"
 duration = "24 hours"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 area = { shape = "cube", size = 100 }
 description = "Make an area up to a 100-foot cube magically secure. Choose any of: sound can't pass the edge; the barrier is dark and foggy from outside; sensors from divination can't enter or appear; creatures inside can't be targeted by divination; nothing can teleport in or out; planar travel is blocked. Casting it on the same spot every day for a year makes it permanent."
 higher_levels = "The cube can be 100 feet larger per side for each slot level above 4th."
@@ -384,7 +384,7 @@ range = "30 feet"
 components = "V, S, M (a hemispherical piece of clear crystal and a matching hemisphere of gum arabic)"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 save = "dex"
 description = "A sphere of shimmering force encloses a Large or smaller creature or object (an unwilling creature makes a Dexterity save). Nothing physical or magical passes through the sphere, inward or outward. The creature inside can roll it at half speed; others can push it. Disintegrate destroys it."
 
@@ -397,7 +397,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (an exquisite chest, 3 feet by 2 feet by 2 feet, worth at least 5,000 gp, and a Tiny replica of the chest worth at least 50 gp)"
 duration = "Instantaneous"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 description = "Hide a chest and its contents (up to 12 cubic feet) on the Ethereal Plane. Recall it as an action while touching the replica. After 60 days there is a cumulative 5% chance per day that the spell ends and the chest is lost."
 
 [[spells]]
@@ -409,7 +409,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (soft clay, which must be worked into roughly the desired shape of the stone object)"
 duration = "Instantaneous"
-classes = ["cleric", "druid", "wizard"]
+classes = ["cleric", "druid", "wizard", "artificer"]
 description = "Shape a Medium or smaller stone object, or a section of stone no more than 5 feet in any dimension, into any shape: a weapon, an idol, a coffer, a passage, a sealed door. Fine detail and moving parts are beyond it."
 
 [[spells]]
@@ -422,7 +422,7 @@ range = "Touch"
 components = "V, S, M (diamond dust worth 100 gp, which the spell consumes)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["druid", "ranger", "sorcerer", "wizard"]
+classes = ["druid", "ranger", "sorcerer", "wizard", "artificer"]
 description = "A willing creature's flesh becomes hard as stone: it has resistance to nonmagical bludgeoning, piercing and slashing damage until the spell ends."
 
 [[spells]]

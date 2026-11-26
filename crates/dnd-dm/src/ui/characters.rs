@@ -1,7 +1,8 @@
 //! Character builder and live sheet.
 
 use crate::app::DmApp;
-use crate::ui::{bonus, heading, id_combo, list_edit};
+use crate::ui::{bonus, checked_combo, entry_combo, flag, heading, list_edit, BAD};
+use dnd_core::requirements::{self, reasons, Area};
 use dnd_core::model::*;
 use dnd_core::{derive, Library, Sheet};
 use eframe::egui;
@@ -33,7 +34,7 @@ pub struct CharState {
 }
 
 pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
-    egui::SidePanel::left("char_list").resizable(true).default_width(220.0).show_inside(ui, |ui| {
+    egui::SidePanel::left("char_list").resizable(true).default_width(180.0).min_width(140.0).show_inside(ui, |ui| {
         ui.label(egui::RichText::new("Characters").strong());
         let list: Vec<(String, String, String)> = {
             let w = app.world.read().unwrap();
@@ -88,7 +89,10 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             ui.label("Select or create a character.");
             return;
         };
-        ui.horizontal(|ui| {
+        // in a narrow window (or with Windows display scaling) the buttons go
+        // on their own row instead of covering the tabs
+        let narrow = ui.available_width() < 840.0;
+        ui.horizontal_wrapped(|ui| {
             for (t, l) in [
                 (Tab::Build, "Build"),
                 (Tab::Sheet, "Sheet"),
@@ -98,6 +102,9 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 (Tab::Notes, "Notes & State"),
             ] {
                 ui.selectable_value(&mut app.characters.tab, t, l);
+            }
+            if narrow {
+                ui.end_row();
             }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if app.characters.confirm_delete {
@@ -178,15 +185,45 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 }
 
 fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut CharState) {
+    // rule checks: the DM may give anything, but sees what breaks the rules
+    let rules_sheet = derive(ch, lib);
+    let problems = requirements::check_with(lib, ch, &rules_sheet);
+    let renv = requirements::env(ch, &rules_sheet);
+    let feat_bad = |id: &str| lib.feats.get(id).and_then(|f| requirements::feat_failure(&renv, f));
+    heading(ui, "Rules check");
+    ui.horizontal_wrapped(|ui| {
+        ui.checkbox(&mut ch.allow_rule_breaks, "Let this character's player pick options they don't qualify for");
+        dnd_mapview::help::text(ui, "You (the DM) can always give a character anything; it just shows in red. Players can only pick what their character qualifies for, unless you tick this box, or tick \"Players may break the rules\" on the Dashboard for everyone.");
+    });
+    if problems.is_empty() {
+        ui.label(egui::RichText::new("Everything this character has meets the rules.").weak());
+    } else {
+        egui::Frame::new().stroke(egui::Stroke::new(1.5, BAD)).corner_radius(4.0).inner_margin(8.0).show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.label(egui::RichText::new(format!("{} thing(s) break the rules (allowed because you are the DM):", problems.len())).color(BAD).strong());
+            for p in &problems {
+                ui.label(egui::RichText::new(format!("- {}", p.message)).color(BAD));
+            }
+        });
+    }
     heading(ui, "Identity");
-    egui::Grid::new("ident").num_columns(4).spacing([10.0, 6.0]).show(ui, |ui| {
+    // two label/field pairs per row when there's room, one when narrow
+    let narrow = ui.available_width() < 640.0;
+    let field = 170.0;
+    egui::Grid::new("ident").num_columns(if narrow { 2 } else { 4 }).spacing([10.0, 6.0]).show(ui, |ui| {
         ui.label("Name");
-        ui.text_edit_singleline(&mut ch.name);
+        ui.add(egui::TextEdit::singleline(&mut ch.name).desired_width(field));
+        if narrow {
+            ui.end_row();
+        }
         ui.label("Player");
-        ui.text_edit_singleline(&mut ch.player);
+        ui.add(egui::TextEdit::singleline(&mut ch.player).desired_width(field));
         ui.end_row();
         ui.label("Alignment");
-        ui.text_edit_singleline(&mut ch.alignment);
+        ui.add(egui::TextEdit::singleline(&mut ch.alignment).desired_width(field));
+        if narrow {
+            ui.end_row();
+        }
         ui.label("XP");
         ui.horizontal(|ui| {
             ui.add(egui::DragValue::new(&mut ch.xp).speed(10));
@@ -195,9 +232,16 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         });
         ui.end_row();
         ui.label("Species");
-        id_combo(ui, "species", &mut ch.species, &lib.list(Kind::Species), "— none —");
+        ui.horizontal(|ui| {
+            entry_combo(ui, "species", &mut ch.species, &lib.list(Kind::Species), "— none —", lib, Kind::Species);
+        });
+        if narrow {
+            ui.end_row();
+        }
         ui.label("Background");
-        id_combo(ui, "background", &mut ch.background, &lib.list(Kind::Background), "— none —");
+        ui.horizontal(|ui| {
+            entry_combo(ui, "background", &mut ch.background, &lib.list(Kind::Background), "— none —", lib, Kind::Background);
+        });
         ui.end_row();
     });
 
@@ -205,12 +249,15 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     let classes = lib.list(Kind::Class);
     let mut remove: Option<usize> = None;
     for (i, cl) in ch.classes.iter_mut().enumerate() {
-        ui.horizontal(|ui| {
-            id_combo(ui, ("class", i), &mut cl.class, &classes, "— class —");
+        let (lvl, cur_class) = (cl.level, cl.class.clone());
+        ui.horizontal_wrapped(|ui| {
+            checked_combo(ui, ("class", i), &mut cl.class, &classes, "— class —", lib, Kind::Class, |id| if id == cur_class { reasons(&problems, Area::Class, id) } else { None });
+            let sub_at = lib.classes.get(&cl.class).map(|c| c.subclass_level).unwrap_or(1);
             let subs: Vec<(String, String)> = lib.subclasses_of(&cl.class).into_iter().map(|s| (s.id.clone(), s.name.clone())).collect();
             let mut sub = cl.subclass.clone().unwrap_or_default();
             let label = lib.classes.get(&cl.class).map(|c| if c.subclass_label.is_empty() { "— subclass —".to_string() } else { format!("— {} —", c.subclass_label) }).unwrap_or("— subclass —".into());
-            if id_combo(ui, ("subclass", i), &mut sub, &subs, &label) {
+            let sub_bad = |id: &str| if lvl < sub_at { Some(format!("Comes at class level {sub_at}; this character is level {lvl}")) } else { reasons(&problems, Area::Subclass, id) };
+            if checked_combo(ui, ("subclass", i), &mut sub, &subs, &label, lib, Kind::Subclass, sub_bad) {
                 cl.subclass = if sub.is_empty() { None } else { Some(sub) };
             }
             ui.label("Level");
@@ -234,8 +281,9 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     }
 
     heading(ui, "Ability scores (base, before species/feat bonuses)");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ui.label("Method");
+        dnd_mapview::help::term(ui, "ability_method");
         egui::ComboBox::from_id_salt("abmethod").selected_text(if ch.ability_method.is_empty() { "manual" } else { &ch.ability_method }).show_ui(ui, |ui| {
             for m in ["point_buy", "standard_array", "rolled", "manual"] {
                 ui.selectable_value(&mut ch.ability_method, m.to_string(), m);
@@ -263,14 +311,14 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         }
     });
     let sheet = derive(ch, lib);
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         for k in ABILITY_KEYS {
             ui.vertical(|ui| {
                 ui.label(egui::RichText::new(k.to_uppercase()).strong());
                 let v = ch.base_abilities.get_mut(k).unwrap();
                 ui.add(egui::DragValue::new(v).range(1..=30));
                 let fin = sheet.abilities.get(k).unwrap();
-                ui.label(egui::RichText::new(format!("→ {} ({})", fin, bonus(dnd_core::ability_mod(fin)))).weak());
+                ui.label(egui::RichText::new(format!("= {} ({})", fin, bonus(dnd_core::ability_mod(fin)))).weak());
             });
             ui.add_space(6.0);
         }
@@ -286,10 +334,11 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
             let n = (f.picks as usize).max(slots.len());
             slots.resize(n, String::new());
             let mut changed = false;
+            ui.label(egui::RichText::new(format!("{} ({}, pick {})", f.name, f.source, f.picks)).strong()).on_hover_text(&f.description);
             ui.horizontal_wrapped(|ui| {
-                ui.label(egui::RichText::new(format!("{} ({}, pick {})", f.name, f.source, f.picks)).strong()).on_hover_text(&f.description);
+                ui.add_space(12.0);
                 for (i, slot) in slots.iter_mut().enumerate() {
-                    changed |= id_combo(ui, ("choice", &f.name, i), slot, &opts, "— choose —");
+                    changed |= checked_combo(ui, ("choice", &f.name, i), slot, &opts, "— choose —", lib, Kind::Feat, feat_bad);
                 }
             });
             if changed {
@@ -313,7 +362,8 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     let feats: Vec<(String, String)> = lib.list(Kind::Feat).into_iter().filter(|(id, _)| lib.feats.get(id).map(|f| !dnd_core::builder::is_option_feat(f)).unwrap_or(true)).collect();
     let mut remove: Option<usize> = None;
     for (i, adv) in ch.advancements.iter_mut().enumerate() {
-        ui.horizontal(|ui| {
+        let adv_why = reasons(&problems, Area::Advancement, &adv.level.to_string());
+        let row = ui.horizontal_wrapped(|ui| {
             ui.label("Level");
             ui.add(egui::DragValue::new(&mut adv.level).range(1..=20));
             for k in ABILITY_KEYS {
@@ -329,18 +379,19 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
             }
             ui.label("or feat");
             let mut f = adv.feat.clone().unwrap_or_default();
-            if id_combo(ui, ("advfeat", i), &mut f, &feats, "— none —") {
+            if checked_combo(ui, ("advfeat", i), &mut f, &feats, "— none —", lib, Kind::Feat, feat_bad) {
                 adv.feat = if f.is_empty() { None } else { Some(f) };
             }
             if ui.small_button("✖").clicked() {
                 remove = Some(i);
             }
         });
+        flag(ui, &row.response, adv_why.as_deref());
     }
     if let Some(i) = remove {
         ch.advancements.remove(i);
     }
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         if ui.button("➕ Add advancement").clicked() {
             let next = ch.advancements.iter().map(|a| a.level).max().map(|l| l + 4).unwrap_or(4);
             ch.advancements.push(Advancement { level: next, ..Default::default() });
@@ -359,14 +410,17 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         let mut remove: Option<usize> = None;
         for (i, f) in ch.feats.iter().enumerate() {
             let name = lib.feats.get(f).map(|x| x.name.clone()).unwrap_or_else(|| f.clone());
-            if ui.button(format!("{name} ✖")).clicked() {
+            dnd_mapview::help::entry(ui, lib, Kind::Feat, f);
+            let b = ui.button(format!("{name} ✖"));
+            flag(ui, &b, reasons(&problems, Area::Feat, f).as_deref());
+            if b.clicked() {
                 remove = Some(i);
             }
         }
         if let Some(i) = remove {
             ch.feats.remove(i);
         }
-        id_combo(ui, "featpick", &mut st.feat_pick, &feats, "— pick feat —");
+        checked_combo(ui, "featpick", &mut st.feat_pick, &feats, "— pick feat —", lib, Kind::Feat, feat_bad);
         if ui.button("Add").clicked() && !st.feat_pick.is_empty() {
             ch.feats.push(st.feat_pick.clone());
             st.feat_pick.clear();
@@ -393,8 +447,10 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
             let ui = &mut cols[i % 3];
             let mut on = ch.skill_proficiencies.contains(&s.key);
             let granted = sheet.skills.iter().find(|k| k.key == s.key).map(|k| k.proficient && !on).unwrap_or(false);
-            let label = format!("{} ({}){}", s.name, s.ability.to_uppercase(), if granted { " ✓granted" } else { "" });
-            if ui.checkbox(&mut on, label).changed() {
+            let label = format!("{} ({}){}", s.name, s.ability.to_uppercase(), if granted { " (granted)" } else { "" });
+            let r = ui.checkbox(&mut on, label);
+            flag(ui, &r, reasons(&problems, Area::Skill, &s.key).as_deref());
+            if r.changed() {
                 if on {
                     ch.skill_proficiencies.push(s.key.clone());
                 } else {
@@ -423,21 +479,29 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
 }
 
 fn stat_box(ui: &mut egui::Ui, label: &str, value: &str, sub: &str) {
-    egui::Frame::group(ui.style()).inner_margin(6.0).show(ui, |ui| {
-        ui.set_min_width(90.0);
-        ui.vertical_centered(|ui| {
+    // a fixed-width tile, so a row of them wraps instead of each one
+    // stretching across the panel; long breakdowns are cut with a tooltip
+    let r = egui::Frame::group(ui.style()).inner_margin(6.0).show(ui, |ui| {
+        ui.set_width(96.0);
+        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
             ui.label(egui::RichText::new(label).weak().small());
             ui.label(egui::RichText::new(value).strong().size(20.0));
             if !sub.is_empty() {
-                ui.label(egui::RichText::new(sub).weak().small());
+                ui.add(egui::Label::new(egui::RichText::new(sub).weak().small()).truncate()).on_hover_text(sub);
             }
         });
     });
+    let key = match label {
+        "Prof. bonus" => "proficiency_bonus",
+        "Passive Perc." => "passive_perception",
+        other => other,
+    };
+    dnd_mapview::help::term_in_corner(ui, r.response.rect, key);
 }
 
 fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut CharState) {
     let s: Sheet = derive(ch, lib);
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ui.label(egui::RichText::new(&s.name).strong().size(22.0));
         ui.label(egui::RichText::new(format!("{} · {} · {} · level {}", s.class_line, s.species, s.background, s.level)).weak());
         ui.checkbox(&mut st.show_trace, "show modifier trace");
@@ -445,21 +509,29 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     for wmsg in &s.warnings {
         ui.colored_label(egui::Color32::from_rgb(220, 150, 60), format!("⚠ {wmsg}"));
     }
+    let mut tiles: Vec<(String, String, String)> = s.abilities.iter().map(|(k, v)| (k.to_uppercase(), bonus(dnd_core::ability_mod(v)), v.to_string())).collect();
+    tiles.push(("Armor Class".into(), s.ac.to_string(), s.ac_breakdown.clone()));
+    tiles.push(("Initiative".into(), bonus(s.initiative), String::new()));
+    tiles.push(("Speed".into(), format!("{} ft", s.speed), s.speeds.iter().filter(|(k, _)| *k != "walk").map(|(k, v)| format!("{k} {v}")).collect::<Vec<_>>().join(" ")));
+    tiles.push(("Prof. bonus".into(), bonus(s.proficiency_bonus), String::new()));
+    tiles.push(("Passive Perc.".into(), s.passive_perception.to_string(), if s.darkvision > 0 { "darkvision".into() } else { String::new() }));
+    tiles.push(("Hit dice".into(), s.hit_dice.iter().map(|(d, n)| format!("{n}{d}")).collect::<Vec<_>>().join(" "), String::new()));
+    // as many tiles per row as fit (egui can't wrap framed tiles by itself)
+    let per_row = (((ui.available_width() - 16.0) / 118.0).floor() as usize).max(1);
+    for row in tiles.chunks(per_row) {
+        ui.horizontal(|ui| {
+            for (label, value, sub) in row {
+                stat_box(ui, label, value, sub);
+            }
+        });
+    }
     ui.horizontal_wrapped(|ui| {
-        for (k, v) in s.abilities.iter() {
-            stat_box(ui, &k.to_uppercase(), &bonus(dnd_core::ability_mod(v)), &v.to_string());
+        if ch.is_dead() {
+            ui.label(egui::RichText::new("DEAD").color(BAD).strong());
+            dnd_mapview::help::term(ui, "dead");
         }
-    });
-    ui.horizontal_wrapped(|ui| {
-        stat_box(ui, "Armor Class", &s.ac.to_string(), &s.ac_breakdown);
-        stat_box(ui, "Initiative", &bonus(s.initiative), "");
-        stat_box(ui, "Speed", &format!("{} ft", s.speed), &s.speeds.iter().filter(|(k, _)| *k != "walk").map(|(k, v)| format!("{k} {v}")).collect::<Vec<_>>().join(" "));
-        stat_box(ui, "Prof. bonus", &bonus(s.proficiency_bonus), "");
-        stat_box(ui, "Passive Perc.", &s.passive_perception.to_string(), if s.darkvision > 0 { "darkvision" } else { "" });
-        stat_box(ui, "Hit dice", &s.hit_dice.iter().map(|(d, n)| format!("{n}{d}")).collect::<Vec<_>>().join(" "), "");
-    });
-    ui.horizontal(|ui| {
         ui.label(egui::RichText::new("Hit points").strong());
+        dnd_mapview::help::term(ui, "hit_points");
         ui.add(egui::DragValue::new(&mut ch.hp.current).range(-999..=s.hp_max));
         ui.label(format!("/ {}", s.hp_max));
         ui.label("temp");
@@ -475,18 +547,23 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         if let Some(m) = ch.hp.max_override.as_mut() {
             ui.add(egui::DragValue::new(m).range(1..=999));
         }
-        ui.label("Death saves ✓");
+    });
+    ui.horizontal_wrapped(|ui| {
+        // the built-in font has no check/cross glyphs, so words instead
+        ui.label("Death saves: successes");
+        dnd_mapview::help::term(ui, "death_saves");
         ui.add(egui::DragValue::new(&mut ch.death_saves.successes).range(0..=3));
-        ui.label("✗");
+        ui.label("failures");
         ui.add(egui::DragValue::new(&mut ch.death_saves.failures).range(0..=3));
         ui.checkbox(&mut ch.inspiration, "Inspiration");
+        dnd_mapview::help::term(ui, "inspiration");
     });
 
     ui.columns(2, |cols| {
         let ui = &mut cols[0];
         heading(ui, "Saving throws");
         for sv in &s.saves {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label(if sv.proficient { "⏺" } else { "○" });
                 ui.label(format!("{:<13}", sv.name));
                 ui.label(egui::RichText::new(bonus(sv.bonus)).strong());
@@ -557,9 +634,10 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         let ui = &mut cols[1];
         heading(ui, "Skills");
         for sk in &s.skills {
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label(if sk.expertise { "★" } else if sk.proficient { "⏺" } else { "○" });
                 ui.label(format!("{} ({})", sk.name, sk.ability.to_uppercase()));
+                dnd_mapview::help::term(ui, &sk.key);
                 ui.label(egui::RichText::new(bonus(sk.bonus)).strong());
                 if !sk.notes.is_empty() {
                     ui.label(egui::RichText::new(sk.notes.join("; ")).weak().small());
@@ -594,12 +672,13 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
 
 fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut CharState) {
     let s = derive(ch, lib);
+    let problems = requirements::check_with(lib, ch, &s);
     heading(ui, "Add item");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ui.add(egui::TextEdit::singleline(&mut st.item_filter).hint_text("filter").desired_width(120.0));
         let f = st.item_filter.to_lowercase();
         let items: Vec<(String, String)> = lib.list(Kind::Item).into_iter().filter(|(id, n)| f.is_empty() || n.to_lowercase().contains(&f) || id.contains(&f)).collect();
-        id_combo(ui, "itempick", &mut st.item_pick, &items, "— item —");
+        entry_combo(ui, "itempick", &mut st.item_pick, &items, "— item —", lib, Kind::Item);
         if st.item_qty == 0 {
             st.item_qty = 1;
         }
@@ -636,7 +715,15 @@ fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut 
         for (i, inv) in ch.inventory.iter_mut().enumerate() {
             let item = if inv.custom { None } else { lib.items.get(&inv.item) };
             let name = item.map(|x| x.name.clone()).unwrap_or_else(|| if inv.name.is_empty() { inv.item.clone() } else { inv.name.clone() });
-            ui.label(&name).on_hover_text(item.map(|x| x.description.clone()).unwrap_or_default());
+            ui.horizontal(|ui| {
+                let r = ui.label(&name);
+                if inv.equipped {
+                    flag(ui, &r, reasons(&problems, Area::Item, &inv.item).as_deref());
+                }
+                if item.is_some() {
+                    dnd_mapview::help::entry(ui, lib, Kind::Item, &inv.item);
+                }
+            });
             ui.add(egui::DragValue::new(&mut inv.qty).range(0..=999));
             let equippable = item.map(|x| x.weapon.is_some() || x.armor.is_some() || !x.modifiers.is_empty()).unwrap_or(true);
             ui.add_enabled(equippable, egui::Checkbox::new(&mut inv.equipped, ""));
@@ -656,7 +743,7 @@ fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut 
         ch.inventory.remove(i);
     }
     heading(ui, "Coins");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         for (l, v) in [("cp", &mut ch.currency.cp), ("sp", &mut ch.currency.sp), ("ep", &mut ch.currency.ep), ("gp", &mut ch.currency.gp), ("pp", &mut ch.currency.pp)] {
             ui.label(l);
             ui.add(egui::DragValue::new(v).range(0..=1_000_000));
@@ -669,8 +756,12 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
     if s.spellcasting.is_empty() {
         ui.label("No spellcasting class. (Classes or subclasses get a [spellcasting] table in their TOML.)");
     }
+    // counts over the limit (you may; it just shows in red)
+    for p in requirements::check_with(lib, ch, &s).iter().filter(|p| p.area == Area::Spell && p.key.is_empty()) {
+        ui.label(egui::RichText::new(&p.message).color(BAD));
+    }
     heading(ui, "Spell slots used");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ch.spells.slots_used.resize(9, 0);
         for (i, n) in s.spell_slots.iter().enumerate() {
             if *n == 0 {
@@ -691,7 +782,7 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
         }
     });
     heading(ui, "Spell list");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         ui.add(egui::TextEdit::singleline(&mut st.spell_filter).hint_text("filter").desired_width(160.0));
         ui.label(egui::RichText::new(format!("known {} · prepared {}{}", ch.spells.known.len(), ch.spells.prepared.len(), s.spellcasting.iter().filter_map(|c| c.prepared_max).map(|m| format!(" (max {m})")).collect::<String>())).weak());
     });
@@ -738,7 +829,17 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
                 }
             }
             ui.label(if sp.level == 0 { "C".to_string() } else { sp.level.to_string() });
-            ui.label(&sp.name).on_hover_text(&sp.description);
+            ui.horizontal(|ui| {
+                // red: the character can't cast it yet (or at all); outlined if known anyway
+                let why = requirements::spell_failure(lib, &s, sp);
+                let r = ui.label(if why.is_some() { egui::RichText::new(&sp.name).color(BAD) } else { egui::RichText::new(&sp.name) });
+                if ch.spells.known.contains(&sp.id) {
+                    flag(ui, &r, why.as_deref());
+                } else if let Some(w) = &why {
+                    r.on_hover_text(w);
+                }
+                dnd_mapview::help::entry(ui, lib, Kind::Spell, &sp.id);
+            });
             ui.label(format!("{} / {}", sp.casting_time, sp.range));
             let mut eff = String::new();
             if !sp.damage.is_empty() {
@@ -821,7 +922,7 @@ fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
     ui.horizontal_wrapped(|ui| {
         for c in &lib.rules.conditions {
             let mut on = ch.conditions.contains(c);
-            if ui.checkbox(&mut on, c).changed() {
+            if ui.checkbox(&mut on, c).on_hover_text(dnd_core::glossary::explain(c).unwrap_or("")).changed() {
                 if on {
                     ch.conditions.push(c.clone());
                 } else {
@@ -830,10 +931,11 @@ fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
             }
         }
         ui.label("Exhaustion");
+        dnd_mapview::help::term(ui, "exhaustion");
         ui.add(egui::DragValue::new(&mut ch.exhaustion).range(0..=6));
     });
     heading(ui, "Hit dice spent");
-    ui.horizontal(|ui| {
+    ui.horizontal_wrapped(|ui| {
         let s = derive(ch, lib);
         for (d, n) in &s.hit_dice {
             let used = ch.hp.hit_dice_used.entry(d.clone()).or_insert(0);
@@ -841,7 +943,17 @@ fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
             ui.add(egui::DragValue::new(used).range(0..=*n));
             ui.label(egui::RichText::new(format!("/{n}")).weak());
         }
-        if ui.button("Long rest").clicked() {
+        // the dead don't rest; bringing them back is a separate, deliberate call
+        let dead = ch.is_dead();
+        let rest = ui.add_enabled(!dead, egui::Button::new("Long rest"));
+        if dead {
+            crate::ui::red_outline(ui, rest.rect);
+            rest.clone().on_disabled_hover_text(egui::RichText::new("Dead: resting won't bring them back. Use \"Bring back to life\" if magic (revivify, raise dead) or your story revives them.").color(BAD));
+            if ui.button(egui::RichText::new("Bring back to life (1 HP)").color(BAD)).on_hover_text("DM override: back at 1 hit point, death saves cleared").clicked() {
+                dnd_core::play::revive(ch, 1);
+            }
+        }
+        if rest.clicked() {
             ch.hp.hit_dice_used.clear();
             ch.spells.slots_used = vec![0; 9];
             ch.spells.pact_slots_used = 0;
@@ -851,18 +963,30 @@ fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
         }
     });
     heading(ui, "Roleplay");
-    for (l, v) in [
-        ("Appearance", &mut ch.appearance),
-        ("Personality", &mut ch.personality),
-        ("Ideals", &mut ch.ideals),
-        ("Bonds", &mut ch.bonds),
-        ("Flaws", &mut ch.flaws),
-    ] {
-        ui.label(l);
-        ui.add(egui::TextEdit::multiline(v).desired_rows(2).desired_width(f32::INFINITY));
+    ui.label("Appearance");
+    ui.add(egui::TextEdit::multiline(&mut ch.appearance).desired_rows(2).desired_width(f32::INFINITY));
+    // each field can pull ideas from the background's suggestion tables
+    let tables: Vec<SuggestionTable> = lib.backgrounds.get(&ch.background).map(|b| b.suggestions.clone()).unwrap_or_default();
+    for (label, key, rows) in [("Personality", "personality", 2), ("Ideals", "ideals", 2), ("Bonds", "bonds", 2), ("Flaws", "flaws", 2), ("Backstory", "backstory", 6)] {
+        ui.horizontal(|ui| {
+            ui.label(label);
+            dnd_mapview::help::term(ui, key);
+            for t in tables.iter().filter(|t| t.fills == key) {
+                ui.menu_button(format!("{} ideas...", t.name), |ui| {
+                    ui.set_max_width(420.0);
+                    for o in &t.options {
+                        let on = dnd_core::builder::has_suggestion(ch, key, o);
+                        if ui.selectable_label(on, o).clicked() {
+                            dnd_core::builder::toggle_suggestion(ch, key, o);
+                        }
+                    }
+                });
+            }
+        });
+        if let Some(v) = dnd_core::builder::suggestion_field(ch, key) {
+            ui.add(egui::TextEdit::multiline(v).desired_rows(rows).desired_width(f32::INFINITY));
+        }
     }
-    ui.label("Backstory");
-    ui.add(egui::TextEdit::multiline(&mut ch.backstory).desired_rows(6).desired_width(f32::INFINITY));
     ui.label("Notes (player can see)");
     ui.add(egui::TextEdit::multiline(&mut ch.notes).desired_rows(6).desired_width(f32::INFINITY));
     ui.label(egui::RichText::new("DM notes (never sent to the player app)").color(crate::ui::theme::ORANGE));

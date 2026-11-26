@@ -152,6 +152,10 @@ pub struct Seat {
     /// Level that player-made characters start at.
     #[serde(default)]
     pub start_level: u32,
+    /// The DM lets this device pick options its character doesn't qualify
+    /// for (campaign-wide, or for the assigned character).
+    #[serde(default)]
+    pub allow_rule_breaks: bool,
 }
 
 /// A player asking the server to roll their ability scores.
@@ -195,6 +199,9 @@ pub struct BuilderOptions {
     /// Spells players may see, for choosing a caster's spells.
     #[serde(default)]
     pub spells: Vec<Spell>,
+    /// Visible items in full, so the player app can explain them.
+    #[serde(default)]
+    pub item_entries: Vec<Item>,
 }
 
 /// A player asking for something to be rolled where the whole table sees it.
@@ -347,11 +354,18 @@ impl PlayerPatch {
 impl Character {
     /// Apply a player's changes, keeping everything DM-owned intact.
     pub fn apply_player_patch(&mut self, p: PlayerPatch) {
-        if let Some(v) = p.hp {
+        // a dead character stays dead until magic or the DM brings it back
+        let dead = self.is_dead();
+        if let Some(mut v) = p.hp {
+            if dead {
+                v.current = self.hp.current;
+            }
             self.hp = v;
         }
         if let Some(v) = p.death_saves {
-            self.death_saves = v;
+            if !dead {
+                self.death_saves = v;
+            }
         }
         if let Some(mut v) = p.spells {
             // which spells a character knows is decided by `play::choose_spells`

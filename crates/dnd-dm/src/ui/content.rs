@@ -119,9 +119,9 @@ pub fn flush(app: &mut DmApp) {
             app.content.saved = Some(draft);
             app.content.error.clear();
             app.content.info = if override_base {
-                format!("Saved as homebrew override → {}", path.display())
+                format!("Saved as homebrew override: {}", path.display())
             } else {
-                format!("Saved → {}", path.display())
+                format!("Saved: {}", path.display())
             };
         }
         Err(e) => app.content.error = format!("Save failed: {e:#}"),
@@ -210,7 +210,8 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             select(app, kind, &id);
         }
         ui.separator();
-        section(ui, &format!("New {}", kind.label().trim_end_matches('s').trim_end_matches("ie").to_lowercase()));
+        let one = match kind { Kind::Species => "species", Kind::Class => "class", Kind::Subclass => "subclass", Kind::Background => "background", Kind::Item => "item", Kind::Feat => "feat", Kind::Spell => "spell", Kind::Creature => "creature" };
+        section(ui, &format!("New {one}"));
         ui.add(egui::TextEdit::singleline(&mut app.content.new_name).hint_text("Name").desired_width(f32::INFINITY));
         ui.add(egui::TextEdit::singleline(&mut app.content.new_id).hint_text("id (auto from name)").desired_width(f32::INFINITY));
         if ui.add(theme::primary("➕ Create")).clicked() && !app.content.new_name.trim().is_empty() {

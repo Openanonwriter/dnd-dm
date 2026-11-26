@@ -1,0 +1,77 @@
+id = "folk_hero"
+name = "Folk Hero"
+skill_proficiencies = ["animal_handling", "survival"]
+tool_proficiencies = ["one type of artisan's tools", "vehicles (land)"]
+starting_equipment = ["artisan's tools", "shovel", "iron pot", "common clothes", "pouch", "10 gp"]
+description = "You came from humble beginnings, but the common folk see you as their champion after you stood up for them once."
+
+[feature]
+name = "Rustic Hospitality"
+description = "Ordinary people treat you as one of their own. They will hide you, feed you and let you rest among them unless you've shown yourself a danger to them, and they'll shield you from the law, though not at the cost of their lives."
+
+[[suggestions]]
+name = "Defining event"
+fills = "backstory"
+options = [
+  "I faced down a cruel lord's soldiers in the village square.",
+  "When the flood came, I pulled my neighbors from the water.",
+  "I stood alone against a beast that was killing our herds.",
+  "I robbed a crooked merchant and shared it with the hungry.",
+  "I rallied farmers into a militia against raiders.",
+  "I slipped into a tyrant's keep and armed the people with stolen weapons.",
+  "I taught villagers to fight off bandits with pitchforks and flails.",
+  "My protest made a lord take back an unjust law.",
+  "A strange being of light or the fey world marked me for a destiny.",
+  "Drafted into a war, I rose through the ranks and came home a hero.",
+]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "Talk is cheap; I watch what people do.",
+  "I can't walk past someone who needs help.",
+  "Once I start something, I see it through to the end.",
+  "I always look for the fair way to settle a quarrel.",
+  "My steady confidence puts the people around me at ease.",
+  "I'd rather act now and think later.",
+  "I use big words I don't quite understand to sound learned.",
+  "Waiting bores me; destiny should hurry up.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Dignity. Every person deserves to be treated with respect. (Good)",
+  "Equal justice. The law applies to lords and peasants alike. (Lawful)",
+  "Liberty. No tyrant should ever stand over the people. (Chaotic)",
+  "Strength. Get strong enough and you can take what you're owed. (Evil)",
+  "Honesty. I'm not going to pretend to be something I'm not. (Neutral)",
+  "Calling. Nothing will turn me from the path I'm meant to walk. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "My family scattered, and I'm searching for them.",
+  "The fields I grew up on are worth protecting with my life.",
+  "A noble once beat me for sport; every bully I meet pays for it.",
+  "I carry my old work tools so I never forget where I came from.",
+  "Someone has to stand up for those who can't, and that's me.",
+  "I left my sweetheart behind to follow my destiny, and I miss them.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "The tyrant of my homeland has a price on my head.",
+  "I'm so sure of my destiny that I can't see my own faults.",
+  "The people back home know a shameful secret about me, so I can't return.",
+  "City life's temptations, especially drink, pull at me hard.",
+  "Part of me thinks I'd make a better tyrant than the one I fought.",
+  "I find it very hard to trust my companions.",
+]

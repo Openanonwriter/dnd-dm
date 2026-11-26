@@ -121,6 +121,7 @@ description = "Your patron gives you a Book of Shadows. Choose three cantrips fr
 [[feats]]
 id = "inv_agonizing_blast"
 name = "Agonizing Blast"
+requires = "spell.eldritch_blast"
 prerequisite = "eldritch blast cantrip"
 tags = ["option", "eldritch_invocation"]
 description = "When you cast eldritch blast, add your Charisma modifier to the damage it deals on a hit."
@@ -134,6 +135,7 @@ description = "You can cast mage armor on yourself at will, without expending a 
 [[feats]]
 id = "inv_ascendant_step"
 name = "Ascendant Step"
+requires = "class.warlock.level >= 9"
 prerequisite = "9th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast levitate on yourself at will, without expending a spell slot or material components."
@@ -154,6 +156,7 @@ modifiers = [{ target = "proficiency.skill.deception", op = "grant" }, { target 
 [[feats]]
 id = "inv_bewitching_whispers"
 name = "Bewitching Whispers"
+requires = "class.warlock.level >= 7"
 prerequisite = "7th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast compulsion once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -161,6 +164,7 @@ description = "You can cast compulsion once using a warlock spell slot. You can'
 [[feats]]
 id = "inv_book_of_ancient_secrets"
 name = "Book of Ancient Secrets"
+requires = "feat.pact_tome"
 prerequisite = "Pact of the Tome"
 tags = ["option", "eldritch_invocation"]
 description = "Inscribe two 1st-level ritual spells from any class's list in your Book of Shadows; you can cast them as rituals while holding it. You can add other ritual spells you find of up to half your warlock level (rounded up), at 50 gp and 2 hours per spell level."
@@ -168,6 +172,7 @@ description = "Inscribe two 1st-level ritual spells from any class's list in you
 [[feats]]
 id = "inv_chains_of_carceri"
 name = "Chains of Carceri"
+requires = "class.warlock.level >= 15 && feat.pact_chain"
 prerequisite = "15th level, Pact of the Chain"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast hold monster at will — targeting a celestial, fiend or elemental — without a slot or material components. You must finish a long rest before using this on the same creature again."
@@ -182,6 +187,7 @@ modifiers = [{ target = "darkvision", op = "max", value = "120" }]
 [[feats]]
 id = "inv_dreadful_word"
 name = "Dreadful Word"
+requires = "class.warlock.level >= 7"
 prerequisite = "7th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast confusion once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -195,6 +201,7 @@ description = "You can cast detect magic at will, without expending a spell slot
 [[feats]]
 id = "inv_eldritch_spear"
 name = "Eldritch Spear"
+requires = "spell.eldritch_blast"
 prerequisite = "eldritch blast cantrip"
 tags = ["option", "eldritch_invocation"]
 description = "When you cast eldritch blast, its range is 300 feet."
@@ -220,6 +227,7 @@ description = "Action: touch a willing humanoid and perceive through its senses 
 [[feats]]
 id = "inv_lifedrinker"
 name = "Lifedrinker"
+requires = "class.warlock.level >= 12 && feat.pact_blade"
 prerequisite = "12th level, Pact of the Blade"
 tags = ["option", "eldritch_invocation"]
 description = "When you hit a creature with your pact weapon, it takes extra necrotic damage equal to your Charisma modifier (minimum 1)."
@@ -233,6 +241,7 @@ description = "You can cast disguise self at will, without expending a spell slo
 [[feats]]
 id = "inv_master_of_myriad_forms"
 name = "Master of Myriad Forms"
+requires = "class.warlock.level >= 15"
 prerequisite = "15th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast alter self at will, without expending a spell slot."
@@ -240,6 +249,7 @@ description = "You can cast alter self at will, without expending a spell slot."
 [[feats]]
 id = "inv_minions_of_chaos"
 name = "Minions of Chaos"
+requires = "class.warlock.level >= 9"
 prerequisite = "9th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast conjure elemental once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -247,6 +257,7 @@ description = "You can cast conjure elemental once using a warlock spell slot. Y
 [[feats]]
 id = "inv_mire_the_mind"
 name = "Mire the Mind"
+requires = "class.warlock.level >= 5"
 prerequisite = "5th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast slow once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -260,6 +271,7 @@ description = "You can cast silent image at will, without expending a spell slot
 [[feats]]
 id = "inv_one_with_shadows"
 name = "One with Shadows"
+requires = "class.warlock.level >= 5"
 prerequisite = "5th level"
 tags = ["option", "eldritch_invocation"]
 description = "When you are in an area of dim light or darkness, you can use your action to become invisible until you move or take an action or reaction."
@@ -267,6 +279,7 @@ description = "When you are in an area of dim light or darkness, you can use you
 [[feats]]
 id = "inv_otherworldly_leap"
 name = "Otherworldly Leap"
+requires = "class.warlock.level >= 9"
 prerequisite = "9th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast jump on yourself at will, without expending a spell slot or material components."
@@ -274,6 +287,7 @@ description = "You can cast jump on yourself at will, without expending a spell 
 [[feats]]
 id = "inv_repelling_blast"
 name = "Repelling Blast"
+requires = "spell.eldritch_blast"
 prerequisite = "eldritch blast cantrip"
 tags = ["option", "eldritch_invocation"]
 description = "When you hit a creature with eldritch blast, you can push it up to 10 feet away from you in a straight line."
@@ -281,6 +295,7 @@ description = "When you hit a creature with eldritch blast, you can push it up t
 [[feats]]
 id = "inv_sculptor_of_flesh"
 name = "Sculptor of Flesh"
+requires = "class.warlock.level >= 7"
 prerequisite = "7th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast polymorph once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -288,6 +303,7 @@ description = "You can cast polymorph once using a warlock spell slot. You can't
 [[feats]]
 id = "inv_sign_of_ill_omen"
 name = "Sign of Ill Omen"
+requires = "class.warlock.level >= 5"
 prerequisite = "5th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast bestow curse once using a warlock spell slot. You can't do so again until you finish a long rest."
@@ -301,6 +317,7 @@ description = "You can cast bane once using a warlock spell slot. You can't do s
 [[feats]]
 id = "inv_thirsting_blade"
 name = "Thirsting Blade"
+requires = "class.warlock.level >= 5 && feat.pact_blade"
 prerequisite = "5th level, Pact of the Blade"
 tags = ["option", "eldritch_invocation"]
 description = "You can attack with your pact weapon twice, instead of once, whenever you take the Attack action on your turn."
@@ -308,6 +325,7 @@ description = "You can attack with your pact weapon twice, instead of once, when
 [[feats]]
 id = "inv_visions_of_distant_realms"
 name = "Visions of Distant Realms"
+requires = "class.warlock.level >= 15"
 prerequisite = "15th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast arcane eye at will, without expending a spell slot."
@@ -315,6 +333,7 @@ description = "You can cast arcane eye at will, without expending a spell slot."
 [[feats]]
 id = "inv_voice_of_the_chain_master"
 name = "Voice of the Chain Master"
+requires = "feat.pact_chain"
 prerequisite = "Pact of the Chain"
 tags = ["option", "eldritch_invocation"]
 description = "You can communicate telepathically with your familiar and perceive through its senses at any distance on the same plane. While doing so you can speak through it in your own voice."
@@ -322,6 +341,7 @@ description = "You can communicate telepathically with your familiar and perceiv
 [[feats]]
 id = "inv_whispers_of_the_grave"
 name = "Whispers of the Grave"
+requires = "class.warlock.level >= 9"
 prerequisite = "9th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can cast speak with dead at will, without expending a spell slot."
@@ -329,6 +349,7 @@ description = "You can cast speak with dead at will, without expending a spell s
 [[feats]]
 id = "inv_witch_sight"
 name = "Witch Sight"
+requires = "class.warlock.level >= 15"
 prerequisite = "15th level"
 tags = ["option", "eldritch_invocation"]
 description = "You can see the true form of any shapechanger or creature concealed by illusion or transmutation magic within 30 feet of you and within line of sight."

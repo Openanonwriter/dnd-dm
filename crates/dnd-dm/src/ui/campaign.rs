@@ -20,7 +20,10 @@ pub fn save_quiet(app: &mut DmApp) -> anyhow::Result<std::path::PathBuf> {
     if name.is_empty() {
         anyhow::bail!("campaign has no name");
     }
-    let dir = app.paths.saves_dir.join(&name);
+    if app.no_save {
+        anyhow::bail!("this run doesn't save (picture-taking mode)");
+    }
+    let dir = app.campaign_dir.clone().unwrap_or_else(|| app.paths.saves_dir.join(&name));
     let mut w = app.world.write().unwrap();
     save::save_campaign(&mut w.campaign, &dir)?;
     Ok(dir)

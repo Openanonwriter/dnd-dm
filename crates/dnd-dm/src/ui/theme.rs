@@ -71,7 +71,13 @@ pub fn apply(ctx: &egui::Context) {
 /// Orange section title with a rule under it.
 pub fn section(ui: &mut egui::Ui, text: &str) {
     ui.add_space(8.0);
-    ui.label(egui::RichText::new(text.to_uppercase()).color(ORANGE).strong().size(12.5));
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new(text.to_uppercase()).color(ORANGE).strong().size(12.5));
+        // a (i) with a plain explanation when the heading is a game term
+        if let Some(t) = dnd_core::glossary::explain_heading(text) {
+            dnd_mapview::help::info(ui, t);
+        }
+    });
     let r = ui.available_rect_before_wrap();
     let y = r.top();
     ui.painter().line_segment([egui::pos2(r.left(), y), egui::pos2(r.right(), y)], Stroke::new(1.0, ORANGE_DIM));

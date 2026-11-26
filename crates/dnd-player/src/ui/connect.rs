@@ -50,7 +50,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             }
 
             theme::section(ui, "Or type the address the DM shows");
-            ui.label(theme::muted("Dashboard → “Players connect to”, e.g. 192.168.1.23:8420"));
+            ui.label(theme::muted("Dashboard > “Players connect to”, e.g. 192.168.1.23:8420"));
             ui.add(egui::TextEdit::singleline(&mut app.url_input).hint_text("192.168.1.23:8420").desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
             ui.horizontal(|ui| {
                 ui.label(theme::muted("Join code"));

@@ -169,6 +169,7 @@ casting_time = "1 hour"
 range = "Touch"
 components = "V, S, M (a sprinkle of holy water and diamonds worth at least 25,000 gp, which the spell consumes)"
 duration = "Instantaneous"
+revive = "max"
 classes = ["cleric", "druid"]
 description = "Restore a creature dead no longer than 200 years (not of old age) to life with all its hit points, if its soul is free and willing. It cures diseases and poisons, lifts curses, restores missing parts and can even create a new body if the old one no longer exists (name the creature). An undead creature returns to its living form."
 

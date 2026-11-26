@@ -170,7 +170,7 @@ count = 2
 from = ["acrobatics", "athletics"]        # empty = any
 [spellcasting]                            # optional; may also sit on a subclass
 ability = "int"
-progression = "full"                      # full | half | third | pact
+progression = "full"                      # full | half | half_up (artificer) | third | pact
 prepared = "max(1, int_mod + class.wizard.level)"
 cantrips_known = [3,3,3,4,…]              # by class level
 spells_known = [ … ]                      # for "known" casters
@@ -210,7 +210,19 @@ starting_equipment = ["…"]
 [feature]
 name = "Military Rank"
 description = "…"
+[[variants]]                 # optional other versions (spy, gladiator, knight…)
+name = "…"
+description = "…"
+[[suggestions]]              # suggested characteristics, shown in both apps
+name = "Personality trait"
+fills = "personality"        # personality | ideals | bonds | flaws | backstory | notes
+pick = 2                     # how many to choose (default 1)
+options = ["…", "…"]
 ```
+
+Players tap a suggestion in the builder to add it to that field (tap again
+to remove it) or roll for a random one; the DM gets the same ideas from
+menus on the Notes & State tab.
 
 ## Items
 
@@ -252,12 +264,31 @@ against the weapon's `category`, the item `id`, the item name, or a
 ```toml
 id = "tough"
 name = "Tough"
-prerequisite = ""
+prerequisite = ""          # shown to people, e.g. "5th level, Pact of the Blade"
+requires = ""              # checked by the app, e.g. "class.warlock.level >= 5 && feat.pact_blade"
 description = "…"
 tags = []                 # "option" + a word makes it a class option (see Choices)
 spells = []               # granted spells while the character has it
 [[modifiers]] …
 ```
+
+**Requirements.** `requires` is a formula. Besides the usual variables it
+can use `feat.<id>` (any feat or class option the character has),
+`spell.<id>` (known or granted), `species.<id>`, `background.<id>` and
+`subclass.<id>`, each 1 if the character has it and 0 if not. The apps also
+check, without any `requires`: a subclass taken before its class level,
+multiclassing without the class's `multiclass_prerequisite` scores (written
+like "Strength 13 or Dexterity 13"), spells above the castable level or off
+the class list, too many cantrips/spells/prepared spells, skills off the class
+list, ability score improvements at the wrong level, and armor the character
+isn't proficient with or strong enough for.
+
+The DM can give a character anything: rule breaks get a red outline and are
+listed under **Rules check** on the Build tab. Players can only pick what
+their character qualifies for — the server refuses the rest — unless the DM
+ticks **Players may break the rules** on the Dashboard (everyone) or **Let this
+character's player pick options they don't qualify for** on a character's
+Build tab. Those picks still show in red.
 
 ## Spells
 
@@ -278,12 +309,21 @@ save = "dex"
 save_half = true          # a successful save halves the damage (default: none)
 upcast = "1d6"            # added per slot level above the spell's own
 heal = "1d8 + mod"        # healing instead of damage; `mod` = casting modifier
+revive = "1"              # brings a dead target back with this many HP ("max" = all); revivify, raise dead…
 damage = "8d6"
 damage_type = "fire"
 area = { shape = "sphere", size = 20, width = 5 }   # sphere cube cone line cylinder
 description = "…"
 higher_levels = "…"
 ```
+
+## Explaining content to players
+
+Every entry's `description` is what the (i) icons and hover tips show, so
+write it for someone new to the game. The apps add the numbers themselves
+(a class's hit die and saves, an item's damage or AC, a spell's casting
+details), so the description only needs to say what the thing is and does.
+Weapon `properties` are explained from the built-in glossary.
 
 ## Creatures
 

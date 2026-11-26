@@ -1,0 +1,128 @@
+# Artificer infusions and armor models: options picked through the
+# Artificer's "Infuse Item" and the Armorer's "Armor Model" features.
+# Descriptions written fresh.
+
+[[feats]]
+id = "infusion_enhanced_arcane_focus"
+name = "Enhanced Arcane Focus"
+tags = ["option", "artificer_infusion"]
+description = "Item: a rod, staff or wand (attunement). The holder gets +1 to spell attack rolls (+2 at artificer 10th) and ignores half cover with spell attacks."
+
+[[feats]]
+id = "infusion_enhanced_defense"
+name = "Enhanced Defense"
+tags = ["option", "artificer_infusion"]
+description = "Item: a suit of armor or a shield. It gives +1 to Armor Class while worn (+2 at artificer 10th)."
+
+[[feats]]
+id = "infusion_enhanced_weapon"
+name = "Enhanced Weapon"
+tags = ["option", "artificer_infusion"]
+description = "Item: a simple or martial weapon. +1 to attack and damage rolls with it (+2 at artificer 10th)."
+
+[[feats]]
+id = "infusion_homunculus_servant"
+name = "Homunculus Servant"
+tags = ["option", "artificer_infusion"]
+description = "Item: a gem or crystal worth 100 gp. It becomes a Tiny flying construct that obeys you, can deliver your touch spells, and channels magic as a bonus action attack (1d4 + PB force)."
+
+[[feats]]
+id = "infusion_mind_sharpener"
+name = "Mind Sharpener"
+tags = ["option", "artificer_infusion"]
+description = "Item: armor or robes. Four charges: when the wearer fails a Constitution save to keep concentration, a charge lets them succeed instead. Regains 1d4 charges each dawn."
+
+[[feats]]
+id = "infusion_radiant_weapon"
+name = "Radiant Weapon"
+requires = "class.artificer.level >= 6"
+tags = ["option", "artificer_infusion"]
+prerequisite = "6th level"
+description = "Item: a simple or martial weapon (attunement). +1 to attack and damage; it sheds light on command, and has four charges: as a reaction when hit, the wielder can blind the attacker (Constitution save). Regains 1d4 charges each dawn."
+
+[[feats]]
+id = "infusion_repeating_shot"
+name = "Repeating Shot"
+tags = ["option", "artificer_infusion"]
+description = "Item: a weapon that uses ammunition (attunement). +1 to attack and damage; it makes its own ammunition and ignores the loading property."
+
+[[feats]]
+id = "infusion_replicate_magic_item"
+name = "Replicate Magic Item"
+tags = ["option", "artificer_infusion"]
+description = "Learn the recipe for one common or uncommon magic item (bag of holding, goggles of night, cap of water breathing, wand of magic detection...), with more choices at higher levels. You can take this infusion several times, each for a different item."
+
+[[feats]]
+id = "infusion_repulsion_shield"
+name = "Repulsion Shield"
+requires = "class.artificer.level >= 6"
+tags = ["option", "artificer_infusion"]
+prerequisite = "6th level"
+description = "Item: a shield (attunement). +1 to AC, and four charges: as a reaction when hit by a melee attack, push the attacker up to 15 feet away. Regains 1d4 charges each dawn."
+
+[[feats]]
+id = "infusion_resistant_armor"
+name = "Resistant Armor"
+requires = "class.artificer.level >= 6"
+tags = ["option", "artificer_infusion"]
+prerequisite = "6th level"
+description = "Item: a suit of armor (attunement). The wearer resists one damage type chosen when you infuse it: acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant or thunder."
+
+[[feats]]
+id = "infusion_returning_weapon"
+name = "Returning Weapon"
+tags = ["option", "artificer_infusion"]
+description = "Item: a simple or martial weapon with the thrown property. +1 to attack and damage, and it flies back to the wielder's hand right after it's thrown."
+
+[[feats]]
+id = "infusion_boots_of_the_winding_path"
+name = "Boots of the Winding Path"
+requires = "class.artificer.level >= 6"
+tags = ["option", "artificer_infusion"]
+prerequisite = "6th level"
+description = "Item: a pair of boots (attunement). As a bonus action the wearer teleports up to 15 feet back to a space they occupied this turn."
+
+[[feats]]
+id = "infusion_spell_refueling_ring"
+name = "Spell-Refueling Ring"
+requires = "class.artificer.level >= 6"
+tags = ["option", "artificer_infusion"]
+prerequisite = "6th level"
+description = "Item: a ring (attunement). Once per day, as an action, the wearer recovers one expended spell slot of 3rd level or lower."
+
+[[feats]]
+id = "infusion_helm_of_awareness"
+name = "Helm of Awareness"
+requires = "class.artificer.level >= 10"
+tags = ["option", "artificer_infusion"]
+prerequisite = "10th level"
+description = "Item: a helmet (attunement). The wearer has advantage on initiative and can't be surprised while not incapacitated."
+
+[[feats]]
+id = "infusion_armor_of_magical_strength"
+name = "Armor of Magical Strength"
+requires = "class.artificer.level >= 10"
+tags = ["option", "artificer_infusion"]
+prerequisite = "10th level"
+description = "Item: a suit of armor (attunement). Six charges: spend one to add the wearer's Intelligence modifier to a Strength check or save, or to avoid being knocked prone. Regains 1d6 charges each dawn."
+
+[[feats]]
+id = "infusion_arcane_propulsion_armor"
+name = "Arcane Propulsion Armor"
+requires = "class.artificer.level >= 14"
+tags = ["option", "artificer_infusion"]
+prerequisite = "14th level"
+description = "Item: a suit of armor (attunement). +5 ft walking speed, gauntlets that act as magic force weapons (1d8 force, thrown and returning), and the armor can't be removed against the wearer's will; it even replaces missing limbs."
+
+[[feats]]
+id = "armor_model_guardian"
+name = "Guardian"
+tags = ["option", "armor_model"]
+description = "Thunder gauntlets: melee weapons (1d8 thunder, Intelligence for attack and damage); a creature hit has disadvantage on attacks against anyone but you until your next turn. Defensive field: bonus action, gain temporary hit points equal to your artificer level (uses = proficiency bonus per long rest)."
+
+[[feats]]
+id = "armor_model_infiltrator"
+name = "Infiltrator"
+tags = ["option", "armor_model"]
+description = "Lightning launcher: ranged weapon 90/300 ft, 1d6 lightning (Intelligence for attack and damage), and once per turn a hit deals 1d6 extra lightning. +5 ft walking speed, advantage on Stealth checks, and the armor makes no noise."
+modifiers = [{ target = "speed", op = "add", value = "5" }, { target = "skill.stealth", op = "advantage", note = "Infiltrator armor" }]

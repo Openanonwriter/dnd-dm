@@ -891,12 +891,15 @@ impl<'a> Engine<'a> {
             let own_level = match sc.progression.as_str() {
                 "full" => lvl,
                 "half" if lvl >= 2 => lvl.div_ceil(2),
+                // artificer: half caster that rounds up, with spells from 1st level
+                "half_up" => lvl.div_ceil(2),
                 "third" if lvl >= 3 => lvl.div_ceil(3),
                 _ => 0,
             };
             let mut max_spell_level = rules.full_caster_slots(own_level).iter().rposition(|n| *n > 0).map(|i| i as u32 + 1).unwrap_or(0);
             match sc.progression.as_str() {
                 "full" => caster_level += lvl,
+                "half_up" => caster_level += lvl.div_ceil(2),
                 "half" => {
                     caster_level += if single_class {
                         if lvl < 2 { 0 } else { lvl.div_ceil(2) }

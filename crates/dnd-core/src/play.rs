@@ -84,6 +84,13 @@ pub fn spell_reach(spell: &Spell, percent: u32) -> Reach {
     }
 }
 
+/// Bring a dead (or dying) character back with `hp` hit points.
+pub fn revive(ch: &mut Character, hp: i32) {
+    ch.hp.current = hp.max(1);
+    ch.death_saves = Default::default();
+    ch.conditions.retain(|c| c != "stable" && c != "unconscious" && c != "dead");
+}
+
 /// How many times a cantrip's dice are rolled at this character level.
 pub fn cantrip_dice(level: u32) -> u32 {
     1 + (level >= 5) as u32 + (level >= 11) as u32 + (level >= 17) as u32
@@ -152,8 +159,9 @@ pub fn spells_available(lib: &Library, ch: &Character, sheet: &Sheet) -> Vec<Str
 
 /// Set the spells a character knows to `wanted`, if the rules allow it.
 /// Spells the DM already gave stay legal; with `add_only` (a game is
-/// running) nothing may be dropped.
-pub fn choose_spells(lib: &Library, ch: &mut Character, wanted: &[String], add_only: bool) -> Result<(), String> {
+/// running) nothing may be dropped. With `free` (the DM allows rule
+/// breaks) any visible spell may be picked and the counts aren't checked.
+pub fn choose_spells(lib: &Library, ch: &mut Character, wanted: &[String], add_only: bool, free: bool) -> Result<(), String> {
     let sheet = crate::sheet::derive(ch, lib);
     if sheet.spellcasting.is_empty() {
         return if wanted.is_empty() { Ok(()) } else { Err("this character does not cast spells".into()) };
@@ -165,7 +173,7 @@ pub fn choose_spells(lib: &Library, ch: &mut Character, wanted: &[String], add_o
             continue;
         }
         let spell = lib.spells.get(id).filter(|s| !s.hidden).ok_or_else(|| format!("unknown spell '{id}'"))?;
-        if !ch.spells.known.contains(id) {
+        if !ch.spells.known.contains(id) && !free {
             let ok = sheet.spellcasting.iter().any(|b| on_list(lib, b, spell) && (spell.level == 0 || (b.spell_limit.is_some() && spell.level <= b.max_spell_level)));
             if !ok {
                 return Err(format!("{} is not a spell this character can learn yet", spell.name));
@@ -182,10 +190,10 @@ pub fn choose_spells(lib: &Library, ch: &mut Character, wanted: &[String], add_o
     let had_leveled = ch.spells.known.len() as u32 - had_cantrips;
     let cantrip_max: u32 = sheet.spellcasting.iter().map(|b| b.cantrips_known).sum();
     let spell_max: u32 = sheet.spellcasting.iter().filter_map(|b| b.spell_limit).sum();
-    if cantrips > cantrip_max.max(had_cantrips) {
+    if cantrips > cantrip_max.max(had_cantrips) && !free {
         return Err(format!("too many cantrips: this character knows {cantrip_max}"));
     }
-    if leveled > spell_max.max(had_leveled) {
+    if leveled > spell_max.max(had_leveled) && !free {
         return Err(format!("too many spells: this character can have {spell_max}"));
     }
     if add_only && ch.spells.known.iter().any(|k| !list.contains(k)) {
@@ -294,6 +302,12 @@ impl World {
     /// Give hit points back to a combatant (never above its maximum).
     pub fn heal(&mut self, target: &str, amount: i32) -> i32 {
         let mut got = 0;
+        // ordinary healing does nothing for the dead
+        if let Some(CombatantKind::Pc { id }) = self.campaign.encounter.find(target).map(|c| c.kind.clone()) {
+            if self.campaign.character(&id).map(|c| c.is_dead()).unwrap_or(false) {
+                return 0;
+            }
+        }
         if let Some(cm) = self.campaign.encounter.find_mut(target) {
             let before = cm.hp;
             cm.hp = (cm.hp + amount.max(0)).min(cm.hp_max.max(cm.hp));
@@ -686,7 +700,36 @@ impl World {
         let mut total_damage = 0;
         let mut any_hit = None;
 
-        if !healing.is_empty() {
+        if !spell.revive.is_empty() {
+            // revivify, raise dead...: only a dead character comes back
+            if targets.is_empty() {
+                parts.push("pick the dead creature as the target".into());
+            }
+            for t in targets {
+                let (tname, _) = self.target_name(t)?;
+                let pc = match self.campaign.encounter.find(t).map(|c| c.kind.clone()) {
+                    Some(CombatantKind::Pc { id }) => Some(id),
+                    _ => None,
+                };
+                let Some(id) = pc.filter(|id| self.campaign.character(id).map(|c| c.is_dead()).unwrap_or(false)) else {
+                    parts.push(format!("{tname} isn't dead, so nothing happens"));
+                    continue;
+                };
+                if !apply {
+                    parts.push(format!("{tname} can come back to life (the DM applies it)"));
+                    continue;
+                }
+                let max = self.sheet(&id).map(|s| s.hp_max).unwrap_or(1).max(1);
+                let hp = if spell.revive.trim() == "max" {
+                    max
+                } else {
+                    expr::roll(&spell.revive, &env, &mut self.rng).map_err(|e| format!("revive '{}': {e}", spell.revive))?.int().clamp(1, max as i64) as i32
+                };
+                revive(self.campaign.character_mut(&id).unwrap(), hp);
+                self.sync_combatant_from_pc(&id);
+                parts.push(format!("{tname} returns to life with {hp} hit point{}", if hp == 1 { "" } else { "s" }));
+            }
+        } else if !healing.is_empty() {
             let amount = expr::roll(&healing, &env, &mut self.rng).map_err(|e| format!("healing '{healing}': {e}"))?.int().max(0) as i32;
             if targets.is_empty() {
                 parts.push(format!("heals {amount}"));
@@ -843,6 +886,12 @@ impl World {
     pub fn rest(&mut self, character_id: &str, long: bool) -> Result<(), String> {
         let sheet = self.sheet(character_id).ok_or("no such character")?;
         let ch = self.campaign.character_mut(character_id).ok_or("no such character")?;
+        if ch.is_dead() {
+            return Err(format!("{} is dead. Resting won't bring them back; that takes magic such as revivify or raise dead.", ch.name));
+        }
+        if long && ch.hp.current <= 0 {
+            return Err(format!("{} needs at least 1 hit point to benefit from a long rest.", ch.name));
+        }
         if long {
             ch.hp.current = sheet.hp_max;
             ch.hp.temp = 0;
@@ -879,6 +928,9 @@ impl World {
         let roll = self.rng.roll_die(sides) as i32;
         let con = sheet.abilities.modifier("con");
         let ch = self.campaign.character_mut(character_id).ok_or("no such character")?;
+        if ch.is_dead() {
+            return Err(format!("{} is dead and can't spend hit dice", ch.name));
+        }
         let used = ch.hp.hit_dice_used.entry(die.to_string()).or_insert(0);
         if *used >= have {
             return Err(format!("no {die} hit dice left"));
@@ -900,6 +952,9 @@ impl World {
     pub fn death_save(&mut self, character_id: &str) -> Result<ActionResult, String> {
         let d = self.rng.roll_die(20) as i32;
         let ch = self.campaign.character_mut(character_id).ok_or("no such character")?;
+        if ch.is_dead() {
+            return Err(format!("{} has already died", ch.name));
+        }
         if ch.hp.current > 0 {
             return Err("only a character at 0 hit points rolls death saves".into());
         }
@@ -1085,11 +1140,11 @@ mod tests {
         let mut w = world();
         let lib = std::mem::take(&mut w.library);
         let wiz = w.campaign.character_mut("wiz").unwrap();
-        assert!(choose_spells(&lib, wiz, &["cure_wounds".into()], false).is_err(), "not a wizard spell");
-        choose_spells(&lib, wiz, &["fire_bolt".into(), "magic_missile".into(), "fireball".into()], false).unwrap();
-        assert!(choose_spells(&lib, wiz, &["fire_bolt".into()], true).is_err(), "no dropping spells mid-game");
+        assert!(choose_spells(&lib, wiz, &["cure_wounds".into()], false, false).is_err(), "not a wizard spell");
+        choose_spells(&lib, wiz, &["fire_bolt".into(), "magic_missile".into(), "fireball".into()], false, false).unwrap();
+        assert!(choose_spells(&lib, wiz, &["fire_bolt".into()], true, false).is_err(), "no dropping spells mid-game");
         let cle = w.campaign.character_mut("cle").unwrap();
-        assert!(choose_spells(&lib, cle, &["bless".into()], false).is_err(), "a cleric prepares, it does not learn");
+        assert!(choose_spells(&lib, cle, &["bless".into()], false, false).is_err(), "a cleric prepares, it does not learn");
         let sheet = crate::sheet::derive(cle, &lib);
         assert!(spells_available(&lib, cle, &sheet).contains(&"bless".to_string()));
         assert!(!spells_available(&lib, cle, &sheet).contains(&"fireball".to_string()));
@@ -1099,7 +1154,7 @@ mod tests {
     fn casting_spends_slots_and_hurts() {
         let mut w = world();
         let lib = std::mem::take(&mut w.library);
-        choose_spells(&lib, w.campaign.character_mut("wiz").unwrap(), &["fire_bolt".into(), "magic_missile".into(), "fireball".into()], false).unwrap();
+        choose_spells(&lib, w.campaign.character_mut("wiz").unwrap(), &["fire_bolt".into(), "magic_missile".into(), "fireball".into()], false, false).unwrap();
         w.library = lib;
         assert!(w.pc_cast("wiz", "magic_missile", 1, &["troll".into()], RollMode::Normal).is_err(), "not prepared yet");
         w.campaign.character_mut("wiz").unwrap().spells.prepared = vec!["magic_missile".into(), "fireball".into()];

@@ -1,10 +1,79 @@
 id = "criminal"
 name = "Criminal"
 skill_proficiencies = ["deception", "stealth"]
-tool_proficiencies = ["gaming set", "thieves' tools"]
-starting_equipment = ["crowbar", "dark common clothes with hood", "15 gp"]
-description = "You are an experienced criminal with a history of breaking the law."
+tool_proficiencies = ["one type of gaming set", "thieves' tools"]
+starting_equipment = ["crowbar", "dark common clothes with a hood", "pouch", "15 gp"]
+description = "You are an experienced criminal with a history of breaking the law, with contacts in the underworld."
 
 [feature]
 name = "Criminal Contact"
-description = "You have a reliable contact who acts as your liaison to a network of other criminals."
+description = "You have a reliable contact who links you to a network of other criminals. You know how to get messages to and from them, even over long distances, through local messengers, crooked caravan masters and sailors."
+
+[[variants]]
+name = "Spy"
+description = "You used the same skills as an agent of espionage, for a crown or for whoever paid most. Your contact is your handler or another spy."
+
+[[suggestions]]
+name = "Criminal specialty"
+fills = "backstory"
+options = [
+  "Blackmailer",
+  "Burglar",
+  "Muscle for hire",
+  "Fence for stolen goods",
+  "Highway robber",
+  "Assassin",
+  "Pickpocket",
+  "Smuggler",
+]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "I find the exits before I find a seat.",
+  "Panic is for amateurs; I get quieter when things go wrong.",
+  "Walking into any room, I've priced the valuables before I've said hello.",
+  "Friends are cheaper than enemies, so I make a lot of them.",
+  "I assume everyone has an angle until they prove otherwise.",
+  "Long odds don't scare me; I like a job nobody else will touch.",
+  "Forbid me something and I'll do it twice.",
+  "I have a short fuse, and the smallest slight lights it.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Code. You never rob your own crew. (Lawful)",
+  "Defiance. Every lock and every law is a challenge. (Chaotic)",
+  "Redistribution. I take from the fat purses and feed the thin ones. (Good)",
+  "Profit. Whatever pays the most is the right thing to do. (Evil)",
+  "My people. Causes come and go; my friends are what matter. (Neutral)",
+  "Second chances. Even someone like me can turn out good. (Good)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "Someone once bailed me out, and I'm still paying them back.",
+  "My jobs keep my family fed and housed.",
+  "Something precious was stolen from me, and I'm stealing it back.",
+  "I'm going to pull the heist people tell stories about for a hundred years.",
+  "I did something unforgivable once, and I'm trying to balance the scales.",
+  "Someone I loved died because I botched a job. It won't happen again.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "If something valuable is in reach, I can't stop thinking about taking it.",
+  "When it comes down to gold or friends, I'm not proud of what I usually pick.",
+  "I nod along to the plan and then do whatever I like.",
+  "Everyone who knows me can tell when I'm lying.",
+  "My first instinct when things get hot is to vanish.",
+  "Someone else is rotting in a cell for my crime, and I've let it stay that way.",
+]

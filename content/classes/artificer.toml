@@ -1,0 +1,87 @@
+# The Artificer, from the DM's "Ultimate 5e" workbook (version 0.1 of this
+# app): proficiencies, gear, feature levels, infusions and spell slots from
+# the workbook's class table; feature descriptions written fresh.
+id = "artificer"
+name = "Artificer"
+hit_die = 8
+primary_abilities = ["int"]
+saving_throws = ["con", "int"]
+armor_proficiencies = ["light", "medium", "shields"]
+weapon_proficiencies = ["simple"]
+tool_proficiencies = ["thieves' tools", "tinker's tools", "one type of artisan's tools"]
+subclass_level = 3
+subclass_label = "Artificer Specialist"
+multiclass_prerequisite = "Intelligence 13"
+starting_equipment = ["two simple weapons", "light_crossbow + 20 bolts", "studded_leather or scale_mail", "thieves' tools + dungeoneer's pack"]
+description = "A master of invention who channels magic through objects: tools, gadgets and infused items."
+
+[skill_choices]
+count = 2
+from = ["arcana", "history", "investigation", "medicine", "nature", "perception", "sleight_of_hand"]
+
+[spellcasting]
+ability = "int"
+progression = "half_up"
+prepared = "max(1, int_mod + floor(class.artificer.level / 2))"
+cantrips_known = [2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4]
+ritual_casting = true
+focus = "thieves' tools, tinker's tools or an infused item"
+
+[[features]]
+name = "Magical Tinkering"
+level = 1
+description = "With tinker's tools in hand, touch a Tiny nonmagical object and give it one minor magical property: it sheds light, plays a recorded message when tapped, gives off a smell or sound, or shows a picture or a few words. You can keep as many objects going as your Intelligence modifier (minimum 1)."
+
+[[features]]
+name = "Spellcasting"
+level = 1
+description = "Intelligence is your spellcasting ability, and you cast through your tools or an infused item. After a long rest, prepare Intelligence modifier + half your artificer level (rounded down, minimum 1) spells from the artificer list. You can cast prepared ritual spells as rituals."
+
+[[features]]
+name = "Infuse Item"
+level = 2
+description = "After a long rest, touch nonmagical objects to turn them into magic items with infusions you know. You know 4 infusions at 2nd level (6 at 6th, 8 at 10th, 10 at 14th, 12 at 18th) and can have 2 infused items at once (3 at 6th, 4 at 10th, 5 at 14th, 6 at 18th)."
+options = "artificer_infusion"
+choose = "if(class.artificer.level >= 18, 12, if(class.artificer.level >= 14, 10, if(class.artificer.level >= 10, 8, if(class.artificer.level >= 6, 6, 4))))"
+
+[[features]]
+name = "The Right Tool for the Job"
+level = 3
+description = "With tinker's tools in hand, spend an hour (during a short or long rest if you like) to create one set of artisan's tools. They vanish if you make another set."
+
+[[features]]
+name = "Tool Expertise"
+level = 6
+description = "Your proficiency bonus is doubled for any ability check that uses your proficiency with a tool."
+
+[[features]]
+name = "Flash of Genius"
+level = 7
+description = "Reaction when you or a creature you can see within 30 feet makes an ability check or saving throw: add your Intelligence modifier to the roll."
+uses = "max(1, int_mod)"
+recharge = "long_rest"
+
+[[features]]
+name = "Magic Item Adept"
+level = 10
+description = "You can attune to up to four magic items at once, and crafting a common or uncommon magic item takes you a quarter of the time and half the gold."
+
+[[features]]
+name = "Spell-Storing Item"
+level = 11
+description = "After a long rest, store a 1st- or 2nd-level artificer spell that takes an action in a simple weapon or a focus you touch. Whoever holds it can cast the spell from it (using your spellcasting modifier) up to twice your Intelligence modifier times."
+
+[[features]]
+name = "Magic Item Savant"
+level = 14
+description = "You can attune to up to five magic items at once, and ignore class, race, spell and level requirements on attuning to or using a magic item."
+
+[[features]]
+name = "Magic Item Master"
+level = 18
+description = "You can attune to up to six magic items at once."
+
+[[features]]
+name = "Soul of Artifice"
+level = 20
+description = "You gain +1 to all saving throws for each magic item you are attuned to. If you drop to 0 hit points but aren't killed outright, you can use your reaction to end one of your infusions and drop to 1 hit point instead."

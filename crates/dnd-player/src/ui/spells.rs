@@ -53,6 +53,21 @@ fn effect(s: &Spell) -> String {
 
 fn details(ui: &mut egui::Ui, s: &Spell) {
     ui.label(theme::muted(format!("{}{}", if s.school.is_empty() { String::new() } else { format!("{} · ", s.school) }, facts(s))).small());
+    ui.horizontal_wrapped(|ui| {
+        if s.level == 0 {
+            dnd_mapview::help::label_term(ui, theme::muted("cantrip").small(), "cantrip");
+        }
+        if s.concentration {
+            dnd_mapview::help::label_term(ui, theme::muted("concentration").small(), "concentration");
+        }
+        if s.ritual {
+            dnd_mapview::help::label_term(ui, theme::muted("ritual").small(), "ritual");
+        }
+        dnd_mapview::help::label_term(ui, theme::muted("components").small(), "components");
+        if !s.higher_levels.is_empty() {
+            dnd_mapview::help::label_term(ui, theme::muted("upcasting").small(), "upcast");
+        }
+    });
     ui.label(&s.description);
     if !s.higher_levels.is_empty() {
         ui.label(theme::muted(format!("Higher levels: {}", s.higher_levels)).small());
@@ -76,6 +91,7 @@ pub fn mode_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
     use dnd_core::play::RollMode::*;
     ui.horizontal(|ui| {
         ui.label(theme::muted("Next d20"));
+        dnd_mapview::help::term(ui, "roll_mode");
         for (m, label) in [(Normal, "normal"), (Advantage, "advantage"), (Disadvantage, "disadvantage")] {
             ui.selectable_value(&mut app.mode, m, label);
         }
@@ -110,6 +126,7 @@ pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
         .collect();
     ui.horizontal_wrapped(|ui| {
         ui.label(theme::muted("Target"));
+        dnd_mapview::help::term(ui, "target");
         for (id, name, pc) in &list {
             let on = app.targets.contains(id);
             let text = egui::RichText::new(name).color(if on { egui::Color32::BLACK } else if *pc { theme::PC_BLUE } else { theme::TEXT });
@@ -219,7 +236,10 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
             section(ui, &title);
             if sp.level == 1 && prepares {
                 let col = if prepared_now > prepared_max { theme::BAD } else { theme::MUTED };
-                ui.label(egui::RichText::new(format!("Prepared {prepared_now} of {prepared_max}. Tick the spells you have ready today.")).small().color(col));
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(egui::RichText::new(format!("Prepared {prepared_now} of {prepared_max}. Tick the spells you have ready today.")).small().color(col));
+                    dnd_mapview::help::term(ui, "prepared");
+                });
             }
         }
         let is_prepared = ch.spells.prepared.contains(&sp.id);
@@ -231,7 +251,8 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
                 if granted && sp.level > 0 {
-                    ui.label(theme::accent("always").small()).on_hover_text("Granted by a feature: always prepared, doesn't count against your limit");
+                    ui.label(theme::accent("always").small());
+                    dnd_mapview::help::term(ui, "always_prepared");
                 } else if sp.level > 0 && prepares {
                     let mut p = is_prepared;
                     if ui.add_enabled(is_prepared || prepared_now < prepared_max, egui::Checkbox::new(&mut p, "")).changed() {
@@ -314,6 +335,40 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
         app.act(Cmd::ChooseSpells(known));
     }
 
+    // ---- beyond the rules, when the DM allows it
+    let free = app.seat.as_ref().map(|x| x.allow_rule_breaks).unwrap_or(false) || ch.allow_rule_breaks;
+    if free {
+        let (_, _, normal) = play::spell_picks(lib, &ch, s);
+        let mut extra: Vec<&Spell> = lib
+            .spells
+            .values()
+            .filter(|sp| !sp.hidden && !ch.spells.known.contains(&sp.id) && !normal.contains(&sp.id) && !s.spells_granted.contains(&sp.id))
+            .filter(|sp| s.spellcasting.iter().any(|b| play::on_list(lib, b, sp) && (sp.level == 0 || b.spell_limit.is_some())))
+            .collect();
+        extra.sort_by(|a, b| a.level.cmp(&b.level).then(a.name.cmp(&b.name)));
+        if !extra.is_empty() {
+            let mut learn: Option<String> = None;
+            egui::CollapsingHeader::new(egui::RichText::new(format!("More spells your DM allows ({})", extra.len())).color(theme::BAD)).id_salt("dm_allowed_spells").show(ui, |ui| {
+                ui.label(theme::muted("Your character doesn't qualify for these yet (too high a level, or no picks left), but your DM lets you take them.").small());
+                for sp in extra {
+                    ui.horizontal_wrapped(|ui| {
+                        let r = ui.add(theme::big_button("Learn"));
+                        theme::red_outline(ui, r.rect);
+                        if r.clicked() {
+                            learn = Some(sp.id.clone());
+                        }
+                        ui.label(egui::RichText::new(format!("{} · {}", sp.name, level_name(sp.level))).size(15.0));
+                    });
+                }
+            });
+            if let Some(id) = learn {
+                let mut known = ch.spells.known.clone();
+                known.push(id);
+                app.act(Cmd::ChooseSpells(known));
+            }
+        }
+    }
+
     // ---- learn
     let (cantrips_left, spells_left, options) = play::spell_picks(lib, &ch, s);
     if cantrips_left > 0 || spells_left > 0 {
@@ -365,14 +420,16 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
 
 /// The spell part of the character builder. Keeps `draft.spells` legal for
 /// the class it has now and returns what is still open to choose.
-pub fn builder_section(ui: &mut egui::Ui, lib: &Library, draft: &mut Character, sheet: &Sheet, open: &mut String) -> Vec<String> {
+pub fn builder_section(ui: &mut egui::Ui, lib: &Library, draft: &mut Character, sheet: &Sheet, open: &mut String, free: bool) -> Vec<String> {
     if sheet.spellcasting.is_empty() {
         draft.spells.known.clear();
         draft.spells.prepared.clear();
         return Vec::new();
     }
     let allowed = |s: &Spell| sheet.spellcasting.iter().any(|b| play::on_list(lib, b, s) && (s.level == 0 || (b.spell_limit.is_some() && s.level <= b.max_spell_level)));
-    draft.spells.known.retain(|id| lib.spells.get(id).map(|s| !s.hidden && allowed(s)).unwrap_or(false));
+    // on the class list but too high a level: locked unless the DM allows rule breaks
+    let learnable = |s: &Spell| sheet.spellcasting.iter().any(|b| play::on_list(lib, b, s) && (s.level == 0 || b.spell_limit.is_some()));
+    draft.spells.known.retain(|id| lib.spells.get(id).map(|s| !s.hidden && (allowed(s) || (free && learnable(s)))).unwrap_or(false));
     let cantrip_max: usize = sheet.spellcasting.iter().map(|b| b.cantrips_known as usize).sum();
     let spell_max: usize = sheet.spellcasting.iter().filter_map(|b| b.spell_limit).sum::<u32>() as usize;
     let prepared_max: usize = sheet.spellcasting.iter().filter_map(|b| b.prepared_max).sum::<i32>().max(0) as usize;
@@ -427,6 +484,29 @@ pub fn builder_section(ui: &mut egui::Ui, lib: &Library, draft: &mut Character, 
         let spells: Vec<&Spell> = all.iter().copied().filter(|s| s.level > 0 && allowed(s)).collect();
         let n = draft.spells.known.iter().filter(|id| !is_cantrip(id)).count();
         group(ui, if prepared_max > 0 { "Spellbook" } else { "Spells known" }, "The spells your character has learned.", spells, &mut draft.spells.known, n, spell_max, open);
+    }
+    // higher-level spells: shown so players know what's coming, picked only with the DM's say-so
+    let locked: Vec<&Spell> = all.iter().copied().filter(|s| s.level > 0 && learnable(s) && !allowed(s)).collect();
+    if !locked.is_empty() {
+        egui::CollapsingHeader::new(egui::RichText::new(format!("Higher-level spells ({})", locked.len())).color(theme::BAD)).id_salt("locked_spells").show(ui, |ui| {
+            ui.label(theme::muted(if free { "Your character can't cast these yet, but your DM allows picking them." } else { "Your character can't learn these yet; they unlock as you level up. Ask your DM if you want one now." }).small());
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().button_padding = egui::vec2(10.0, 7.0);
+                for s in &locked {
+                    let on = draft.spells.known.contains(&s.id);
+                    let r = ui.add_enabled(free || on, egui::Button::new(egui::RichText::new(format!("{} · L{}", s.name, s.level)).size(15.0)).selected(on));
+                    theme::red_outline(ui, r.rect);
+                    if r.clicked() {
+                        if on {
+                            draft.spells.known.retain(|x| x != &s.id);
+                        } else {
+                            draft.spells.known.push(s.id.clone());
+                        }
+                        *open = s.id.clone();
+                    }
+                }
+            });
+        });
     }
     // prepared
     let available = play::spells_available(lib, draft, sheet);

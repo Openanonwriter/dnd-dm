@@ -50,7 +50,7 @@ casting_time = "1 action"
 range = "Self"
 components = "V, S"
 duration = "1 minute"
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "Roll a d20 at the end of each of your turns: on 11 or higher you vanish into the Ethereal Plane until the start of your next turn, then return to a space you choose within 10 feet of where you vanished. While ethereal you can only affect and be affected by other ethereal things."
 
 [[spells]]
@@ -122,7 +122,7 @@ casting_time = "1 action"
 range = "30 feet"
 components = "V, S"
 duration = "Instantaneous"
-classes = ["cleric", "paladin"]
+classes = ["cleric", "paladin", "artificer"]
 description = "Create 45 pounds of bland but nourishing food and 30 gallons of fresh water — enough for fifteen humanoids or five steeds for 24 hours. The food spoils after 24 hours if uneaten."
 
 [[spells]]
@@ -147,7 +147,7 @@ casting_time = "1 action"
 range = "120 feet"
 components = "V, S"
 duration = "Instantaneous"
-classes = ["bard", "cleric", "druid", "paladin", "sorcerer", "warlock", "wizard"]
+classes = ["bard", "cleric", "druid", "paladin", "sorcerer", "warlock", "wizard", "artificer"]
 description = "Choose a creature, object or magical effect. Any spell of 3rd level or lower on it ends. For each higher-level spell, make an ability check with your spellcasting ability against DC 10 + the spell's level; on a success it ends."
 higher_levels = "Spells of a level no higher than the slot you use end automatically."
 
@@ -208,7 +208,7 @@ range = "Touch"
 components = "V, S, M (a wing feather from any bird)"
 duration = "Concentration, up to 10 minutes"
 concentration = true
-classes = ["sorcerer", "warlock", "wizard"]
+classes = ["sorcerer", "warlock", "wizard", "artificer"]
 description = "A willing creature you touch gains a flying speed of 60 feet. When the spell ends it falls if it is still aloft, unless it can stop the fall."
 higher_levels = "One additional creature for each slot level above 3rd."
 
@@ -222,7 +222,7 @@ range = "Touch"
 components = "V, S, M (a bit of gauze and a wisp of smoke)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["sorcerer", "warlock", "wizard"]
+classes = ["sorcerer", "warlock", "wizard", "artificer"]
 description = "A willing creature and what it wears and carries turns into a misty cloud. It can fly at 10 feet, enter others' spaces, pass through small cracks, and resists nonmagical damage, with advantage on Str, Dex and Con saves. It can't talk, manipulate objects, attack or cast spells, and can't fall."
 
 [[spells]]
@@ -234,7 +234,7 @@ casting_time = "1 hour"
 range = "Touch"
 components = "V, S, M (incense and powdered diamond worth at least 200 gp, which the spell consumes)"
 duration = "Until dispelled or triggered"
-classes = ["bard", "cleric", "wizard"]
+classes = ["bard", "cleric", "wizard", "artificer"]
 save = "dex"
 save_half = true
 damage = "5d8"
@@ -254,7 +254,7 @@ range = "30 feet"
 components = "V, S, M (a shaving of licorice root)"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "A willing creature's speed doubles, it gains +2 AC and advantage on Dexterity saves, and it gets an extra action each turn (only Attack with one weapon attack, Dash, Disengage, Hide or Use an Object). When the spell ends, it can't move or act until after its next turn."
 
 [[spells]]
@@ -395,7 +395,7 @@ range = "Touch"
 components = "V, S"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["cleric", "druid", "ranger", "sorcerer", "wizard"]
+classes = ["cleric", "druid", "ranger", "sorcerer", "wizard", "artificer"]
 description = "A willing creature you touch has resistance to one damage type of your choice — acid, cold, fire, lightning or thunder — for the duration."
 
 [[spells]]
@@ -419,7 +419,8 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (diamonds worth 300 gp, which the spell consumes)"
 duration = "Instantaneous"
-classes = ["cleric", "paladin"]
+revive = "1"
+classes = ["cleric", "paladin", "artificer"]
 description = "Touch a creature that has died within the last minute. It returns to life with 1 hit point. It can't restore a creature that died of old age or replace missing body parts."
 
 [[spells]]
@@ -576,7 +577,7 @@ range = "30 feet"
 components = "V, S, M (a short reed or piece of straw)"
 duration = "24 hours"
 ritual = true
-classes = ["druid", "ranger", "sorcerer", "wizard"]
+classes = ["druid", "ranger", "sorcerer", "wizard", "artificer"]
 description = "Up to ten willing creatures you can see can breathe underwater until the spell ends, keeping their normal breathing too."
 
 [[spells]]
@@ -589,7 +590,7 @@ range = "30 feet"
 components = "V, S, M (a piece of cork)"
 duration = "1 hour"
 ritual = true
-classes = ["cleric", "druid", "ranger", "sorcerer"]
+classes = ["cleric", "druid", "ranger", "sorcerer", "artificer"]
 description = "Up to ten willing creatures can move across any liquid surface — water, acid, mud, snow, quicksand or lava — as if it were harmless solid ground (molten lava can still hurt them). A submerged target rises to the surface at 60 feet per round."
 
 [[spells]]

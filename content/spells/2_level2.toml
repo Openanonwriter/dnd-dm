@@ -26,7 +26,7 @@ casting_time = "1 action"
 range = "30 feet"
 components = "V, S, M (a tiny strip of white cloth)"
 duration = "8 hours"
-classes = ["cleric", "paladin"]
+classes = ["cleric", "paladin", "artificer"]
 description = "Up to three creatures each have their hit point maximum and current hit points increased by 5 for the duration."
 higher_levels = "+5 more for each slot level above 2nd."
 
@@ -40,7 +40,7 @@ range = "Self"
 components = "V, S"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "Assume a different form, choosing one option (you can switch as an action): Aquatic Adaptation (gills and webbing; breathe underwater, swim speed equal to walking); Change Appearance (alter how you look, keeping the same basic shape and size category); or Natural Weapons (claws, fangs, horns or hooves dealing 1d6 of a fitting type, magical with +1 to attack and damage)."
 
 [[spells]]
@@ -66,7 +66,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (gold dust worth at least 25 gp, which the spell consumes)"
 duration = "Until dispelled"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 description = "Magically lock a closed door, window, gate, chest or other entryway. You and creatures you designate can open it normally; you can also set a password that suppresses the spell for a minute. Otherwise it is impassable until broken or the spell is dispelled, and the DC to break or pick it rises by 10."
 
 [[spells]]
@@ -131,7 +131,7 @@ range = "Self"
 components = "V"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 description = "Your body becomes blurred and wavering. Creatures have disadvantage on attack rolls against you, unless they don't rely on sight (blindsight, truesight, or they can see through illusions)."
 
 [[spells]]
@@ -158,7 +158,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (ruby dust worth 50 gp, which the spell consumes)"
 duration = "Until dispelled"
-classes = ["cleric", "wizard"]
+classes = ["cleric", "wizard", "artificer"]
 description = "A flame as bright as a torch springs from an object you touch. It looks like a regular flame but creates no heat, uses no oxygen, and can be covered or hidden but not smothered or quenched."
 
 [[spells]]
@@ -184,7 +184,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (either a pinch of dried carrot or an agate)"
 duration = "8 hours"
-classes = ["druid", "ranger", "sorcerer", "wizard"]
+classes = ["druid", "ranger", "sorcerer", "wizard", "artificer"]
 description = "A willing creature gains darkvision out to 60 feet for the duration."
 
 [[spells]]
@@ -211,7 +211,7 @@ range = "Touch"
 components = "V, S, M (fur or a feather from a beast)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["bard", "cleric", "druid", "sorcerer"]
+classes = ["bard", "cleric", "druid", "sorcerer", "artificer"]
 description = "Choose one effect for the creature you touch: Bear's Endurance (advantage on Constitution checks and 2d6 temporary hit points), Bull's Strength (advantage on Strength checks, double carrying capacity), Cat's Grace (advantage on Dexterity checks, no damage from falls of 20 feet or less), Eagle's Splendor (Charisma checks), Fox's Cunning (Intelligence checks) or Owl's Wisdom (Wisdom checks)."
 higher_levels = "One additional creature for each slot level above 2nd."
 
@@ -225,7 +225,7 @@ range = "30 feet"
 components = "V, S, M (a pinch of powdered iron)"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 save = "con"
 description = "A creature or object grows or shrinks (an unwilling creature makes a Constitution save). Enlarge: it doubles in size, its size category rises by one, it has advantage on Strength checks and saves, and its weapons deal +1d4 damage. Reduce: it halves in size, drops one size category, has disadvantage on Strength checks and saves, and its weapons deal -1d4 damage (minimum 1)."
 
@@ -341,7 +341,7 @@ range = "60 feet"
 components = "V, S, M (a piece of iron and a flame)"
 duration = "Concentration, up to 1 minute"
 concentration = true
-classes = ["bard", "druid"]
+classes = ["bard", "druid", "artificer"]
 save = "con"
 damage = "2d8"
 damage_type = "fire"
@@ -374,7 +374,7 @@ range = "Touch"
 components = "V, S, M (an eyelash encased in gum arabic)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["bard", "sorcerer", "warlock", "wizard"]
+classes = ["bard", "sorcerer", "warlock", "wizard", "artificer"]
 description = "A creature you touch, and anything it wears or carries, becomes invisible until the spell ends. It ends for a target that attacks or casts a spell."
 higher_levels = "One additional creature for each slot level above 2nd."
 
@@ -399,7 +399,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S"
 duration = "Instantaneous"
-classes = ["bard", "cleric", "druid", "paladin", "ranger"]
+classes = ["bard", "cleric", "druid", "paladin", "ranger", "artificer"]
 description = "End either one disease or one condition afflicting the creature you touch: blinded, deafened, paralyzed or poisoned."
 
 [[spells]]
@@ -412,7 +412,7 @@ range = "60 feet"
 components = "V, S, M (either a small leather loop or a piece of golden wire bent into a cup shape with a long shank on one end)"
 duration = "Concentration, up to 10 minutes"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 save = "con"
 description = "One creature or loose object (up to 500 pounds) rises vertically up to 20 feet and stays aloft. An unwilling creature makes a Constitution save. The target can move only by pushing or pulling against fixed objects. On your turn you can move it up or down 20 feet. When the spell ends it floats gently down."
 
@@ -452,7 +452,7 @@ range = "30 feet"
 components = "V, S, M (a small bit of honeycomb and jade dust worth at least 10 gp, which the spell consumes)"
 duration = "Until dispelled"
 ritual = true
-classes = ["bard", "wizard"]
+classes = ["bard", "wizard", "artificer"]
 description = "Implant a message of up to 25 words in an object, spoken over up to 10 minutes, and a visual or audible trigger condition within 30 feet. When triggered, a magical mouth appears on the object and recites the message in your voice."
 
 [[spells]]
@@ -465,7 +465,7 @@ range = "Touch"
 components = "V, S"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["paladin", "wizard"]
+classes = ["paladin", "wizard", "artificer"]
 description = "A nonmagical weapon you touch becomes a magic weapon with a +1 bonus to attack and damage rolls."
 higher_levels = "+2 with a 4th-level slot, +3 with a 6th-level or higher slot."
 
@@ -550,7 +550,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S"
 duration = "1 hour"
-classes = ["cleric", "druid", "paladin", "ranger"]
+classes = ["cleric", "druid", "paladin", "ranger", "artificer"]
 description = "Neutralize one poison afflicting the creature you touch (or one at random). For the duration it has advantage on saving throws against being poisoned and resistance to poison damage."
 
 [[spells]]
@@ -576,7 +576,7 @@ casting_time = "1 action"
 range = "Touch"
 components = "V, S, M (powdered corn extract and a twisted loop of parchment)"
 duration = "1 hour"
-classes = ["wizard"]
+classes = ["wizard", "artificer"]
 description = "Touch a rope up to 60 feet long: one end rises until the whole rope hangs in the air, and an invisible entrance at the top opens to an extradimensional space that holds up to eight Medium or smaller creatures. Attacks and spells can't cross into or out of it, but those inside can see out through a window. Anything inside drops out when the spell ends."
 
 [[spells]]
@@ -604,7 +604,7 @@ casting_time = "1 action"
 range = "Self"
 components = "V, S, M (a pinch of talc and a small sprinkling of powdered silver)"
 duration = "1 hour"
-classes = ["bard", "sorcerer", "wizard"]
+classes = ["bard", "sorcerer", "wizard", "artificer"]
 description = "For the duration you see invisible creatures and objects as if they were visible, and you can see into the Ethereal Plane. Ethereal creatures and objects appear ghostly and translucent."
 
 [[spells]]
@@ -651,7 +651,7 @@ range = "Touch"
 components = "V, S, M (a drop of bitumen and a spider)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["sorcerer", "warlock", "wizard"]
+classes = ["sorcerer", "warlock", "wizard", "artificer"]
 description = "A willing creature you touch can move up, down and across vertical surfaces and upside down along ceilings while leaving its hands free, and gains a climbing speed equal to its walking speed."
 
 [[spells]]
@@ -722,7 +722,7 @@ range = "60 feet"
 components = "V, S, M (a bit of spiderweb)"
 duration = "Concentration, up to 1 hour"
 concentration = true
-classes = ["sorcerer", "wizard"]
+classes = ["sorcerer", "wizard", "artificer"]
 save = "dex"
 area = { shape = "cube", size = 20 }
 description = "Thick sticky webs fill a 20-foot cube; they are difficult terrain and lightly obscure the area, and must be anchored between solid masses. A creature that starts its turn in them or enters them makes a Dexterity save or is restrained. A restrained creature can use its action for a Strength check against your spell save DC to break free. The webs burn away in a round when exposed to fire, dealing 2d4 fire damage to creatures starting their turn in the fire."

@@ -108,6 +108,9 @@ pub struct PlayerApp {
     pub shot: crate::shot::Shot,
     /// Tab to open on once the sheet is there (development aid).
     pub start_tab: Option<Tab>,
+    /// Development aid: `DND_PLAYER_CREATE="species,class,background"`
+    /// opens the builder with those picks (for screenshots).
+    pub dev_create: Option<String>,
 }
 
 const EDIT_DEBOUNCE: Duration = Duration::from_millis(700);
@@ -162,6 +165,7 @@ impl PlayerApp {
             mode: Default::default(),
             targets: std::env::var("DND_PLAYER_TARGET").ok().into_iter().collect(),
             shot: crate::shot::Shot::from_env(),
+            dev_create: std::env::var("DND_PLAYER_CREATE").ok(),
             start_tab: std::env::var("DND_PLAYER_TAB").ok().and_then(|t| Tab::ALL.into_iter().find(|x| x.label().eq_ignore_ascii_case(&t))),
         };
         if let Some(o) = app.store.load_builder() {
@@ -601,6 +605,16 @@ impl eframe::App for PlayerApp {
             }
         }
 
+        if self.builder.is_some() && self.screen != Screen::Connect {
+            if let Some(v) = self.dev_create.take() {
+                self.open_builder();
+                let p: Vec<&str> = v.split(',').map(|s| s.trim()).collect();
+                self.draft.name = "New hero".into();
+                self.draft.species = p.first().map(|s| s.to_string()).unwrap_or_default();
+                self.draft.classes = vec![dnd_core::ClassLevel { class: p.get(1).map(|s| s.to_string()).unwrap_or_default(), level: 1, ..Default::default() }];
+                self.draft.background = p.get(2).map(|s| s.to_string()).unwrap_or_default();
+            }
+        }
         if self.screen == Screen::Sheet && self.sheet.is_some() && self.online {
             if let Some(t) = self.start_tab.take() {
                 self.tab = t;

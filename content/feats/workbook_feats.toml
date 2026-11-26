@@ -1,0 +1,14 @@
+# Feats from the DM's "Ultimate 5e" workbook (version 0.1 of this app),
+# descriptions written fresh. Where a feat lets you choose an ability, add the
+# +1 on the character's Modifiers tab (or as an ability increase).
+
+[[feats]]
+id = "athlete"
+name = "Athlete"
+description = "Hard physical training: +1 to Strength or Dexterity (max 20). Standing up from prone costs only 5 feet of movement, climbing costs no extra movement, and you can make a running jump after only 5 feet of run-up."
+
+[[feats]]
+id = "actor"
+name = "Actor"
+description = "Skilled at mimicry and drama: +1 Charisma (max 20). Advantage on Deception and Performance checks to pass yourself off as someone else. You can mimic a person's speech or a creature's sounds after hearing them for a minute; a listener sees through it with an Insight check against your Deception."
+modifiers = [{ target = "ability.cha", op = "add", value = "1" }]

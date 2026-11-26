@@ -37,14 +37,14 @@ pub const MODES: [(&str, dnd_core::play::RollMode); 3] =
 
 pub const SHAPES: [&str; 4] = ["sphere", "cube", "cone", "line"];
 pub const DIRS: [(&str, (f64, f64)); 8] = [
-    ("→ E", (1.0, 0.0)),
-    ("↘ SE", (1.0, 1.0)),
-    ("↓ S", (0.0, 1.0)),
-    ("↙ SW", (-1.0, 1.0)),
-    ("← W", (-1.0, 0.0)),
-    ("↖ NW", (-1.0, -1.0)),
-    ("↑ N", (0.0, -1.0)),
-    ("↗ NE", (1.0, -1.0)),
+    ("E", (1.0, 0.0)),
+    ("SE", (1.0, 1.0)),
+    ("S", (0.0, 1.0)),
+    ("SW", (-1.0, 1.0)),
+    ("W", (-1.0, 0.0)),
+    ("NW", (-1.0, -1.0)),
+    ("N", (0.0, -1.0)),
+    ("NE", (1.0, -1.0)),
 ];
 
 /// Cells highlighted by the current area tool (used by the map view too).
@@ -79,11 +79,13 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
     let before = w.campaign.encounter.clone();
 
     // ---------------------------------------------------------- add panel
-    egui::SidePanel::right("enc_tools").resizable(true).default_width(330.0).show_inside(ui, |ui| {
+    // never more than 45% of the space, so the tracker keeps its columns in a narrow window
+    let cap = (ui.available_width() * 0.45).max(220.0);
+    egui::SidePanel::right("enc_tools").resizable(true).default_width(330.0_f32.min(cap)).max_width(cap).show_inside(ui, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
             heading(ui, "Add combatants");
             let pcs: Vec<(String, String)> = w.campaign.characters.iter().map(|c| (c.id.clone(), c.name.clone())).collect();
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 id_combo(ui, "pcpick", &mut st.pc_pick, &pcs, "— player character —");
                 if ui.button("Add").clicked() && !st.pc_pick.is_empty() {
                     if let Some(c) = w.combatant_from_character(&st.pc_pick) {
@@ -102,11 +104,11 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     }
                 }
             });
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.add(egui::TextEdit::singleline(&mut st.creature_filter).hint_text("filter").desired_width(90.0));
                 let f = st.creature_filter.to_lowercase();
                 let list: Vec<(String, String)> = w.library.list(Kind::Creature).into_iter().filter(|(id, n)| f.is_empty() || n.to_lowercase().contains(&f) || id.contains(&f)).collect();
-                id_combo(ui, "crpick", &mut st.creature_pick, &list, "— creature —");
+                crate::ui::entry_combo(ui, "crpick", &mut st.creature_pick, &list, "— creature —", &w.library, Kind::Creature);
                 ui.add(egui::DragValue::new(&mut st.creature_count).range(1..=30));
                 if ui.button("Add").clicked() && !st.creature_pick.is_empty() {
                     for _ in 0..st.creature_count {
@@ -119,7 +121,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     }
                 }
             });
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.add(egui::TextEdit::singleline(&mut st.custom_name).hint_text("custom name").desired_width(110.0));
                 ui.label("HP");
                 ui.add(egui::DragValue::new(&mut st.custom_hp).range(0..=999));
@@ -140,7 +142,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
                 Some(c) => {
                     ui.label(egui::RichText::new(&c.name).strong().size(16.0));
-                    ui.horizontal(|ui| {
+                    ui.horizontal_wrapped(|ui| {
                         ui.label("Amount");
                         ui.add(egui::DragValue::new(&mut st.amount).range(0..=999));
                         if ui.button("💥 Damage").clicked() {
@@ -167,7 +169,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                         }
                     });
                     if let Some(cm) = w.campaign.encounter.find_mut(&c.id) {
-                        ui.horizontal(|ui| {
+                        ui.horizontal_wrapped(|ui| {
                             ui.label("Concentrating on");
                             ui.add(egui::TextEdit::singleline(&mut cm.concentrating_on).desired_width(140.0));
                         });
@@ -175,7 +177,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                         ui.horizontal_wrapped(|ui| {
                             for cond in &w.library.rules.conditions {
                                 let mut on = cm.conditions.contains(cond);
-                                if ui.checkbox(&mut on, cond).changed() {
+                                if ui.checkbox(&mut on, cond).on_hover_text(dnd_core::glossary::explain(cond).unwrap_or("")).changed() {
                                     if on {
                                         cm.conditions.push(cond.clone());
                                     } else {
@@ -202,7 +204,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     if !attacks.is_empty() {
                         ui.add_space(4.0);
                         ui.label(egui::RichText::new("Attack").strong());
-                        ui.horizontal(|ui| {
+                        ui.horizontal_wrapped(|ui| {
                             id_combo(ui, "atk_target", &mut st.target, &targets, "— target —");
                             egui::ComboBox::from_id_salt("atk_mode").width(90.0).selected_text(MODES[st.mode.min(2)].0).show_ui(ui, |ui| {
                                 for (i, m) in MODES.iter().enumerate() {
@@ -251,7 +253,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 
             heading(ui, "Distance");
             let names: Vec<(String, String)> = w.campaign.encounter.combatants.iter().map(|c| (c.id.clone(), c.name.clone())).collect();
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 id_combo(ui, "dista", &mut st.dist_a, &names, "— A —");
                 id_combo(ui, "distb", &mut st.dist_b, &names, "— B —");
             });
@@ -267,7 +269,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
 
             heading(ui, "Within radius");
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label("Center");
                 id_combo(ui, "radc", &mut st.area_origin, &names, "— combatant —");
                 ui.label("ft");
@@ -284,7 +286,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
 
             heading(ui, "Area of effect");
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 egui::ComboBox::from_id_salt("shape").selected_text(SHAPES[st.area_shape.min(3)]).show_ui(ui, |ui| {
                     for (i, s) in SHAPES.iter().enumerate() {
                         ui.selectable_value(&mut st.area_shape, i, *s);
@@ -367,7 +369,11 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 w.campaign.encounter = Encounter::default();
                 st.selected = None;
             }
+        });
+        // its own row: a drop-down can't wrap with the buttons above
+        ui.horizontal(|ui| {
             ui.label("Distance rule");
+            dnd_mapview::help::term(ui, "distance_rule");
             egui::ComboBox::from_id_salt("drule").selected_text(format!("{:?}", w.campaign.settings.distance_rule)).show_ui(ui, |ui| {
                 for r in [DistanceRule::Chebyshev, DistanceRule::Alternating, DistanceRule::Euclidean] {
                     ui.selectable_value(&mut w.campaign.settings.distance_rule, r, format!("{r:?}"));
@@ -379,10 +385,15 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         let active = w.campaign.encounter.active;
         let mut remove: Option<String> = None;
         let mut select: Option<String> = None;
-        egui::ScrollArea::vertical().show(ui, |ui| {
+        // scrolls sideways too, so no column is ever out of reach
+        egui::ScrollArea::both().show(ui, |ui| {
             egui::Grid::new("tracker").striped(true).num_columns(11).spacing([8.0, 4.0]).show(ui, |ui| {
                 for h in ["", "Init", "Name", "HP", "Max", "Temp", "AC", "X", "Y", "Conditions", ""] {
-                    ui.label(egui::RichText::new(h).weak());
+                    // hover a column title for what it means
+                    let r = ui.label(egui::RichText::new(h).weak());
+                    if let Some(t) = dnd_core::glossary::explain(h) {
+                        r.on_hover_text(t);
+                    }
                 }
                 ui.end_row();
                 for (i, c) in w.campaign.encounter.combatants.iter_mut().enumerate() {

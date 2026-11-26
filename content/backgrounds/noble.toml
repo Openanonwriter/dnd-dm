@@ -1,0 +1,66 @@
+id = "noble"
+name = "Noble"
+skill_proficiencies = ["history", "persuasion"]
+tool_proficiencies = ["one type of gaming set"]
+language_choices = 1
+starting_equipment = ["fine clothes", "signet ring", "scroll of pedigree", "purse", "25 gp"]
+description = "You were born into wealth, power and privilege, and understand the duties that come with a title."
+
+[feature]
+name = "Position of Privilege"
+description = "People tend to think the best of you. You are welcome in high society, common folk try to accommodate you, and you can secure an audience with a local noble if you need one."
+
+[[variants]]
+name = "Knight"
+description = "You hold a knighthood, one of the lowest noble titles. Instead of household servants you have a squire and a groom, and you may have sworn service to a lord."
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "I make everyone I speak with feel like the most important person in the room.",
+  "Commoners adore me for my open hand and kind word.",
+  "My posture and manner leave no doubt that I was born to rule.",
+  "I never appear in public unless I'm dressed in the latest fashion.",
+  "Dirt, sweat and cheap inns are beneath me, and I say so.",
+  "My blood is no better than anyone's, and I treat people that way.",
+  "I keep a little book of every favor owed to me, and I collect.",
+  "I learned swordplay, dancing and poetry, and I show off all three.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Courtesy. My rank earns respect, but everyone deserves dignity. (Good)",
+  "Order. I honor those above me, and expect the same from those below. (Lawful)",
+  "Independence. I'll prove I can stand without my family's help. (Chaotic)",
+  "Power. With enough of it, no one can tell me what to do. (Evil)",
+  "Bloodline. Family comes before everything. (Any)",
+  "Duty. Those born high must protect those born low. (Good)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "I'll take on any challenge to earn my family's approval.",
+  "An alliance between my house and another must be kept at any cost.",
+  "Nothing matters more than my family.",
+  "I love the heir of a rival house my family despises.",
+  "My loyalty to the crown is absolute.",
+  "The common people must see me as their hero.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "Deep down, I think everyone is beneath me.",
+  "I'm hiding a scandal that could bring down my whole house.",
+  "I hear insults in every compliment and lose my temper fast.",
+  "I chase pleasure and luxury far too eagerly.",
+  "I expect servants to appear whenever I snap my fingers.",
+  "My words and deeds keep embarrassing my family.",
+]

@@ -45,6 +45,17 @@ everything (dice, hits, damage); phones only ask.
 6. **At 0 hit points** a player gets *Roll death save*: three passes make
    them stable, three fails kill, a 20 puts them back up with 1.
 
+## Death
+
+Three failed death saves and the character is **dead** (the DM sees a red
+DEAD label, the player "Your character has died"). The dead can't rest,
+spend hit dice or roll death saves, and ordinary healing (cure wounds,
+potions, the +5 buttons) does nothing for them; the server refuses it all.
+Only a revival spell brings them back: *revivify* or *raise dead* at 1 hit
+point, *reincarnate*, *resurrection* or *true resurrection* at full. The DM
+can also override it with *Bring back to life* on the character's Notes &
+State tab. A long rest needs at least 1 hit point even for the living.
+
 Dashboard → *Players' attacks change hit points*: turn this off and attacks
 and spells are only rolled and announced; the DM applies the numbers.
 
@@ -96,10 +107,42 @@ what is allowed. Tokens that are not on the map are not checked.
 | Class kind | Example | Chooses | Prepares |
 |---|---|---|---|
 | Spellbook | Wizard | cantrips + 6 spells, 2 more per level | from the book, each long rest |
-| Whole list | Cleric | cantrips only | from the whole class list |
-| Known | (homebrew sorcerer, bard) | cantrips + `spells_known` per level | nothing: all are ready |
+| Whole list | Cleric, druid, paladin, artificer | cantrips only | from the whole class list |
+| Known | Bard, ranger, sorcerer, warlock | cantrips + `spells_known` per level | nothing: all are ready |
 
-The DM can always add any spell to a character by hand; those stay.
+Spells a feature grants (a cleric's domain spells, a paladin's oath, a
+Land druid's terrain, racial magic) are marked **always** and never count
+against the limits. The DM can always add any spell to a character by hand;
+those stay.
+
+## Rules the apps enforce
+
+Everything a character has is checked against what it qualifies for:
+subclass level, class options with prerequisites (an invocation that needs
+Pact of the Blade), feat prerequisites, multiclass ability scores, spells
+above the castable level or off the list, the number of cantrips, known and
+prepared spells, class skill picks, ability score improvements at the right
+levels, and armor the character is proficient with and strong enough for.
+
+- **DM**: anything goes. The Build tab starts with a *Rules check* list of
+  what is broken, and each offending pick has a red outline with the reason
+  on hover. Drop-downs show options the character doesn't qualify for in
+  red.
+- **Players**: red-outlined options can't be picked; tapping one says what
+  it needs. The server refuses a character or spell choice that breaks a
+  rule.
+- **Allowing it**: Dashboard → *Players may break the rules* (everyone), or
+  *Let this character's player pick options they don't qualify for* on a
+  character's Build tab. The picks still show in red, and the player's
+  Spells tab gains *More spells your DM allows*.
+
+## Help for new players
+
+Every stat, skill, condition, section heading, class, subclass, species,
+background, feat, item and spell has a small **(i)**. Hover it on the PC for
+a short explanation; tap it on the phone for the full text in a popup (tap
+elsewhere to close). The wording lives in `crates/dnd-core/src/glossary.rs`
+(game terms) and is built from the content files for everything else.
 
 ## Trying it alone
 
@@ -108,4 +151,6 @@ cargo run --release -p dnd-player --example demo
 ```
 
 opens the player app against a small fight running inside the same program
-(nothing is opened to the network). `DND_PLAYER_TAB=spells` starts on a tab.
+(nothing is opened to the network). `DND_PLAYER_TAB=spells` starts on a tab;
+`DND_PLAYER_CREATE="dwarf,cleric,acolyte"` opens the character builder with
+those picks. See `docs/DEVELOPING.md` for the rest.

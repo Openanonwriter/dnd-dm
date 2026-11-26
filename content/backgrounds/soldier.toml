@@ -1,10 +1,66 @@
 id = "soldier"
 name = "Soldier"
 skill_proficiencies = ["athletics", "intimidation"]
-tool_proficiencies = ["gaming set", "vehicles (land)"]
-starting_equipment = ["insignia of rank", "trophy from a fallen enemy", "gaming set", "common clothes", "10 gp"]
-description = "War has been your life for as long as you care to remember."
+tool_proficiencies = ["one type of gaming set", "vehicles (land)"]
+starting_equipment = ["insignia of rank", "trophy from a fallen enemy", "gaming set", "common clothes", "pouch", "10 gp"]
+description = "War has been your life for as long as you care to remember: training, drilling and fighting in an army or mercenary company."
 
 [feature]
 name = "Military Rank"
-description = "Soldiers loyal to your former organization still recognize your authority and can be relied upon for simple favours and access."
+description = "Soldiers loyal to your former army still recognize your rank and defer to you if they are of lower rank. You can call on them for simple favors, borrow common equipment or horses, and get into military camps and fortresses where your rank is known."
+
+[[suggestions]]
+name = "Specialty"
+fills = "backstory"
+options = ["Officer", "Scout", "Foot soldier", "Cavalry rider", "Field medic", "Quartermaster", "Standard bearer", "Siege engineer"]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "I still wake before dawn and make my bed with sharp corners.",
+  "I sort everyone I meet into a rank, whether they have one or not.",
+  "I keep my boots polished and my blade oiled, even in the mud.",
+  "Loud bangs make me reach for a weapon before I think.",
+  "I hum old marching songs when I'm nervous.",
+  "I give nicknames to everyone in the group, and they stick.",
+  "I eat fast and sleep anywhere; habits from the campaign trail.",
+  "I count the exits, the guards and the weapons in every room.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Shield. I stand between harm and the people who can't stand against it. (Good)",
+  "Discipline. A plan followed together beats brilliance alone. (Lawful)",
+  "Mutiny. An unjust order deserves to be refused. (Chaotic)",
+  "Victory. Win first; the reasons can be argued later. (Evil)",
+  "Survival. Get everyone home alive; nothing else counts. (Neutral)",
+  "Banner. I fight for my homeland and its people. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "I carry a fallen comrade's token and mean to bring it to their family.",
+  "My old sergeant is the closest thing I have to a parent.",
+  "The war isn't over for me until the warlord who started it is gone.",
+  "I owe a healer my life after a battle everyone thought I'd lost.",
+  "My old company scattered, and I'm trying to find what became of them.",
+  "I promised a dying friend I'd look after their younger sibling.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "I follow orders even when I know they're wrong.",
+  "Civilians and their worries seem petty to me, and it shows.",
+  "I deserted once, and I'm terrified someone will find out.",
+  "I settle arguments with threats far too quickly.",
+  "I drink to quiet what I saw in the war.",
+  "I can't stand being told what to do by anyone who hasn't fought.",
+]

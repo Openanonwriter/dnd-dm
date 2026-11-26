@@ -59,6 +59,11 @@ pub struct DmApp {
     pub last_change: Instant,
     pub autosave: bool,
     pub shot: crate::shot::Shot,
+    /// A campaign opened from a folder (DND_DM_CAMPAIGN) saves back there,
+    /// never over the campaign of the same name in saves/.
+    pub campaign_dir: Option<std::path::PathBuf>,
+    /// Picture-taking runs (DND_DM_SHOT) never save anything.
+    pub no_save: bool,
 }
 
 pub const AUTOSAVE_DELAY: Duration = Duration::from_millis(1200);
@@ -104,6 +109,8 @@ impl DmApp {
             last_change: Instant::now(),
             autosave: true,
             shot: crate::shot::Shot::from_env(),
+            campaign_dir: std::env::var("DND_DM_CAMPAIGN").ok().map(std::path::PathBuf::from),
+            no_save: std::env::var("DND_DM_SHOT").is_ok(),
         };
         if let Ok(v) = std::env::var("DND_DM_VIEW") {
             app.view = match v.as_str() {
@@ -117,6 +124,17 @@ impl DmApp {
         }
         app.encounter.selected = std::env::var("DND_DM_SELECT").ok();
         app.characters.selected = std::env::var("DND_DM_SELECT").ok();
+        if let Ok(t) = std::env::var("DND_DM_CHAR_TAB") {
+            use crate::ui::characters::Tab;
+            app.characters.tab = match t.as_str() {
+                "sheet" => Tab::Sheet,
+                "inventory" => Tab::Inventory,
+                "spells" => Tab::Spells,
+                "modifiers" => Tab::Modifiers,
+                "notes" => Tab::Notes,
+                _ => Tab::Build,
+            };
+        }
         // a picture-taking run stays off the network
         if app.paths.config.autostart_server && std::env::var("DND_DM_SHOT").is_err() {
             app.start_server();
@@ -187,7 +205,7 @@ impl DmApp {
             self.seen_revision = rev;
             self.last_change = Instant::now();
         }
-        if rev == self.saved_revision {
+        if rev == self.saved_revision || self.no_save {
             return;
         }
         if force || (self.autosave && self.last_change.elapsed() >= AUTOSAVE_DELAY) {
@@ -297,6 +315,8 @@ impl DmApp {
                         ui.horizontal(|ui| {
                             ui.label(theme::muted(k.label()));
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                // room for the scroll bar when the list scrolls
+                                ui.add_space(8.0);
                                 ui.label(theme::accent(n.to_string()));
                             });
                         });
@@ -325,7 +345,9 @@ impl eframe::App for DmApp {
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.maybe_autosave(true);
-        ui::content::flush(self);
+        if !self.no_save {
+            ui::content::flush(self);
+        }
         self.stop_server();
     }
 }

@@ -211,6 +211,7 @@ casting_time = "1 hour"
 range = "Touch"
 components = "V, S, M (a diamond worth at least 1,000 gp, which the spell consumes)"
 duration = "Instantaneous"
+revive = "max"
 classes = ["bard", "cleric"]
 description = "Return a creature dead no longer than 100 years (not of old age) to life with all its hit points, if its soul is willing. It neutralizes poisons, cures diseases and lifts curses at time of death, and restores missing body parts. The creature has -4 on attacks, saves and checks, reduced by 1 each long rest. Casting it leaves you weakened (-4 on attacks, saves and checks) until you finish a long rest."
 

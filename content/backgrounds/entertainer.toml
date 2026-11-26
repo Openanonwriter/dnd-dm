@@ -1,0 +1,70 @@
+id = "entertainer"
+name = "Entertainer"
+skill_proficiencies = ["acrobatics", "performance"]
+tool_proficiencies = ["disguise kit", "one musical instrument"]
+starting_equipment = ["musical instrument", "favor of an admirer", "costume", "pouch", "15 gp"]
+description = "You come alive in front of an audience: singing, dancing, acting, juggling or telling tales."
+
+[feature]
+name = "By Popular Demand"
+description = "You can always find somewhere to perform: an inn, a circus, a theater, a noble's court. In exchange you get free modest lodging and food, and locals recognize you and tend to like you while you perform there."
+
+[[variants]]
+name = "Gladiator"
+description = "Your show is combat: you turn fighting into a spectacle for a cheering crowd. You can perform in any arena, and you carry a cheap but flashy weapon (a trident or net) instead of an instrument."
+
+[[suggestions]]
+name = "Entertainer routine"
+fills = "backstory"
+options = ["Actor", "Dancer", "Fire-eater", "Jester", "Juggler", "Musician", "Poet", "Singer", "Storyteller", "Acrobat"]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "Any moment is the right moment for one of my stories.",
+  "I trade in gossip and always know the latest rumor.",
+  "I'm forever falling head over heels for someone new.",
+  "A joke from me can calm a room that's about to brawl.",
+  "Insult me cleverly and you'll earn my respect.",
+  "If the spotlight drifts away from me, I go looking for it.",
+  "Good enough is never good enough; I rehearse until it's perfect.",
+  "My moods change with the weather, sometimes faster.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Beauty. A great show makes the world a little brighter. (Good)",
+  "Heritage. The old songs must be sung so they're never lost. (Lawful)",
+  "Novelty. I want to astonish people with something nobody has seen. (Chaotic)",
+  "Fame. My name will be on everyone's lips. (Evil)",
+  "Truth in art. A performance should show who you really are. (Any)",
+  "The crowd. Their smiles are what I live for. (Neutral)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "My instrument was a gift from someone I loved, and I'd never part with it.",
+  "A rival stole my best instrument, and I'm going to get it back.",
+  "I'll be a legend on every stage in the land.",
+  "I model myself on a hero from the old ballads.",
+  "There's a rival performer I must outshine, no matter what.",
+  "My old troupe is my family, and I'd do anything for them.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "There's very little I wouldn't do for applause.",
+  "A pretty face in the audience makes me forget my lines and my sense.",
+  "A scandal follows me from town to town.",
+  "I mocked a powerful noble on stage, and they haven't forgotten.",
+  "Every feeling I have shows on my face.",
+  "I mean well, but my friends can't count on me to show up.",
+]

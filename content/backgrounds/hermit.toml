@@ -1,0 +1,76 @@
+id = "hermit"
+name = "Hermit"
+skill_proficiencies = ["medicine", "religion"]
+tool_proficiencies = ["herbalism kit"]
+language_choices = 1
+starting_equipment = ["scroll case of notes", "winter blanket", "common clothes", "herbalism kit", "5 gp"]
+description = "You lived in seclusion, in a monastery, a cave or a hut in the wilds, for a formative part of your life."
+
+[feature]
+name = "Discovery"
+description = "Your quiet years gave you access to a unique, powerful discovery: a great truth about the cosmos, a forgotten location, a hidden secret. Work out the details with your DM."
+
+[[suggestions]]
+name = "Life of seclusion"
+fills = "backstory"
+options = [
+  "I went looking for enlightenment.",
+  "I followed the strict rule of a religious order.",
+  "I was banished for something I didn't do.",
+  "Something terrible happened, and I walked away from everyone.",
+  "I needed silence to finish my great work of art, music or writing.",
+  "I wanted to live close to nature, far from towns.",
+  "I kept watch over an ancient ruin or relic.",
+  "I was on a pilgrimage to find a holy person, place or object.",
+]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "After so long alone, I speak little and mostly in nods and gestures.",
+  "Nothing disturbs my calm, not even disaster.",
+  "I quote my old teacher's sayings on every subject.",
+  "I feel deeply for anyone who is suffering.",
+  "Manners and customs are a mystery to me, and I ignore them.",
+  "I see everything that happens as part of a vast cosmic pattern.",
+  "I drift off into my thoughts and miss what's going on around me.",
+  "I'm building a grand theory of everything and love to explain it.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Sharing. What I learned belongs to everyone, not just me. (Good)",
+  "Reason. Feelings shouldn't cloud what is true and right. (Lawful)",
+  "Questioning. Curiosity is how the world moves forward. (Chaotic)",
+  "Hidden power. Solitude is a road to magical might. (Evil)",
+  "Non-interference. Meddling in others' lives only causes trouble. (Neutral)",
+  "Self-knowledge. Understand yourself and you understand everything. (Any)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "The others from my hermitage are my true family.",
+  "I went into hiding from people who may still be hunting me.",
+  "I'm still searching for the enlightenment I went looking for.",
+  "I withdrew from the world because of a love I couldn't have.",
+  "If my discovery became known, it could bring ruin to the world.",
+  "In my solitude I glimpsed a great evil that only I can stop.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "Back among people, I indulge in every comfort I went without.",
+  "Dark thoughts followed me into solitude and never left.",
+  "My beliefs are rigid, and I won't hear otherwise.",
+  "Winning an argument matters more to me than keeping the peace.",
+  "I'd take huge risks for a scrap of lost knowledge.",
+  "I hoard secrets and share them with no one.",
+]

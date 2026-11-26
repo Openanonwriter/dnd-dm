@@ -67,10 +67,33 @@ pub fn apply(ctx: &egui::Context) {
 
 pub fn section(ui: &mut egui::Ui, text: &str) {
     ui.add_space(8.0);
-    ui.label(egui::RichText::new(text.to_uppercase()).color(ORANGE).strong().size(13.0));
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new(text.to_uppercase()).color(ORANGE).strong().size(13.0));
+        // a (i) with a plain explanation when the heading is a game term
+        if let Some(t) = dnd_core::glossary::explain_heading(text) {
+            dnd_mapview::help::info(ui, t);
+        }
+    });
     let r = ui.available_rect_before_wrap();
     ui.painter().line_segment([egui::pos2(r.left(), r.top()), egui::pos2(r.right(), r.top())], Stroke::new(1.0, ORANGE_DIM));
     ui.add_space(4.0);
+}
+
+/// A section heading with the (i) for a given glossary term.
+pub fn section_help(ui: &mut egui::Ui, text: &str, key: &str) {
+    ui.add_space(8.0);
+    ui.horizontal(|ui| {
+        ui.label(egui::RichText::new(text.to_uppercase()).color(ORANGE).strong().size(13.0));
+        dnd_mapview::help::term(ui, key);
+    });
+    let r = ui.available_rect_before_wrap();
+    ui.painter().line_segment([egui::pos2(r.left(), r.top()), egui::pos2(r.right(), r.top())], Stroke::new(1.0, ORANGE_DIM));
+    ui.add_space(4.0);
+}
+
+/// A red outline around something the character doesn't qualify for.
+pub fn red_outline(ui: &egui::Ui, rect: egui::Rect) {
+    ui.painter().rect_stroke(rect.expand(2.0), 6.0, Stroke::new(1.6, BAD), egui::StrokeKind::Outside);
 }
 
 pub fn card() -> egui::Frame {
@@ -112,5 +135,7 @@ pub fn tile(ui: &mut egui::Ui, w: f32, label: &str, value: &str, sub: &str) -> e
             });
         })
         .response;
-    resp.interact(egui::Sense::click())
+    let r = resp.interact(egui::Sense::click());
+    dnd_mapview::help::term_in_corner(ui, r.rect, label);
+    r
 }

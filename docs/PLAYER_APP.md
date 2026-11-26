@@ -9,7 +9,16 @@ testing). It talks to the DM's `dnd-dm` server over Wi-Fi and shares
 
 - **Find the DM** — "Scan network" probes the local /24 for a dnd-dm server;
   or type the address the DM app shows on its Dashboard.
-- **Pick your character** from the campaign's list; the app remembers it.
+- **Say who you are** — the app asks for your name; the DM sees it on the
+  Dashboard and gives you your character. (The DM can instead let players
+  pick from the list.)
+- **Make your own character** between sessions: species, class, subclass,
+  background, ability scores (standard array, point buy or server-rolled),
+  skills, class choices (fighting style, invocations…), feats, starting gear,
+  spells, and personality traits, ideals, bonds and flaws suggested by your
+  background (tap one to use it, or roll). Every pick has an (i) that
+  explains it. Options your character doesn't qualify for have a red
+  outline and say what they need; the DM can unlock them.
 - **Live sheet** — abilities, saves, skills (tap to roll), AC, initiative,
   speed, HP with damage/heal buttons, death saves, inspiration, attacks with
   roll buttons, spell slots (tap pips), prepared spells, inventory and coins,
@@ -25,6 +34,11 @@ testing). It talks to the DM's `dnd-dm` server over Wi-Fi and shares
 - **Offline** — the last sheet is cached in the app's data folder and opens
   without the server; edits made offline are kept on the device.
 - **Dice** — local roller with history; advantage / disadvantage buttons.
+- **Help** — a small (i) next to every stat, skill, condition, spell and
+  item; tap it for a plain-language explanation.
+- **Death** — at 0 HP you roll death saves; after three failures the sheet
+  locks (no healing, no rest) until the DM or a revival spell brings you
+  back.
 - **Printable sheet** — exports the same HTML the DM app prints.
 
 ## Build
@@ -62,7 +76,12 @@ and open the APK, or use `-Install` with USB debugging on.
 | `src/app.rs` | `PlayerApp`: screens, event pump, debounce + patch, dice |
 | `src/client.rs` | background network thread (`ureq`), WebSocket listener (`tungstenite`), LAN scan |
 | `src/store.rs` | `config.toml` and the offline cache |
-| `src/ui/*` | connect / pick / sheet screens |
+| `src/ui/connect.rs` | find and join the DM |
+| `src/ui/pick.rs` | the waiting room / character list |
+| `src/ui/create.rs` | the character builder |
+| `src/ui/sheet.rs` | the live sheet: stats, combat, items, notes, dice |
+| `src/ui/spells.rs` | spells tab and the builder's spell section |
+| `src/ui/map.rs` | the battle map |
 | `android/` | Gradle shell: manifest, icon, no code; `jniLibs/` is filled by cargo-ndk |
 
 Android specifics: the app is a `cdylib` named `libdnd_player.so` loaded by

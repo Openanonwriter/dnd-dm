@@ -243,6 +243,12 @@ pub struct CampaignSettings {
     /// upload their own character; while on, new characters come from the DM.
     #[serde(default)]
     pub game_live: bool,
+    /// Players may pick options their character doesn't qualify for
+    /// (a feat above their level, a spell they can't cast yet...). The DM
+    /// can always; this opens it to every player. See also the
+    /// per-character `allow_rule_breaks`.
+    #[serde(default)]
+    pub allow_rule_breaks: bool,
     /// Level that player-made characters start at.
     #[serde(default = "default_start_level")]
     pub player_start_level: u32,
@@ -280,6 +286,7 @@ impl Default for CampaignSettings {
             port: 8420,
             players_choose_character: false,
             game_live: false,
+            allow_rule_breaks: false,
             player_start_level: 1,
             players_move_tokens: true,
             player_move_limit: 0,

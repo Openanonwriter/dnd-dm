@@ -28,6 +28,12 @@ impl Shot {
     pub fn tick(&mut self, ctx: &egui::Context) {
         let Some(path) = self.path.clone() else { return };
         self.frames += 1;
+        // `DND_DM_SHOT_ZOOM=1.5` mimics Windows display scaling
+        if self.frames == 1 {
+            if let Some(z) = std::env::var("DND_DM_SHOT_ZOOM").ok().and_then(|v| v.parse::<f32>().ok()) {
+                ctx.set_zoom_factor(z);
+            }
+        }
         ctx.request_repaint();
         if self.frames == 45 {
             ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::UserData::default()));

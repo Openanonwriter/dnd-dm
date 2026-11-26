@@ -3,6 +3,7 @@
 //! from square to square. No image files: everything is drawn from shapes,
 //! so the same code runs on Windows and on a phone.
 
+pub mod help;
 mod props;
 mod tokens;
 

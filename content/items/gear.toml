@@ -9,6 +9,7 @@ description = "Holds 1 cubic foot / 30 pounds of gear."
 [[items]]
 id = "bedroll"
 name = "Bedroll"
+description = "A padded roll to sleep on, with a blanket. Much better than bare ground."
 kind = "gear"
 cost = "1 gp"
 weight = 7.0
@@ -32,6 +33,7 @@ description = "Burns for 1 hour, bright light 20 ft and dim light a further 20 f
 [[items]]
 id = "rations"
 name = "Rations (1 day)"
+description = "One day of dry travel food: jerky, hard bread, dried fruit and nuts."
 kind = "consumable"
 cost = "5 sp"
 weight = 2.0
@@ -39,6 +41,7 @@ weight = 2.0
 [[items]]
 id = "waterskin"
 name = "Waterskin"
+description = "A leather bag that holds about 4 pints (half a gallon) of water."
 kind = "gear"
 cost = "2 sp"
 weight = 5.0
@@ -62,6 +65,7 @@ description = "10 uses. As an action, stabilize a creature at 0 hit points witho
 [[items]]
 id = "arrows_20"
 name = "Arrows (20)"
+description = "Twenty arrows for a shortbow or longbow. After a fight you can recover about half the ones you shot."
 kind = "ammunition"
 cost = "1 gp"
 weight = 1.0
@@ -69,6 +73,7 @@ weight = 1.0
 [[items]]
 id = "crossbow_bolts_20"
 name = "Crossbow Bolts (20)"
+description = "Twenty bolts for a crossbow. After a fight you can recover about half the ones you shot."
 kind = "ammunition"
 cost = "1 gp"
 weight = 1.5
@@ -76,6 +81,7 @@ weight = 1.5
 [[items]]
 id = "holy_symbol"
 name = "Holy Symbol (amulet)"
+description = "A sacred emblem of a god. Clerics and paladins hold or wear it to cast their spells instead of using most material components."
 kind = "gear"
 cost = "5 gp"
 weight = 1.0
@@ -83,6 +89,7 @@ weight = 1.0
 [[items]]
 id = "arcane_focus"
 name = "Arcane Focus (crystal)"
+description = "A crystal, orb, rod, staff or wand that sorcerers, warlocks and wizards cast through instead of using most material components."
 kind = "gear"
 cost = "10 gp"
 weight = 1.0

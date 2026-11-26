@@ -167,7 +167,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
 /// Left: every map of the campaign, grouped by chapter.
 fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut Option<(String, bool)>) {
     let st = &mut app.map;
-    egui::SidePanel::left("map_shelf").resizable(false).exact_width(214.0).show_inside(ui, |ui| {
+    egui::SidePanel::left("map_shelf").resizable(false).exact_width(if ui.available_width() < 900.0 { 170.0 } else { 214.0 }).show_inside(ui, |ui| {
         egui::ScrollArea::vertical().show(ui, |ui| {
             theme::section(ui, "Maps");
             let mut rows: Vec<(String, String, String, bool)> = vec![(w.campaign.map.chapter.clone(), w.campaign.map.id.clone(), w.campaign.map.name.clone(), true)];
@@ -312,7 +312,7 @@ fn tool_strip(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui) {
     let st = &mut app.map;
     let map = &mut w.campaign.map;
     egui::SidePanel::right("map_tools").resizable(false).exact_width(54.0).frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin::symmetric(4, 6))).show_inside(ui, |ui| {
-        egui::ScrollArea::vertical().scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysHidden).show(ui, |ui| {
+        egui::ScrollArea::vertical().scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::VisibleWhenNeeded).show(ui, |ui| {
             ui.spacing_mut().item_spacing.y = 3.0;
             for (t, label, tip) in Tool::ALL {
                 let (icon, name) = label.split_once(' ').unwrap_or(("", label));

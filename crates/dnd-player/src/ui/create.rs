@@ -53,7 +53,12 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         // borrow the options out of the app while the form edits the draft
         match (app.builder.take(), app.builder_lib.take()) {
             (Some(opts), Some(lib)) => {
-                egui::ScrollArea::vertical().show(ui, |ui| form(app, ui, &opts, &lib, level));
+                // DND_PLAYER_SCROLL=<points> starts scrolled down (screenshots)
+                let mut area = egui::ScrollArea::vertical();
+                if let Some(y) = std::env::var("DND_PLAYER_SCROLL").ok().and_then(|v| v.parse::<f32>().ok()) {
+                    area = area.vertical_scroll_offset(y);
+                }
+                area.show(ui, |ui| form(app, ui, &opts, &lib, level));
                 app.builder = Some(opts);
                 app.builder_lib = Some(lib);
             }
@@ -109,6 +114,9 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
         c.level = level;
     }
     let sheet: Sheet = dnd_core::derive(&app.draft, lib);
+    // what this character qualifies for; the DM may allow more
+    let renv = dnd_core::requirements::env(&app.draft, &sheet);
+    let free = app.seat.as_ref().map(|s| s.allow_rule_breaks).unwrap_or(false);
     let rolled: Vec<i32> = app.seat.as_ref().map(|s| s.rolled.clone()).unwrap_or_default();
     let replacing = app.seat.as_ref().filter(|s| s.made_character).map(|s| s.character_name.clone());
 
@@ -135,7 +143,10 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 ui.label(&s.description);
             }
             for t in &s.traits {
-                ui.label(theme::muted(format!("• {}", t.name)).small());
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted(format!("• {}", t.name)).small());
+                    dnd_mapview::help::text(ui, &t.description);
+                });
             }
         });
     }
@@ -165,7 +176,17 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 ui.label(&c.description);
             }
             for f in c.features.iter().filter(|f| f.level <= level) {
-                ui.label(theme::muted(format!("• {}", f.name)).small());
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted(format!("• {} (level {})", f.name, f.level)).small());
+                    dnd_mapview::help::text(ui, &f.description);
+                });
+            }
+            let later = c.features.iter().filter(|f| f.level > level).count();
+            if later > 0 {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted(format!("+ {later} more features at higher levels")).small());
+                    dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Class, &c.id);
+                });
             }
         });
     }
@@ -179,9 +200,19 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
             sub.clear();
         }
         if !subs.is_empty() {
-            theme::section(ui, if c.subclass_label.is_empty() { "Subclass" } else { &c.subclass_label });
+            theme::section_help(ui, if c.subclass_label.is_empty() { "Subclass" } else { &c.subclass_label }, "subclass");
             let list: Vec<(String, String)> = subs.iter().map(|s| (s.id.clone(), s.name.clone())).collect();
             chips(ui, &mut sub, &list);
+            // what each choice is, before you pick one
+            if sub.is_empty() {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted("What are these?").small());
+                    for s in &subs {
+                        ui.label(theme::muted(&s.name).small());
+                        dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Subclass, &s.id);
+                    }
+                });
+            }
             if let Some(s) = subs.iter().find(|s| s.id == sub) {
                 theme::card().show(ui, |ui| {
                     ui.set_width(ui.available_width());
@@ -189,7 +220,16 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                         ui.label(&s.description);
                     }
                     for f in s.features.iter().filter(|f| f.level <= level) {
-                        ui.label(theme::muted(format!("• {}", f.name)).small());
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(theme::muted(format!("• {} (level {})", f.name, f.level)).small());
+                            dnd_mapview::help::text(ui, &f.description);
+                        });
+                    }
+                    if s.features.iter().any(|f| f.level > level) {
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(theme::muted("More features at higher levels").small());
+                            dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Subclass, &s.id);
+                        });
                     }
                 });
             }
@@ -222,13 +262,55 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 ui.label(&b.description);
             }
             if let Some(f) = &b.feature {
-                ui.label(theme::muted(format!("• {}", f.name)).small());
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted(format!("• Feature: {}", f.name)).small());
+                    dnd_mapview::help::text(ui, &f.description);
+                });
+            }
+            for v in &b.variants {
+                ui.horizontal_wrapped(|ui| {
+                    ui.label(theme::muted(format!("• Variant: {}", v.name)).small());
+                    dnd_mapview::help::text(ui, &v.description);
+                });
             }
         });
+        // suggested characteristics: tap an idea to put it on your character
+        if !b.suggestions.is_empty() {
+            theme::section_help(ui, "Suggested characteristics", "suggested_characteristics");
+            ui.label(theme::muted("Tap an idea to add it to your character (tap again to remove it), or roll the dice for a random one. You can edit the text afterwards under About.").small());
+            for t in &b.suggestions {
+                theme::card().show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    ui.horizontal(|ui| {
+                        ui.label(theme::accent(&t.name).strong());
+                        let target = builder::suggestion_field_label(&t.fills);
+                        if !target.is_empty() {
+                            ui.label(theme::muted(format!("goes in {target}{}", if t.pick > 1 { format!(" · pick {}", t.pick) } else { String::new() })).small());
+                        }
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if ui.button("🎲 Roll").clicked() && !t.options.is_empty() {
+                                let free: Vec<&String> = t.options.iter().filter(|o| !builder::has_suggestion(&app.draft, &t.fills, o)).collect();
+                                if !free.is_empty() {
+                                    let n = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.subsec_nanos() as usize).unwrap_or(0);
+                                    builder::toggle_suggestion(&mut app.draft, &t.fills, free[n % free.len()]);
+                                }
+                            }
+                        });
+                    });
+                    for (n, o) in t.options.iter().enumerate() {
+                        let on = builder::has_suggestion(&app.draft, &t.fills, o);
+                        let text = egui::RichText::new(format!("{}. {o}", n + 1)).size(14.0);
+                        if ui.selectable_label(on, if on { text.color(theme::ORANGE) } else { text }).clicked() {
+                            builder::toggle_suggestion(&mut app.draft, &t.fills, o);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     // ------------------------------------------------------------ choices
-    // features that offer a pick: Fighting Style, Metamagic, Draconic Ancestryâ€¦
+    // features that offer a pick: Fighting Style, Metamagic, Draconic Ancestry...
     let mut choices_open: Vec<String> = Vec::new();
     let open: Vec<_> = sheet.features.iter().filter(|f| !f.options.is_empty() && f.picks > 0).collect();
     let keep: Vec<String> = open.iter().map(|f| f.name.clone()).collect();
@@ -241,24 +323,39 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
             picked.retain(|id| options.iter().any(|o| &o.id == id));
             theme::card().show(ui, |ui| {
                 ui.set_width(ui.available_width());
-                ui.label(egui::RichText::new(format!("{} Â· pick {}", f.name, f.picks)).strong().size(16.0));
+                ui.label(egui::RichText::new(format!("{} · pick {}", f.name, f.picks)).strong().size(16.0));
                 if !f.description.is_empty() {
                     ui.label(theme::muted(&f.description).small());
                 }
+                let note_id = egui::Id::new(("rule_note", &f.name));
                 ui.horizontal_wrapped(|ui| {
                     ui.spacing_mut().button_padding = egui::vec2(12.0, 8.0);
                     for o in &options {
                         let on = picked.contains(&o.id);
                         let full = picked.len() as u32 >= f.picks;
-                        if ui.add_enabled(on || !full, egui::Button::new(egui::RichText::new(&o.name).size(15.0)).selected(on)).clicked() {
+                        let why = dnd_core::requirements::feat_failure(&renv, o);
+                        let r = ui.add_enabled(on || !full, egui::Button::new(egui::RichText::new(&o.name).size(15.0)).selected(on));
+                        if why.is_some() {
+                            theme::red_outline(ui, r.rect);
+                        }
+                        if r.clicked() {
                             if on {
                                 picked.retain(|p| p != &o.id);
-                            } else {
+                            } else if why.is_none() || free {
                                 picked.push(o.id.clone());
+                            } else if let Some(w) = &why {
+                                // locked: say why instead of picking it
+                                ui.ctx().data_mut(|d| d.insert_temp(note_id, w.clone()));
                             }
                         }
                     }
                 });
+                if let Some(note) = ui.ctx().data(|d| d.get_temp::<String>(note_id)) {
+                    ui.label(egui::RichText::new(format!("{note}. Ask your DM if you want it anyway.")).color(theme::BAD).small());
+                }
+                if options.iter().any(|o| dnd_core::requirements::feat_failure(&renv, o).is_some()) {
+                    ui.label(theme::muted(if free { "Red outline = your character doesn't qualify yet, but your DM allows it." } else { "Red outline = your character doesn't qualify yet. Tap one to see what it needs." }).small());
+                }
                 for id in &picked {
                     if let Some(o) = options.iter().find(|o| &o.id == id) {
                         if !o.prerequisite.is_empty() {
@@ -283,6 +380,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     theme::section(ui, "Ability scores");
     let methods = [("standard_array".to_string(), "Standard array".to_string()), ("point_buy".to_string(), "Point buy".to_string()), ("rolled".to_string(), "Rolled".to_string())];
     let mut method = app.draft.ability_method.clone();
+    dnd_mapview::help::label_term(ui, theme::muted("How do you want your scores?").small(), "ability_method");
     if chips(ui, &mut method, &methods) {
         match method.as_str() {
             "standard_array" => deal(&mut app.draft, &opts.rules.standard_array),
@@ -344,7 +442,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                     let total = sheet.abilities.get(k).unwrap_or(cur);
                     let modifier = sheet.ability_mods.get(*k).copied().unwrap_or(0);
                     ui.label(theme::accent(format!("{total} ({})", super::bonus(modifier))).strong().size(16.0)).on_hover_text("with species bonuses and improvements");
-                    ui.label(theme::muted("→"));
+                    ui.label(theme::muted("="));
                     if let Some(pool) = &pool {
                         egui::ComboBox::from_id_salt(("abil", k)).selected_text(cur.to_string()).width(64.0).show_ui(ui, |ui| {
                             for (i, v) in pool.iter().enumerate() {
@@ -401,8 +499,27 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 });
                 if adv.feat.is_some() {
                     let mut id = adv.feat.clone().unwrap_or_default();
-                    let list: Vec<(String, String)> = general_feats.iter().map(|f| (f.id.clone(), f.name.clone())).collect();
-                    chips(ui, &mut id, &list);
+                    let note_id = egui::Id::new(("feat_note", *l));
+                    ui.horizontal_wrapped(|ui| {
+                        ui.spacing_mut().button_padding = egui::vec2(12.0, 8.0);
+                        for f in &general_feats {
+                            let why = dnd_core::requirements::feat_failure(&renv, f);
+                            let r = ui.selectable_label(id == f.id, egui::RichText::new(&f.name).size(16.0));
+                            if why.is_some() {
+                                theme::red_outline(ui, r.rect);
+                            }
+                            if r.clicked() && id != f.id {
+                                if why.is_none() || free {
+                                    id = f.id.clone();
+                                } else if let Some(w) = &why {
+                                    ui.ctx().data_mut(|d| d.insert_temp(note_id, w.clone()));
+                                }
+                            }
+                        }
+                    });
+                    if let Some(note) = ui.ctx().data(|d| d.get_temp::<String>(note_id)) {
+                        ui.label(egui::RichText::new(format!("{note}. Ask your DM if you want it anyway.")).color(theme::BAD).small());
+                    }
                     if let Some(f) = general_feats.iter().find(|f| f.id == id) {
                         if !f.prerequisite.is_empty() {
                             ui.label(theme::accent(format!("needs: {}", f.prerequisite)).small());
@@ -464,7 +581,14 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                     continue;
                 }
                 let mut on = app.draft.skill_proficiencies.contains(key);
-                if ui.add_enabled(on || picked < max, egui::Checkbox::new(&mut on, egui::RichText::new(name).size(16.0))).changed() {
+                let changed = ui
+                    .horizontal(|ui| {
+                        let c = ui.add_enabled(on || picked < max, egui::Checkbox::new(&mut on, egui::RichText::new(name).size(16.0))).changed();
+                        dnd_mapview::help::term(ui, key);
+                        c
+                    })
+                    .inner;
+                if changed {
                     if on {
                         app.draft.skill_proficiencies.push(key.clone());
                     } else {
@@ -503,15 +627,29 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                         .collect::<Vec<_>>()
                         .join(" + ")
                 };
+                // an (i) for every real item in the option
+                let infos = |ui: &mut egui::Ui, o: &builder::GearOption| {
+                    for g in &o.items {
+                        if let Some(id) = &g.item {
+                            dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Item, id);
+                        }
+                    }
+                };
                 if options.len() <= 1 {
                     if let Some(o) = options.first() {
-                        ui.label(format!("• {}", describe(o)));
+                        ui.horizontal_wrapped(|ui| {
+                            ui.label(format!("• {}", describe(o)));
+                            infos(ui, o);
+                        });
                     }
                 } else {
                     theme::card().show(ui, |ui| {
                         ui.set_width(ui.available_width());
                         for (n, o) in options.iter().enumerate() {
-                            ui.radio_value(&mut choices[i], n, egui::RichText::new(describe(o)).size(15.0));
+                            ui.horizontal_wrapped(|ui| {
+                                ui.radio_value(&mut choices[i], n, egui::RichText::new(describe(o)).size(15.0));
+                                infos(ui, o);
+                            });
                         }
                     });
                 }
@@ -523,7 +661,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     }
 
     // ------------------------------------------------------------ spells
-    let spells_open = crate::ui::spells::builder_section(ui, lib, &mut app.draft, &sheet, &mut app.ui_state.spell_open);
+    let spells_open = crate::ui::spells::builder_section(ui, lib, &mut app.draft, &sheet, &mut app.ui_state.spell_open, free);
 
     // ------------------------------------------------------------ story
     theme::section(ui, "About (optional)");
@@ -531,7 +669,10 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     ui.add(egui::TextEdit::singleline(&mut app.draft.alignment).hint_text("e.g. chaotic good").char_limit(40).desired_width(f32::INFINITY));
     ui.add_space(4.0);
     text_area(ui, "Appearance", "What do people see?", &mut app.draft.appearance);
-    text_area(ui, "Personality", "How do you act?", &mut app.draft.personality);
+    text_area(ui, "Personality", "How do you act? (ideas under Suggested characteristics)", &mut app.draft.personality);
+    text_area(ui, "Ideals", "What do you believe in?", &mut app.draft.ideals);
+    text_area(ui, "Bonds", "Who or what do you care about most?", &mut app.draft.bonds);
+    text_area(ui, "Flaws", "What gets you into trouble?", &mut app.draft.flaws);
     text_area(ui, "Backstory", "Where do you come from?", &mut app.draft.backstory);
 
     // ------------------------------------------------------------ preview

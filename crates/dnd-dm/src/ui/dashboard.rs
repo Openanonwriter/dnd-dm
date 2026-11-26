@@ -194,8 +194,11 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
             if ui.button(label).on_hover_text("Every character: hit points, spell slots and features come back as the rules say").clicked() {
                 let mut w = app.world.write().unwrap();
                 let ids: Vec<String> = w.campaign.characters.iter().map(|c| c.id.clone()).collect();
-                for id in ids {
-                    let _ = w.rest(&id, long);
+                // the dead (and, for a long rest, anyone at 0 HP) don't rest
+                let skipped: Vec<String> = ids.iter().filter_map(|id| w.rest(id, long).err()).collect();
+                drop(w);
+                if !skipped.is_empty() {
+                    app.set_status(skipped.join(" "), true);
                 }
             }
         }
@@ -438,6 +441,13 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     w.campaign.settings.show_monster_hp_to_players = show_hp;
                     w.touch();
                 }
+                let mut free = app.world.read().unwrap().campaign.settings.allow_rule_breaks;
+                if ui.checkbox(&mut free, "Players may break the rules").changed() {
+                    let mut w = app.world.write().unwrap();
+                    w.campaign.settings.allow_rule_breaks = free;
+                    w.touch();
+                }
+                dnd_mapview::help::text(ui, "When ticked, every player may pick options their character doesn't qualify for (a feat above their level, a spell they can't cast yet). They still show in red. To allow it for just one character, use the checkbox on that character's Build tab.");
             });
             if app.server.is_some() {
                 for ip in &app.ips {

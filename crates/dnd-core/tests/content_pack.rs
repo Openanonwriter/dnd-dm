@@ -13,11 +13,11 @@ fn content_dir() -> PathBuf {
 fn base_pack_loads_without_warnings() {
     let lib = Library::load_packs(&[content_dir()]);
     assert!(lib.warnings.is_empty(), "{:#?}", lib.warnings);
-    assert!(lib.species.len() >= 16);
-    assert_eq!(lib.classes.len(), 12);
+    assert!(lib.species.len() >= 17);
+    assert_eq!(lib.classes.len(), 13);
     assert!(lib.subclasses.len() >= 12);
-    assert!(lib.items.len() >= 50);
-    assert!(lib.spells.len() >= 321);
+    assert!(lib.items.len() >= 170);
+    assert!(lib.spells.len() >= 335);
     assert!(lib.creatures.len() >= 9);
     assert_eq!(lib.rules.skills.len(), 18);
 }
@@ -95,10 +95,10 @@ fn choices_and_granted_spells_work_on_real_characters() {
     // fiend warlock: patron spells are on its list to learn, plain warlocks can't
     let mut wl = Character::new("w", "W");
     wl.classes = vec![ClassLevel { class: "warlock".into(), subclass: Some("fiend".into()), level: 1, ..Default::default() }];
-    assert!(dnd_core::play::choose_spells(&lib, &mut wl, &["burning_hands".into()], false).is_ok());
+    assert!(dnd_core::play::choose_spells(&lib, &mut wl, &["burning_hands".into()], false, false).is_ok());
     wl.classes[0].subclass = None;
     wl.spells.known.clear();
-    assert!(dnd_core::play::choose_spells(&lib, &mut wl, &["burning_hands".into()], false).is_err());
+    assert!(dnd_core::play::choose_spells(&lib, &mut wl, &["burning_hands".into()], false, false).is_err());
 
     // tiefling: racial spells unlock by character level
     let mut tf = Character::new("t", "T");
@@ -204,4 +204,150 @@ fn creatures_become_combatants() {
     assert_eq!(c2.id, "ogre_2");
     let html = dnd_core::export::creature_html(world.library.creatures.get("giant_spider").unwrap());
     assert!(html.contains("Spider Climb"));
+}
+
+#[test]
+fn artificer_casts_from_first_level_and_rounds_up() {
+    let lib = Library::load_packs(&[content_dir()]);
+    let mut ch = Character::new("a", "A");
+    ch.species = "dwarf_warding".into();
+    ch.base_abilities = Abilities { str: 10, dex: 14, con: 14, int: 16, wis: 10, cha: 8 };
+    for (lvl, slots) in [(1u32, vec![2, 0, 0]), (3, vec![3, 0, 0]), (5, vec![4, 2, 0]), (9, vec![4, 3, 2])] {
+        ch.classes = vec![ClassLevel { class: "artificer".into(), subclass: Some("alchemist".into()), level: lvl, ..Default::default() }];
+        let s = derive(&ch, &lib);
+        assert!(s.warnings.is_empty(), "{:?}", s.warnings);
+        assert_eq!(&s.spell_slots[..3], &slots[..], "level {lvl}");
+    }
+    let s = derive(&ch, &lib);
+    assert_eq!(s.spellcasting[0].prepared_max, Some(3 + 4)); // int 17 -> +3, half of 9 = 4
+    assert!(s.spells_granted.contains(&"gaseous_form".to_string()));
+    assert!(dnd_core::play::spells_available(&lib, &ch, &s).contains(&"booming_blade".to_string()) == false); // cantrips are learned, not prepared
+}
+
+#[test]
+fn everything_a_player_can_pick_explains_itself() {
+    let lib = Library::load_packs(&[content_dir()]);
+    for kind in [Kind::Species, Kind::Class, Kind::Subclass, Kind::Background, Kind::Feat, Kind::Item, Kind::Spell] {
+        for (id, name) in lib.list(kind) {
+            let text = dnd_core::describe::describe(&lib, kind, &id).unwrap_or_default();
+            assert!(text.len() > 15, "{kind:?} {name} has no real explanation: {text:?}");
+        }
+    }
+    for b in lib.backgrounds.values() {
+        let fills: Vec<&str> = b.suggestions.iter().map(|t| t.fills.as_str()).collect();
+        for want in ["personality", "ideals", "bonds", "flaws"] {
+            assert!(fills.contains(&want), "{} has no {want} suggestions", b.id);
+        }
+        for t in &b.suggestions {
+            assert!(dnd_core::builder::suggestion_field_label(&t.fills) != "", "{}: bad fills {}", b.id, t.fills);
+            assert!(t.options.len() >= 6, "{}: {} has only {} options", b.id, t.name, t.options.len());
+        }
+    }
+    // picking a suggestion fills the field; picking it again takes it out
+    let mut ch = Character::new("x", "X");
+    dnd_core::builder::toggle_suggestion(&mut ch, "ideals", "Tradition. Keep the rites. (Lawful)");
+    dnd_core::builder::toggle_suggestion(&mut ch, "ideals", "Mercy. Help. (Good)");
+    assert_eq!(ch.ideals.lines().count(), 2);
+    dnd_core::builder::toggle_suggestion(&mut ch, "ideals", "Tradition. Keep the rites. (Lawful)");
+    assert_eq!(ch.ideals, "Mercy. Help. (Good)");
+}
+
+#[test]
+fn rule_checks_flag_what_a_character_does_not_qualify_for() {
+    use dnd_core::requirements::{check, Area};
+    let lib = Library::load_packs(&[content_dir()]);
+    let mut ch = Character::new("w", "W");
+    ch.species = "tiefling".into();
+    ch.base_abilities = Abilities { str: 8, dex: 14, con: 13, int: 10, wis: 12, cha: 15 };
+    ch.classes = vec![ClassLevel { class: "warlock".into(), subclass: Some("fiend".into()), level: 3, ..Default::default() }];
+    ch.choices.insert("Eldritch Invocations".into(), vec!["inv_thirsting_blade".into()]);
+    ch.choices.insert("Pact Boon".into(), vec!["pact_blade".into()]);
+    let p = check(&lib, &ch);
+    assert!(p.iter().any(|x| x.area == Area::Choice && x.key == "inv_thirsting_blade" && x.message.contains("5th level")), "{p:#?}");
+    ch.classes[0].level = 5;
+    assert!(!check(&lib, &ch).iter().any(|x| x.key == "inv_thirsting_blade"), "qualifies at 5 with the blade pact");
+
+    // a subclass too early, a spell too high, and a multiclass without the scores
+    let mut f = Character::new("f", "F");
+    f.base_abilities = Abilities { str: 15, dex: 10, con: 14, int: 8, wis: 10, cha: 10 };
+    f.classes = vec![ClassLevel { class: "fighter".into(), subclass: Some("champion".into()), level: 1, ..Default::default() }];
+    assert!(check(&lib, &f).iter().any(|x| x.area == Area::Subclass));
+    f.classes.push(ClassLevel { class: "wizard".into(), level: 1, ..Default::default() });
+    f.spells.known = vec!["fireball".into()];
+    let p = check(&lib, &f);
+    assert!(p.iter().any(|x| x.area == Area::Class && x.key == "wizard"), "{p:#?}");
+    assert!(p.iter().any(|x| x.area == Area::Spell && x.key == "fireball"), "{p:#?}");
+
+    // spells: locked for the player unless the DM allows rule breaks
+    let mut wiz = Character::new("z", "Z");
+    wiz.classes = vec![ClassLevel { class: "wizard".into(), level: 1, ..Default::default() }];
+    assert!(dnd_core::play::choose_spells(&lib, &mut wiz, &["fireball".into()], false, false).is_err());
+    assert!(dnd_core::play::choose_spells(&lib, &mut wiz, &["fireball".into()], false, true).is_ok());
+}
+
+#[test]
+fn players_cannot_upload_rule_breaks_unless_the_dm_allows() {
+    use dnd_core::builder::{prepare_player_character, UploadContext};
+    let lib = Library::load_packs(&[content_dir()]);
+    let mut camp = Campaign::new("T");
+    let mut up = Character::new("", "Hexblade");
+    up.species = "human".into();
+    up.ability_method = "standard_array".into();
+    up.base_abilities = Abilities { str: 10, dex: 13, con: 14, int: 8, wis: 12, cha: 15 };
+    up.classes = vec![ClassLevel { class: "warlock".into(), subclass: Some("fiend".into()), level: 5, ..Default::default() }];
+    up.choices.insert("Eldritch Invocations".into(), vec!["inv_thirsting_blade".into()]);
+    up.choices.insert("Pact Boon".into(), vec!["pact_chain".into()]);
+    let cx = UploadContext { start_level: 5, ..Default::default() };
+    let e = prepare_player_character(&lib, &camp, "Sam", &up, &cx).unwrap_err();
+    assert!(e.contains("Thirsting Blade") && e.contains("DM"), "{e}");
+    camp.settings.allow_rule_breaks = true;
+    let ch = prepare_player_character(&lib, &camp, "Sam", &up, &cx).unwrap();
+    assert_eq!(ch.choices.get("Eldritch Invocations"), Some(&vec!["inv_thirsting_blade".to_string()]));
+}
+
+#[test]
+fn the_dead_stay_dead_until_magic_brings_them_back() {
+    let mut w = dnd_core::World::new(vec![content_dir()]);
+    for (id, class) in [("ash", "cleric"), ("bo", "fighter")] {
+        let mut ch = Character::new(id, id);
+        ch.species = "human".into();
+        ch.base_abilities = Abilities { str: 14, dex: 10, con: 14, int: 10, wis: 16, cha: 10 };
+        ch.classes = vec![ClassLevel { class: class.into(), level: 5, ..Default::default() }];
+        ch.hp.current = 30;
+        w.campaign.characters.push(ch);
+        let mut c = w.combatant_from_character(id).unwrap();
+        c.visible = true;
+        w.campaign.encounter.combatants.push(c);
+    }
+    // bo goes down and fails three death saves
+    {
+        let bo = w.campaign.character_mut("bo").unwrap();
+        bo.hp.current = 0;
+        bo.death_saves.failures = 3;
+    }
+    w.sync_combatant_from_pc("bo");
+    assert!(w.campaign.character("bo").unwrap().is_dead());
+    assert!(w.rest("bo", true).unwrap_err().contains("dead"));
+    assert!(w.rest("bo", false).unwrap_err().contains("dead"));
+    assert!(w.spend_hit_die("bo", "d10").is_err());
+    assert!(w.death_save("bo").is_err());
+    let token = w.pc_combatant("bo").unwrap();
+    assert_eq!(w.heal(&token, 10), 0, "healing does nothing for the dead");
+    // a player's own sheet can't heal them either
+    let mut patch = dnd_core::api::PlayerPatch::default();
+    patch.hp = Some(HitPoints { current: 20, ..Default::default() });
+    patch.death_saves = Some(DeathSaves::default());
+    w.campaign.character_mut("bo").unwrap().apply_player_patch(patch);
+    assert!(w.campaign.character("bo").unwrap().is_dead());
+    // at 0 HP but alive: no long rest either
+    w.campaign.character_mut("ash").unwrap().hp.current = 0;
+    assert!(w.rest("ash", true).unwrap_err().contains("at least 1 hit point"));
+    w.campaign.character_mut("ash").unwrap().hp.current = 30;
+    // revivify brings bo back with 1 hit point
+    w.campaign.character_mut("ash").unwrap().spells.prepared = vec!["revivify".into()];
+    let r = w.pc_cast("ash", "revivify", 3, &[token.clone()], dnd_core::play::RollMode::Normal).unwrap();
+    assert!(r.text.contains("returns to life"), "{}", r.text);
+    let bo = w.campaign.character("bo").unwrap();
+    assert!(!bo.is_dead() && bo.hp.current == 1);
+    assert!(w.rest("bo", true).is_ok(), "alive again, so resting works");
 }

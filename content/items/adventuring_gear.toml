@@ -1,0 +1,781 @@
+# Adventuring gear, equipment packs, clothes, spellcasting foci, containers,
+# alchemical supplies and poisons. Prices and weights from the DM's
+# "Ultimate 5e" workbook (version 0.1 of this app); descriptions written fresh.
+
+# ------------------------------------------------------------ equipment packs
+
+[[items]]
+id = "burglars_pack"
+name = "Burglar's pack"
+kind = "gear"
+cost = "16 gp"
+weight = 44.5
+description = "A backpack holding a bag of 1,000 ball bearings, 10 feet of string, a bell, 5 candles, a crowbar, a hammer, 10 pitons, a hooded lantern, 2 flasks of oil, 5 days of rations, a tinderbox and a waterskin, with 50 feet of hempen rope tied on."
+
+[[items]]
+id = "diplomats_pack"
+name = "Diplomat's pack"
+kind = "gear"
+cost = "39 gp"
+weight = 36.0
+description = "A chest with 2 map or scroll cases, a set of fine clothes, a bottle of ink, an ink pen, a lamp, 2 flasks of oil, 5 sheets of paper, a vial of perfume, sealing wax and soap."
+
+[[items]]
+id = "dungeoneers_pack"
+name = "Dungeoneer's pack"
+kind = "gear"
+cost = "12 gp"
+weight = 61.5
+description = "A backpack with a crowbar, a hammer, 10 pitons, 10 torches, a tinderbox, 10 days of rations and a waterskin, with 50 feet of hempen rope tied on."
+
+[[items]]
+id = "entertainers_pack"
+name = "Entertainer's pack"
+kind = "gear"
+cost = "40 gp"
+weight = 38.0
+description = "A backpack with a bedroll, 2 costumes, 5 candles, 5 days of rations, a waterskin and a disguise kit."
+
+[[items]]
+id = "explorers_pack"
+name = "Explorer's pack"
+kind = "gear"
+cost = "10 gp"
+weight = 59.0
+description = "A backpack with a bedroll, a mess kit, a tinderbox, 10 torches, 10 days of rations and a waterskin, with 50 feet of hempen rope tied on."
+
+[[items]]
+id = "priests_pack"
+name = "Priest's pack"
+kind = "gear"
+cost = "19 gp"
+weight = 24.0
+description = "A backpack with a blanket, 10 candles, a tinderbox, an alms box, 2 blocks of incense, a censer, vestments, 2 days of rations and a waterskin."
+
+[[items]]
+id = "scholars_pack"
+name = "Scholar's pack"
+kind = "gear"
+cost = "40 gp"
+weight = 10.0
+description = "A backpack with a book of lore, a bottle of ink, an ink pen, 10 sheets of parchment, a little bag of sand and a small knife."
+
+# ------------------------------------------------------------ basic gear
+
+[[items]]
+id = "abacus"
+name = "Abacus"
+description = "A wooden frame of sliding beads for quick sums: handy for merchants, quartermasters and anyone counting treasure."
+cost = "2 gp"
+weight = 2.0
+
+[[items]]
+id = "bell"
+name = "Bell"
+description = "A small brass bell. Hang it on a string across a doorway as a simple alarm, or ring it to signal friends."
+cost = "1 gp"
+
+[[items]]
+id = "blanket"
+name = "Blanket"
+description = "A warm wool blanket for cold nights on the road."
+cost = "5 sp"
+weight = 3.0
+
+[[items]]
+id = "block_and_tackle"
+name = "Block and tackle"
+cost = "1 gp"
+weight = 5.0
+description = "Pulleys, a cable and a hook. With it you can hoist up to four times the weight you could normally lift."
+
+[[items]]
+id = "book"
+name = "Book"
+cost = "25 gp"
+weight = 5.0
+description = "Poetry, history, lore, diagrams or anything else that fits on a page. A book of spells is a spellbook."
+
+[[items]]
+id = "candle"
+name = "Candle"
+cost = "1 cp"
+description = "Burns for 1 hour: bright light 5 feet around it and dim light 5 feet beyond."
+
+[[items]]
+id = "chain_10ft"
+name = "Chain (10 feet)"
+cost = "5 gp"
+weight = 10.0
+description = "Has 10 hit points; bursting it takes a DC 20 Strength check."
+
+[[items]]
+id = "chalk"
+name = "Chalk (1 piece)"
+description = "A stick of chalk for marking walls, doors and your way back out of a maze."
+cost = "1 cp"
+
+[[items]]
+id = "fishing_tackle"
+name = "Fishing tackle"
+cost = "1 gp"
+weight = 4.0
+description = "A wooden rod, silk line, floats, hooks, sinkers, lures and a little netting."
+
+[[items]]
+id = "grappling_hook"
+name = "Grappling hook"
+description = "A three-pronged iron hook. Tie a rope to it, throw it over a wall or ledge and climb up."
+cost = "2 gp"
+weight = 4.0
+
+[[items]]
+id = "hammer"
+name = "Hammer"
+description = "An ordinary hammer for driving pitons, spikes and nails."
+cost = "1 gp"
+weight = 3.0
+
+[[items]]
+id = "hourglass"
+name = "Hourglass"
+description = "Sand that runs for a set time (usually an hour). Useful for keeping watch shifts."
+cost = "25 gp"
+weight = 1.0
+
+[[items]]
+id = "ink"
+name = "Ink (1 ounce bottle)"
+description = "A one-ounce bottle of ink for writing letters, maps and spell notes."
+cost = "10 gp"
+
+[[items]]
+id = "ink_pen"
+name = "Ink pen"
+description = "A wooden pen with a metal nib; dip it in ink to write."
+cost = "2 cp"
+
+[[items]]
+id = "ladder_10ft"
+name = "Ladder (10 feet)"
+description = "A 10-foot wooden ladder."
+cost = "1 sp"
+weight = 25.0
+
+[[items]]
+id = "lock"
+name = "Lock"
+cost = "10 gp"
+weight = 1.0
+description = "Comes with a key. Without it, picking the lock takes thieves' tools and a DC 15 Dexterity check (better locks cost more and are harder)."
+
+[[items]]
+id = "magnifying_glass"
+name = "Magnifying glass"
+cost = "100 gp"
+description = "Gives a closer look at small things (advantage on checks to appraise or inspect fine detail) and can start a fire in bright sunlight in about 5 minutes."
+
+[[items]]
+id = "manacles"
+name = "Manacles"
+cost = "2 gp"
+weight = 6.0
+description = "Bind a Small or Medium creature. Slipping free takes a DC 20 Dexterity check; breaking them a DC 20 Strength check. A key comes with them; without it, thieves' tools and a DC 15 check open them. 15 hit points."
+
+[[items]]
+id = "mess_kit"
+name = "Mess kit"
+cost = "2 sp"
+weight = 1.0
+description = "A tin box with a cup and simple cutlery; the halves work as a cooking pan and a plate."
+
+[[items]]
+id = "miners_pick"
+name = "Pick, miner's"
+description = "A heavy pick for breaking rock and digging tunnels."
+cost = "2 gp"
+weight = 10.0
+
+[[items]]
+id = "paper"
+name = "Paper (one sheet)"
+description = "A sheet of good writing paper."
+cost = "2 sp"
+
+[[items]]
+id = "parchment"
+name = "Parchment (one sheet)"
+description = "A sheet of parchment (treated animal skin) that lasts longer than paper."
+cost = "1 sp"
+
+[[items]]
+id = "perfume"
+name = "Perfume (vial)"
+description = "A small vial of scent: good for social events, or for masking an unpleasant smell."
+cost = "5 gp"
+
+[[items]]
+id = "piton"
+name = "Piton"
+description = "An iron spike with a ring, hammered into rock or a wall to anchor a rope while climbing."
+cost = "5 cp"
+weight = 0.25
+
+[[items]]
+id = "pole_10ft"
+name = "Pole (10 feet)"
+description = "A 10-foot wooden pole. The classic way to poke suspicious floors and chests from a safe distance."
+cost = "5 cp"
+weight = 7.0
+
+[[items]]
+id = "portable_ram"
+name = "Ram, portable"
+cost = "4 gp"
+weight = 35.0
+description = "+4 to Strength checks to break down doors; another character helping you gives you advantage on the check."
+
+[[items]]
+id = "rope_silk"
+name = "Rope, silk (50 ft)"
+cost = "10 gp"
+weight = 5.0
+description = "2 hit points; can be burst with a DC 17 Strength check."
+
+[[items]]
+id = "sealing_wax"
+name = "Sealing wax"
+description = "Wax for sealing letters, usually stamped with a signet ring."
+cost = "5 sp"
+
+[[items]]
+id = "shovel"
+name = "Shovel"
+description = "For digging holes, graves and buried treasure."
+cost = "2 gp"
+weight = 5.0
+
+[[items]]
+id = "signal_whistle"
+name = "Signal whistle"
+description = "A loud whistle that can be heard far away; agree on signals with your group."
+cost = "5 cp"
+
+[[items]]
+id = "signet_ring"
+name = "Signet ring"
+description = "A ring carved with a personal or family seal, pressed into wax to mark letters as yours."
+cost = "5 gp"
+
+[[items]]
+id = "sledgehammer"
+name = "Sledgehammer"
+description = "A big two-handed hammer for smashing doors, locks and walls."
+cost = "2 gp"
+weight = 10.0
+
+[[items]]
+id = "iron_spikes"
+name = "Spikes, iron (10)"
+description = "Ten iron spikes. Hammer them under a door to wedge it shut, or into walls as anchors."
+cost = "1 gp"
+weight = 5.0
+
+[[items]]
+id = "spyglass"
+name = "Spyglass"
+cost = "1000 gp"
+weight = 1.0
+description = "Things seen through it look twice as large."
+
+[[items]]
+id = "tent"
+name = "Tent, two-person"
+description = "A canvas tent that sleeps two."
+cost = "2 gp"
+weight = 20.0
+
+[[items]]
+id = "whetstone"
+name = "Whetstone"
+description = "A stone for sharpening blades."
+cost = "1 cp"
+weight = 1.0
+
+# ------------------------------------------------------------ alchemy and tools of the trade
+
+[[items]]
+id = "acid_vial"
+name = "Acid (vial)"
+kind = "consumable"
+cost = "25 gp"
+weight = 1.0
+description = "Action: splash a creature within 5 feet or throw it up to 20 feet, shattering it. Ranged attack (improvised weapon); on a hit, 2d6 acid damage."
+
+[[items]]
+id = "alchemists_fire"
+name = "Alchemist's fire (flask)"
+kind = "consumable"
+cost = "50 gp"
+weight = 1.0
+description = "Sticky fluid that ignites in air. Action: throw it up to 20 feet (ranged improvised attack). On a hit the target takes 1d4 fire damage at the start of each of its turns until it or someone uses an action and a DC 10 Dexterity check to put it out."
+
+[[items]]
+id = "antitoxin"
+name = "Antitoxin (vial)"
+kind = "consumable"
+cost = "50 gp"
+description = "Drinking it gives advantage on saving throws against poison for 1 hour. It does nothing for undead or constructs."
+
+[[items]]
+id = "ball_bearings"
+name = "Ball bearings (bag of 1,000)"
+kind = "consumable"
+cost = "1 gp"
+weight = 2.0
+description = "Action: spill them over a 10-foot square. A creature moving across makes a DC 10 Dexterity save or falls prone; moving at half speed avoids the save."
+
+[[items]]
+id = "caltrops"
+name = "Caltrops (bag of 20)"
+kind = "consumable"
+cost = "1 gp"
+weight = 2.0
+description = "Action: scatter them over a 5-foot square. A creature entering it makes a DC 15 Dexterity save or stops moving, takes 1 piercing damage and loses 10 feet of speed until it regains a hit point. Moving at half speed avoids the save."
+
+[[items]]
+id = "climbers_kit"
+name = "Climber's kit"
+kind = "tool"
+cost = "25 gp"
+weight = 12.0
+description = "Special pitons, boot tips, gloves and a harness. Action: anchor yourself; you can't fall more than 25 feet from that point or climb more than 25 feet away from it without undoing the anchor."
+
+[[items]]
+id = "crowbar"
+name = "Crowbar"
+cost = "2 gp"
+weight = 5.0
+description = "Advantage on Strength checks where its leverage helps."
+
+[[items]]
+id = "holy_water"
+name = "Holy water (flask)"
+kind = "consumable"
+cost = "25 gp"
+weight = 1.0
+description = "Action: splash a creature within 5 feet or throw it up to 20 feet (ranged improvised attack). A fiend or undead hit takes 2d6 radiant damage."
+
+[[items]]
+id = "hunting_trap"
+name = "Hunting trap"
+cost = "5 gp"
+weight = 25.0
+description = "Action to set: a saw-toothed steel ring that snaps shut on a creature stepping on it (DC 13 Dexterity save or 1d4 piercing damage and its speed drops to 0). Chained to something heavy, it holds the creature until it escapes with a DC 13 Strength check (each failure deals 1 piercing damage)."
+
+[[items]]
+id = "lamp"
+name = "Lamp"
+cost = "5 sp"
+weight = 1.0
+description = "Bright light 15 feet and dim light 30 feet beyond. Burns 6 hours on a flask of oil."
+
+[[items]]
+id = "bullseye_lantern"
+name = "Lantern, bullseye"
+cost = "10 gp"
+weight = 2.0
+description = "Bright light in a 60-foot cone and dim light 60 feet beyond. Burns 6 hours on a flask of oil."
+
+[[items]]
+id = "hooded_lantern"
+name = "Lantern, hooded"
+cost = "5 gp"
+weight = 2.0
+description = "Bright light 30 feet and dim light 30 feet beyond. Burns 6 hours on a flask of oil. Lower the hood (an action) to cut it to dim light within 5 feet."
+
+[[items]]
+id = "oil_flask"
+name = "Oil (flask)"
+kind = "consumable"
+cost = "1 sp"
+weight = 1.0
+description = "A pint of oil. Action: splash it on a creature within 5 feet or throw it up to 20 feet; if the oil is then lit within a minute, the target takes 5 fire damage. Or pour it over a 5-foot square and light it: it burns for 2 rounds, dealing 5 fire damage to creatures entering or ending their turn there. Also fuels lamps and lanterns."
+
+[[items]]
+id = "basic_poison"
+name = "Poison, basic (vial)"
+kind = "consumable"
+cost = "100 gp"
+description = "Coat one slashing or piercing weapon or up to three pieces of ammunition (an action). For 1 minute, a creature hit makes a DC 10 Constitution save or takes 1d4 poison damage. Dries off after it's used."
+
+[[items]]
+id = "tinderbox"
+name = "Tinderbox"
+cost = "5 sp"
+weight = 1.0
+description = "Flint, fire steel and tinder. Lighting a torch or anything with exposed fuel takes an action; other fires take a minute."
+
+# ------------------------------------------------------------ clothes
+
+[[items]]
+id = "common_clothes"
+name = "Clothes, common"
+description = "Simple everyday clothes: shirt, trousers or skirt, belt and shoes."
+cost = "5 sp"
+weight = 3.0
+
+[[items]]
+id = "costume"
+name = "Clothes, costume"
+description = "A performer's outfit for a particular role or character."
+cost = "5 gp"
+weight = 4.0
+
+[[items]]
+id = "fine_clothes"
+name = "Clothes, fine"
+description = "Expensive, fashionable clothes for meeting nobles and attending court."
+cost = "15 gp"
+weight = 6.0
+
+[[items]]
+id = "robes"
+name = "Robes"
+description = "Loose robes, as worn by priests, scholars and wizards."
+cost = "1 gp"
+weight = 4.0
+
+[[items]]
+id = "travelers_clothes"
+name = "Clothes, traveler's"
+description = "Sturdy clothes for the road: boots, a wool cloak and a hood."
+cost = "2 gp"
+weight = 4.0
+
+# ------------------------------------------------------------ spellcasting foci
+
+[[items]]
+id = "focus_crystal"
+name = "Crystal (arcane focus)"
+cost = "10 gp"
+weight = 1.0
+description = "Sorcerers, warlocks and wizards can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "focus_orb"
+name = "Orb (arcane focus)"
+cost = "20 gp"
+weight = 3.0
+description = "Sorcerers, warlocks and wizards can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "focus_rod"
+name = "Rod (arcane focus)"
+cost = "10 gp"
+weight = 2.0
+description = "Sorcerers, warlocks and wizards can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "focus_staff"
+name = "Staff (arcane focus)"
+cost = "5 gp"
+weight = 4.0
+description = "A spellcasting focus that also works as a quarterstaff."
+
+[[items]]
+id = "focus_wand"
+name = "Wand (arcane focus)"
+cost = "10 gp"
+weight = 1.0
+description = "Sorcerers, warlocks and wizards can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "mistletoe"
+name = "Sprig of mistletoe (druidic focus)"
+cost = "1 gp"
+description = "Druids can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "totem"
+name = "Totem (druidic focus)"
+cost = "1 gp"
+description = "Druids can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "wooden_staff"
+name = "Wooden staff (druidic focus)"
+cost = "5 gp"
+weight = 4.0
+description = "A druidic focus that also works as a quarterstaff."
+
+[[items]]
+id = "yew_wand"
+name = "Yew wand (druidic focus)"
+cost = "10 gp"
+weight = 1.0
+description = "Druids can cast through it instead of using material components without a listed cost."
+
+[[items]]
+id = "holy_amulet"
+name = "Amulet (holy symbol)"
+cost = "5 gp"
+weight = 1.0
+description = "Clerics and paladins cast through a holy symbol they hold or wear visibly."
+
+[[items]]
+id = "holy_emblem"
+name = "Emblem (holy symbol)"
+cost = "5 gp"
+description = "A holy symbol worked onto a shield or worn; clerics and paladins cast through it."
+
+[[items]]
+id = "reliquary"
+name = "Reliquary (holy symbol)"
+cost = "5 gp"
+weight = 2.0
+description = "A small box holding a sacred relic; clerics and paladins cast through it."
+
+# ------------------------------------------------------------ containers
+
+[[items]]
+id = "barrel"
+name = "Barrel"
+cost = "2 gp"
+weight = 70.0
+description = "Holds 40 gallons of liquid or 4 cubic feet of solids."
+
+[[items]]
+id = "basket"
+name = "Basket"
+cost = "4 sp"
+weight = 2.0
+description = "Holds 2 cubic feet / 40 pounds of gear."
+
+[[items]]
+id = "bucket"
+name = "Bucket"
+cost = "5 cp"
+weight = 2.0
+description = "Holds 3 gallons of liquid or half a cubic foot of solids."
+
+[[items]]
+id = "bolt_case"
+name = "Case, crossbow bolt"
+cost = "1 gp"
+weight = 1.0
+description = "Holds 20 crossbow bolts."
+
+[[items]]
+id = "scroll_case"
+name = "Case, map or scroll"
+cost = "1 gp"
+weight = 1.0
+description = "Holds ten rolled sheets of paper or five of parchment."
+
+[[items]]
+id = "chest"
+name = "Chest"
+cost = "5 gp"
+weight = 25.0
+description = "Holds 12 cubic feet / 300 pounds of gear."
+
+[[items]]
+id = "flask"
+name = "Flask or tankard"
+cost = "2 cp"
+weight = 1.0
+description = "Holds a pint."
+
+[[items]]
+id = "jug"
+name = "Jug or pitcher"
+cost = "2 cp"
+weight = 4.0
+description = "Holds a gallon."
+
+[[items]]
+id = "iron_pot"
+name = "Pot, iron"
+cost = "2 gp"
+weight = 10.0
+description = "Holds a gallon."
+
+[[items]]
+id = "pouch"
+name = "Pouch"
+cost = "5 sp"
+weight = 1.0
+description = "Holds a fifth of a cubic foot / 6 pounds: about 20 sling bullets or 50 blowgun needles."
+
+[[items]]
+id = "quiver"
+name = "Quiver"
+cost = "1 gp"
+weight = 1.0
+description = "Holds 20 arrows."
+
+[[items]]
+id = "sack"
+name = "Sack"
+cost = "1 cp"
+weight = 0.5
+description = "Holds 1 cubic foot / 30 pounds of gear."
+
+[[items]]
+id = "vial"
+name = "Vial"
+cost = "1 gp"
+description = "Holds 4 ounces of liquid."
+
+# ------------------------------------------------------------ ammunition
+
+[[items]]
+id = "blowgun_needles_50"
+name = "Blowgun needles (50)"
+description = "Fifty needles to shoot from a blowgun."
+kind = "ammunition"
+cost = "1 gp"
+weight = 1.0
+
+[[items]]
+id = "sling_bullets_20"
+name = "Sling bullets (20)"
+description = "Twenty lead or stone bullets for a sling."
+kind = "ammunition"
+cost = "4 cp"
+weight = 1.5
+
+# ------------------------------------------------------------ poisons (DM tools; hidden from players)
+
+[[items]]
+id = "assassins_blood"
+name = "Assassin's blood (ingested poison)"
+kind = "consumable"
+cost = "150 gp"
+hidden = true
+description = "DC 10 Constitution save: on a failure, 1d12 poison damage and poisoned for 24 hours; on a success, half damage and not poisoned."
+
+[[items]]
+id = "burnt_othur_fumes"
+name = "Burnt othur fumes (inhaled poison)"
+kind = "consumable"
+cost = "500 gp"
+hidden = true
+description = "DC 13 Constitution save or take 3d6 poison damage, then repeat the save at the start of each turn, taking 1d6 poison damage on each failure. Three successes end it."
+
+[[items]]
+id = "carrion_crawler_mucus"
+name = "Carrion crawler mucus (contact poison)"
+kind = "consumable"
+cost = "200 gp"
+hidden = true
+description = "Harvested from a dead or helpless carrion crawler. DC 13 Constitution save or poisoned for 1 minute, and paralyzed while poisoned this way; it repeats the save at the end of each turn."
+
+[[items]]
+id = "drow_poison"
+name = "Drow poison (injury poison)"
+kind = "consumable"
+cost = "200 gp"
+hidden = true
+description = "Made only by drow far from sunlight. DC 13 Constitution save or poisoned for 1 hour; failing by 5 or more also leaves it unconscious until it takes damage or is shaken awake."
+
+[[items]]
+id = "essence_of_ether"
+name = "Essence of ether (inhaled poison)"
+kind = "consumable"
+cost = "300 gp"
+hidden = true
+description = "DC 15 Constitution save or poisoned for 8 hours and unconscious while poisoned this way, until it takes damage or is shaken awake."
+
+[[items]]
+id = "malice"
+name = "Malice (inhaled poison)"
+kind = "consumable"
+cost = "250 gp"
+hidden = true
+description = "DC 15 Constitution save or poisoned for 1 hour, and blinded while poisoned this way."
+
+[[items]]
+id = "midnight_tears"
+name = "Midnight tears (ingested poison)"
+kind = "consumable"
+cost = "1500 gp"
+hidden = true
+description = "No effect until the stroke of midnight. If not neutralized by then: DC 17 Constitution save, 9d6 poison damage on a failure or half on a success."
+
+[[items]]
+id = "oil_of_taggit"
+name = "Oil of taggit (contact poison)"
+kind = "consumable"
+cost = "400 gp"
+hidden = true
+description = "DC 13 Constitution save or poisoned for 24 hours, and unconscious while poisoned this way. Waking only if it takes damage."
+
+[[items]]
+id = "pale_tincture"
+name = "Pale tincture (ingested poison)"
+kind = "consumable"
+cost = "250 gp"
+hidden = true
+description = "DC 16 Constitution save or 1d6 poison damage and poisoned. It repeats the save every 24 hours, taking 1d6 poison damage on each failure; seven successes cure it. Its damage can't be healed while it lasts."
+
+[[items]]
+id = "purple_worm_poison"
+name = "Purple worm poison (injury poison)"
+kind = "consumable"
+cost = "2000 gp"
+hidden = true
+description = "Harvested from a dead or helpless purple worm. DC 19 Constitution save: 12d6 poison damage on a failure, half on a success."
+
+[[items]]
+id = "serpent_venom"
+name = "Serpent venom (injury poison)"
+kind = "consumable"
+cost = "200 gp"
+hidden = true
+description = "Harvested from a dead or helpless giant poisonous snake. DC 11 Constitution save: 3d6 poison damage on a failure, half on a success."
+
+[[items]]
+id = "torpor"
+name = "Torpor (ingested poison)"
+kind = "consumable"
+cost = "600 gp"
+hidden = true
+description = "DC 15 Constitution save or poisoned for 4d6 hours, and incapacitated while poisoned this way."
+
+[[items]]
+id = "truth_serum"
+name = "Truth serum (ingested poison)"
+kind = "consumable"
+cost = "150 gp"
+hidden = true
+description = "DC 11 Constitution save or poisoned for 1 hour, and unable to knowingly lie while poisoned this way, as if under zone of truth."
+
+[[items]]
+id = "wyvern_poison"
+name = "Wyvern poison (injury poison)"
+kind = "consumable"
+cost = "1200 gp"
+hidden = true
+description = "Harvested from a dead or helpless wyvern. DC 15 Constitution save: 7d6 poison damage on a failure, half on a success."
+
+# ------------------------------------------------------------ from the workbook's weapon and armor tables
+
+[[items]]
+id = "double_bladed_scimitar"
+name = "Double-bladed scimitar"
+kind = "weapon"
+cost = "100 gp"
+weight = 6.0
+description = "Special: when you attack with it as part of the Attack action, you can use a bonus action to attack with the other blade (1d4 slashing)."
+weapon = { damage = "2d4", damage_type = "slashing", category = "martial", kind = "melee", properties = ["two_handed", "special"] }
+
+[[items]]
+id = "spiked_armor"
+name = "Spiked armor"
+kind = "armor"
+cost = "75 gp"
+weight = 45.0
+description = "Rough armor of thick leather covered in spikes."
+armor = { base_ac = 14, category = "medium", dex_cap = 2, stealth_disadvantage = true }

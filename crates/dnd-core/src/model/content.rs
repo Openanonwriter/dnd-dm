@@ -234,6 +234,13 @@ pub struct Background {
     pub language_choices: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub feature: Option<Feature>,
+    /// Other versions of this background (a spy instead of a criminal...).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub variants: Vec<Feature>,
+    /// Suggested characteristics: tables of ideas a player can pick from or
+    /// roll on (personality traits, ideals, bonds, flaws, a specialty).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub suggestions: Vec<SuggestionTable>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub starting_equipment: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -243,6 +250,21 @@ pub struct Background {
     /// Hidden from player apps (DM-only content).
     #[serde(default, skip_serializing_if = "is_false")]
     pub hidden: bool,
+}
+
+/// One table of suggested characteristics on a background.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct SuggestionTable {
+    /// "Personality trait", "Ideal", "Criminal specialty"...
+    pub name: String,
+    /// The character field a pick goes into: personality, ideals, bonds,
+    /// flaws, backstory or notes.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub fills: String,
+    /// How many to pick (personality traits are usually 2). Default 1.
+    #[serde(default, skip_serializing_if = "is_zero_u32")]
+    pub pick: u32,
+    pub options: Vec<String>,
 }
 
 // ------------------------------------------------------------------ items
@@ -342,6 +364,13 @@ pub struct Feat {
     pub description: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub prerequisite: String,
+    /// The prerequisite as a formula the app can check, e.g.
+    /// `"class.warlock.level >= 5 && feat.pact_blade"`. Besides the usual
+    /// variables it can use `feat.<id>`, `spell.<id>` (known or granted),
+    /// `species.<id>`, `background.<id>` and `subclass.<id>`, which are 1
+    /// when the character has that and 0 otherwise.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub requires: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modifiers: Vec<Modifier>,
     /// Spell ids granted while the character has this feat or option
@@ -415,6 +444,10 @@ pub struct Spell {
     /// Healing formula; `mod` is the caster's spellcasting modifier.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub heal: String,
+    /// Brings a dead target back to life with this many hit points
+    /// (a formula, or "max" for all of them): revivify, raise dead...
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub revive: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     /// Hidden from player apps (DM-only content).

@@ -145,6 +145,10 @@ pub struct Character {
     /// Extra feats not tied to an advancement (e.g. variant human).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub feats: Vec<String>,
+    /// This character's player may pick options the character doesn't
+    /// qualify for (set by the DM; the campaign setting opens it to all).
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub allow_rule_breaks: bool,
     /// Picks for features that offer options (Fighting Style, Eldritch
     /// Invocations, Draconic Ancestry...): feature name -> feat ids.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
@@ -200,6 +204,11 @@ pub struct Character {
 impl Character {
     pub fn new(id: impl Into<String>, name: impl Into<String>) -> Self {
         Self { id: id.into(), name: name.into(), ..Default::default() }
+    }
+    /// Dead: at 0 hit points with three failed death saves. Only magic
+    /// (revivify, raise dead...) or the DM brings a dead character back.
+    pub fn is_dead(&self) -> bool {
+        self.hp.current <= 0 && self.death_saves.failures >= 3
     }
     pub fn total_level(&self) -> u32 {
         self.classes.iter().map(|c| c.level).sum::<u32>().max(1)

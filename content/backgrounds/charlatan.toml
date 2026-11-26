@@ -1,0 +1,73 @@
+id = "charlatan"
+name = "Charlatan"
+skill_proficiencies = ["deception", "sleight_of_hand"]
+tool_proficiencies = ["disguise kit", "forgery kit"]
+starting_equipment = ["fine clothes", "disguise kit", "weighted dice, marked cards, ten bottles of colored liquid or a fake signet ring", "pouch", "15 gp"]
+description = "You've always had a way with people: you know what they want to hear and how to sell it to them, usually at a profit."
+
+[feature]
+name = "False Identity"
+description = "You keep a second identity with papers, acquaintances and disguises. You can also forge documents, from official papers to personal letters, if you have seen an example of the kind you want to copy."
+
+[[suggestions]]
+name = "Favorite scheme"
+fills = "backstory"
+options = [
+  "Loaded dice and rigged card games in back rooms.",
+  "Shaving coins and faking official seals.",
+  "Befriending lonely rich folk and slowly emptying their vaults.",
+  "Becoming whoever the job needs: heir, inspector, long-lost cousin.",
+  "Peddling tonics, charms and cures that do nothing at all.",
+  "Playing a holy prophet and passing the collection plate.",
+]
+
+[[suggestions]]
+name = "Personality trait"
+fills = "personality"
+pick = 2
+options = [
+  "Every town has someone I'm sweet on, and none of it lasts.",
+  "I crack jokes at funerals, trials and anywhere else they don't belong.",
+  "I win people over with compliments, poured on thick.",
+  "Show me a wager and I'll take it, whatever the stakes.",
+  "I bend the truth out of habit, even when the truth would serve me better.",
+  "I tease the people I like the most, and I tease them hard.",
+  "I carry a handful of holy symbols and wear whichever one opens doors today.",
+  "Small shiny things find their way into my pockets without me deciding it.",
+]
+
+[[suggestions]]
+name = "Ideal"
+fills = "ideals"
+options = [
+  "Liberty. No master, no law, no leash. (Chaotic)",
+  "A fair game. I only fleece people who won't miss the coin. (Lawful)",
+  "Robin's purse. What I take from the greedy, I give to the needy. (Good)",
+  "Artistry. Every con should be a fresh masterpiece. (Chaotic)",
+  "Crew first. My friends are the one thing I'd never swindle. (Good)",
+  "Gold. I'll be rich, and I don't care who pays for it. (Evil)",
+]
+
+[[suggestions]]
+name = "Bond"
+fills = "bonds"
+options = [
+  "I cheated a dangerous person, and I keep moving so they never find me or mine.",
+  "A rotten old mentor taught me everything; I still feel I owe them.",
+  "Somewhere I have a child who doesn't know me, and I want their world to be kinder than mine.",
+  "My family lost its fortune, and I'll win it back one mark at a time.",
+  "Someone powerful destroyed a person I loved; one day I'll take them for everything.",
+  "One of my cons ruined an innocent family, and I can't stop trying to make it right.",
+]
+
+[[suggestions]]
+name = "Flaw"
+fills = "flaws"
+options = [
+  "A charming smile turns my brain off.",
+  "Money runs through my fingers; I'm always one bad night from broke.",
+  "I'm certain nobody could ever pull one over on me.",
+  "I can't leave an easy mark alone, even when I should.",
+  "The bigger and more dangerous the target, the more I want to con them.",
+  "When a scheme goes wrong, I'm the first one out the door.",
+]

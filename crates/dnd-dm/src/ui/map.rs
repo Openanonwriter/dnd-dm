@@ -193,7 +193,7 @@ fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut O
                         st.cache = None;
                         st.confirm_delete = false;
                     }
-                    if !*live && ui.small_button("▶").on_hover_text("Move the party here. Creatures on the current map stay there; the ones prepared here appear.").clicked() {
+                    if !*live && ui.button("▶").on_hover_text("Move the party here. Creatures on the current map stay there; the ones prepared here appear.").clicked() {
                         go = Some(id.clone());
                     }
                 });
@@ -211,7 +211,7 @@ fn shelf_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, status: &mut O
             }
 
             theme::section(ui, "New map");
-            ui.add(egui::TextEdit::singleline(&mut st.new_name).hint_text("name").desired_width(f32::INFINITY));
+            ui.add(crate::ui::theme::line_edit(&mut st.new_name).hint_text("name").desired_width(f32::INFINITY));
             ui.horizontal(|ui| {
                 ui.add(egui::DragValue::new(&mut st.new_w).range(12..=120).prefix("W "));
                 ui.add(egui::DragValue::new(&mut st.new_h).range(10..=120).prefix("H "));
@@ -367,7 +367,7 @@ fn tool_options(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
         Tool::Door => {
             ui.horizontal_wrapped(|ui| {
                 for (i, (_, name)) in DOOR_KINDS.iter().enumerate() {
-                    ui.selectable_value(&mut st.door_kind, i, *name);
+                    crate::ui::theme::choice(ui, &mut st.door_kind, i, *name);
                 }
             });
         }
@@ -392,13 +392,13 @@ fn tool_options(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
             ui.checkbox(&mut st.prop_hidden, "Hidden from players").on_hover_text("A trap or hidden loot: only you see it until you right-click it");
         }
         Tool::Note => {
-            ui.add(egui::TextEdit::singleline(&mut st.note).desired_width(f32::INFINITY).hint_text("what to remember here"));
+            ui.add(crate::ui::theme::line_edit(&mut st.note).desired_width(f32::INFINITY).hint_text("what to remember here"));
             ui.checkbox(&mut st.note_public, "Players can read it");
         }
         Tool::Fog => {
             ui.horizontal(|ui| {
-                ui.selectable_value(&mut st.fog_hide, false, "Reveal");
-                ui.selectable_value(&mut st.fog_hide, true, "Hide");
+                crate::ui::theme::choice(ui, &mut st.fog_hide, false, "Reveal");
+                crate::ui::theme::choice(ui, &mut st.fog_hide, true, "Hide");
             });
             ui.add(egui::Slider::new(&mut st.brush, 1..=6).text("brush"));
             if map.fog == FogMode::Off {
@@ -412,8 +412,8 @@ fn tool_options(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
 /// Name, size, fog and darkness of the map on the canvas.
 fn map_settings(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
     theme::section(ui, "Map");
-    ui.add(egui::TextEdit::singleline(&mut map.name).desired_width(f32::INFINITY).hint_text("map name"));
-    ui.add(egui::TextEdit::singleline(&mut map.chapter).desired_width(f32::INFINITY).hint_text("chapter / place")).on_hover_text("Which part of the campaign this map belongs to; maps are grouped by it");
+    ui.add(crate::ui::theme::line_edit(&mut map.name).desired_width(f32::INFINITY).hint_text("map name"));
+    ui.add(crate::ui::theme::line_edit(&mut map.chapter).desired_width(f32::INFINITY).hint_text("chapter / place")).on_hover_text("Which part of the campaign this map belongs to; maps are grouped by it");
     ui.horizontal(|ui| {
         let (mut mw, mut mh) = (map.width, map.height);
         ui.add(egui::DragValue::new(&mut mw).range(4..=200).prefix("W "));
@@ -439,11 +439,11 @@ fn map_settings(st: &mut MapViewState, map: &mut MapState, ui: &mut egui::Ui) {
     });
     if map.fog != FogMode::Off {
         ui.horizontal(|ui| {
-            if ui.small_button("Reveal all").clicked() {
+            if ui.button("Reveal all").clicked() {
                 remember(st, map);
                 map.reveal_all();
             }
-            if ui.small_button("Forget all").on_hover_text("Players forget everything they have seen here").clicked() {
+            if ui.button("Forget all").on_hover_text("Players forget everything they have seen here").clicked() {
                 remember(st, map);
                 map.reset_fog();
             }
@@ -548,7 +548,7 @@ fn side_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: bool
                     };
                     ui.colored_label(col, "⏺");
                     let label = if c.pos.is_some() { c.name.clone() } else { format!("{} (not placed)", c.name) };
-                    if ui.selectable_label(sel, label).on_hover_text("Select to see its health and conditions; then click a square to put it there").clicked() {
+                    if crate::ui::theme::chip(ui, sel, label).on_hover_text("Select to see its health and conditions; then click a square to put it there").clicked() {
                         est.selected = if sel { None } else { Some(c.id.clone()) };
                         st.tool = Tool::Select;
                     }
@@ -599,10 +599,10 @@ fn side_panel(app: &mut DmApp, w: &mut World, ui: &mut egui::Ui, preparing: bool
                     ui.horizontal(|ui| {
                         ui.label("Light");
                         ui.add(egui::DragValue::new(&mut c.light).range(0..=120).suffix(" ft"));
-                        if ui.small_button("torch").clicked() {
+                        if ui.button("torch").clicked() {
                             c.light = 20;
                         }
-                        if ui.small_button("none").clicked() {
+                        if ui.button("none").clicked() {
                             c.light = 0;
                         }
                     });

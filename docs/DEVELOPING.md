@@ -94,6 +94,23 @@ emoji the font does have are used on buttons; check a new one with
 | player app screens | `crates/dnd-player/src/ui/*.rs` |
 | LAN server routes | `crates/dnd-server/src/lib.rs` |
 
+## The look (both apps)
+
+Both apps are built from the same few parts, each defined once in its
+`theme.rs` (`crates/dnd-dm/src/ui/theme.rs`, `crates/dnd-player/src/theme.rs`):
+one control height and corner radius (`H_CTRL`, `R_CTRL`: 30 and 8 on the
+desk, 44 and 12 on the phone), one card radius (`R_CARD`), the same colours,
+and the same text face (Adwaita Sans, in `crates/dnd-mapview/assets/fonts`,
+installed by `dnd_mapview::face::install`). Use the parts rather than
+one-off sizes: `theme::primary` for the main action, a plain `ui.button`
+for the rest, `theme::chip` / `theme::choice` for on/off and one-of-several
+(`selectable_label` is for rows inside menus and tables only),
+`theme::line_edit` for one-line text, `theme::card()` and
+`theme::section()`. A button may never sit on top of text: where a row has
+words and buttons, give the words the room the buttons leave
+(`theme::Room`), or put the buttons on their own line. Lists of check boxes
+go in a grid so they line up. `docs/PLAYER_APP.md` has the full table.
+
 ## Layout rules of thumb
 
 Windows display scaling shrinks the space the app has. Rows of widgets use

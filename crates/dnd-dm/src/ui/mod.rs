@@ -29,7 +29,7 @@ pub const BAD: egui::Color32 = egui::Color32::from_rgb(235, 80, 70);
 
 /// A red outline around something that breaks the rules.
 pub fn red_outline(ui: &egui::Ui, rect: egui::Rect) {
-    ui.painter().rect_stroke(rect.expand(2.0), 4.0, egui::Stroke::new(1.6, BAD), egui::StrokeKind::Outside);
+    ui.painter().rect_stroke(rect.expand(2.0), crate::ui::theme::R_CTRL, egui::Stroke::new(1.6, BAD), egui::StrokeKind::Outside);
 }
 
 /// Outline `r` in red with the reason on hover when `why` is set.
@@ -130,7 +130,7 @@ pub fn heading(ui: &mut egui::Ui, text: &str) {
 pub fn list_edit(ui: &mut egui::Ui, label: &str, list: &mut Vec<String>) -> bool {
     let mut text = list.join(", ");
     ui.label(label);
-    let r = ui.add(egui::TextEdit::singleline(&mut text).desired_width(f32::INFINITY));
+    let r = ui.add(crate::ui::theme::line_edit(&mut text).desired_width(f32::INFINITY));
     if r.changed() {
         *list = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
         true

@@ -240,20 +240,20 @@ impl DmApp {
                 match &self.server {
                     Some(h) => {
                         ui.colored_label(theme::GOOD, format!("⏺ server :{}", h.addr.port()));
-                        if ui.small_button("stop").clicked() {
+                        if ui.button("stop").clicked() {
                             self.stop_server();
                         }
                     }
                     None => {
                         ui.colored_label(theme::MUTED, "○ server off");
-                        if ui.small_button("start").clicked() {
+                        if ui.button("start").clicked() {
                             self.start_server();
                         }
                     }
                 }
                 ui.separator();
                 ui.label(theme::accent("🎲"));
-                let r = ui.add(egui::TextEdit::singleline(&mut self.dice_formula).desired_width(110.0).hint_text("1d20+5"));
+                let r = ui.add(crate::ui::theme::line_edit(&mut self.dice_formula).desired_width(110.0).hint_text("1d20+5"));
                 let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
                 if ui.add(theme::primary("Roll")).clicked() || enter {
                     self.roll_dice();
@@ -300,6 +300,7 @@ impl DmApp {
                         let text = egui::RichText::new(v.label()).size(15.0).color(if selected { egui::Color32::BLACK } else { theme::TEXT });
                         let btn = egui::Button::new(text)
                             .fill(if selected { theme::ORANGE } else { egui::Color32::TRANSPARENT })
+                            .stroke(egui::Stroke::NONE)
                             .min_size(egui::vec2(144.0, 34.0));
                         if ui.add(btn).clicked() {
                             self.view = v;

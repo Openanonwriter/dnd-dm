@@ -180,7 +180,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
     egui::SidePanel::left("content_list").resizable(true).default_width(270.0).frame(egui::Frame::new().fill(theme::BG).inner_margin(8.0)).show_inside(ui, |ui| {
         ui.horizontal(|ui| {
             ui.label(theme::accent("🔍"));
-            ui.add(egui::TextEdit::singleline(&mut app.content.filter).desired_width(f32::INFINITY).hint_text("filter by name or id"));
+            ui.add(crate::ui::theme::line_edit(&mut app.content.filter).desired_width(f32::INFINITY).hint_text("filter by name or id"));
         });
         let (list, hb): (Vec<(String, String)>, Vec<bool>) = {
             let w = app.world.read().unwrap();
@@ -197,7 +197,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
                 let sel = app.content.selected.as_deref() == Some(id.as_str());
                 ui.horizontal(|ui| {
-                    if ui.selectable_label(sel, name).on_hover_text(id).clicked() {
+                    if crate::ui::theme::chip(ui, sel, name).on_hover_text(id).clicked() {
                         to_select = Some(id.clone());
                     }
                     if is_hb {
@@ -212,8 +212,8 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         ui.separator();
         let one = match kind { Kind::Species => "species", Kind::Class => "class", Kind::Subclass => "subclass", Kind::Background => "background", Kind::Item => "item", Kind::Feat => "feat", Kind::Spell => "spell", Kind::Creature => "creature" };
         section(ui, &format!("New {one}"));
-        ui.add(egui::TextEdit::singleline(&mut app.content.new_name).hint_text("Name").desired_width(f32::INFINITY));
-        ui.add(egui::TextEdit::singleline(&mut app.content.new_id).hint_text("id (auto from name)").desired_width(f32::INFINITY));
+        ui.add(crate::ui::theme::line_edit(&mut app.content.new_name).hint_text("Name").desired_width(f32::INFINITY));
+        ui.add(crate::ui::theme::line_edit(&mut app.content.new_id).hint_text("id (auto from name)").desired_width(f32::INFINITY));
         if ui.add(theme::primary("➕ Create")).clicked() && !app.content.new_name.trim().is_empty() {
             let name = app.content.new_name.trim().to_string();
             let id = if app.content.new_id.trim().is_empty() { dnd_core::Character::slug(&name) } else { dnd_core::Character::slug(app.content.new_id.trim()) };

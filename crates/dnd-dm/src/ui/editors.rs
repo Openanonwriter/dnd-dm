@@ -31,13 +31,13 @@ pub fn row(ui: &mut egui::Ui, label: &str, add: impl FnOnce(&mut egui::Ui)) {
 
 pub fn text(ui: &mut egui::Ui, label: &str, v: &mut String) {
     row(ui, label, |ui| {
-        ui.add(egui::TextEdit::singleline(v).desired_width(f32::INFINITY));
+        ui.add(crate::ui::theme::line_edit(v).desired_width(f32::INFINITY));
     });
 }
 
 pub fn text_w(ui: &mut egui::Ui, label: &str, v: &mut String, width: f32) {
     row(ui, label, |ui| {
-        ui.add(egui::TextEdit::singleline(v).desired_width(width));
+        ui.add(crate::ui::theme::line_edit(v).desired_width(width));
     });
 }
 
@@ -77,9 +77,9 @@ pub fn chips(ui: &mut egui::Ui, label: &str, list: &mut Vec<String>, suggestions
                 list.remove(i);
             }
             let mut buf: String = ui.data_mut(|d| d.get_temp(id).unwrap_or_default());
-            let r = ui.add(egui::TextEdit::singleline(&mut buf).desired_width(110.0).hint_text("add…"));
+            let r = ui.add(crate::ui::theme::line_edit(&mut buf).desired_width(110.0).hint_text("add…"));
             let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-            if (ui.small_button("+").clicked() || enter) && !buf.trim().is_empty() {
+            if (ui.button("+").clicked() || enter) && !buf.trim().is_empty() {
                 list.push(buf.trim().to_string());
                 buf.clear();
                 r.request_focus();
@@ -148,14 +148,14 @@ pub fn map_i32(ui: &mut egui::Ui, label: &str, map: &mut BTreeMap<String, i32>, 
             for k in keys {
                 ui.label(&k);
                 ui.add(egui::DragValue::new(map.get_mut(&k).unwrap()));
-                if ui.small_button("✖").clicked() {
+                if ui.button("✖").clicked() {
                     map.remove(&k);
                 }
             }
             let mut buf: String = ui.data_mut(|d| d.get_temp(id).unwrap_or_default());
-            let r = ui.add(egui::TextEdit::singleline(&mut buf).desired_width(100.0).hint_text("key…"));
+            let r = ui.add(crate::ui::theme::line_edit(&mut buf).desired_width(100.0).hint_text("key…"));
             let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-            if (ui.small_button("+").clicked() || enter) && !buf.trim().is_empty() {
+            if (ui.button("+").clicked() || enter) && !buf.trim().is_empty() {
                 map.entry(buf.trim().to_string()).or_insert(0);
                 buf.clear();
             }
@@ -192,7 +192,7 @@ pub fn modifiers(ui: &mut egui::Ui, list: &mut Vec<Modifier>) {
             ui.end_row();
             for (i, m) in list.iter_mut().enumerate() {
                 ui.horizontal(|ui| {
-                    ui.add(egui::TextEdit::singleline(&mut m.target).desired_width(140.0));
+                    ui.add(crate::ui::theme::line_edit(&mut m.target).desired_width(140.0));
                     egui::ComboBox::from_id_salt(("tgt", i)).selected_text("…").width(36.0).show_ui(ui, |ui| {
                         for t in COMMON_TARGETS {
                             if ui.selectable_label(false, t).clicked() {
@@ -206,11 +206,11 @@ pub fn modifiers(ui: &mut egui::Ui, list: &mut Vec<Modifier>) {
                         ui.selectable_value(&mut m.op, op, format!("{op:?}").to_lowercase());
                     }
                 });
-                ui.add(egui::TextEdit::singleline(&mut m.value).desired_width(90.0).hint_text("2 · level"));
-                ui.add(egui::TextEdit::singleline(&mut m.condition).desired_width(110.0).hint_text("armored"));
-                ui.add(egui::TextEdit::singleline(&mut m.note).desired_width(120.0));
+                ui.add(crate::ui::theme::line_edit(&mut m.value).desired_width(90.0).hint_text("2 · level"));
+                ui.add(crate::ui::theme::line_edit(&mut m.condition).desired_width(110.0).hint_text("armored"));
+                ui.add(crate::ui::theme::line_edit(&mut m.note).desired_width(120.0));
                 ui.label("");
-                if ui.small_button("✖").clicked() {
+                if ui.button("✖").clicked() {
                     remove = Some(i);
                 }
                 ui.end_row();
@@ -220,7 +220,7 @@ pub fn modifiers(ui: &mut egui::Ui, list: &mut Vec<Modifier>) {
     if let Some(i) = remove {
         list.remove(i);
     }
-    if ui.small_button("➕ modifier").clicked() {
+    if ui.button("➕ modifier").clicked() {
         list.push(Modifier { target: "ac".into(), op: ModOp::Add, value: "1".into(), ..Default::default() });
     }
 }
@@ -230,12 +230,12 @@ pub fn attack(ui: &mut egui::Ui, a: &mut Attack) {
         ui.label(theme::muted("to hit"));
         ui.add(egui::DragValue::new(&mut a.to_hit));
         ui.label(theme::muted("reach/range"));
-        ui.add(egui::TextEdit::singleline(&mut a.reach).desired_width(150.0).hint_text("reach 5 ft., one target"));
+        ui.add(crate::ui::theme::line_edit(&mut a.reach).desired_width(150.0).hint_text("reach 5 ft., one target"));
         ui.label(theme::muted("damage"));
-        ui.add(egui::TextEdit::singleline(&mut a.damage).desired_width(80.0).hint_text("1d6 + 2"));
-        ui.add(egui::TextEdit::singleline(&mut a.damage_type).desired_width(90.0).hint_text("slashing"));
+        ui.add(crate::ui::theme::line_edit(&mut a.damage).desired_width(80.0).hint_text("1d6 + 2"));
+        ui.add(crate::ui::theme::line_edit(&mut a.damage_type).desired_width(90.0).hint_text("slashing"));
         ui.label(theme::muted("extra"));
-        ui.add(egui::TextEdit::singleline(&mut a.extra).desired_width(140.0));
+        ui.add(crate::ui::theme::line_edit(&mut a.extra).desired_width(140.0));
     });
 }
 
@@ -252,13 +252,13 @@ pub fn features(ui: &mut egui::Ui, label: &str, list: &mut Vec<Feature>, level_l
             theme::card().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(theme::muted("Name"));
-                    ui.add(egui::TextEdit::singleline(&mut f.name).desired_width(220.0));
+                    ui.add(crate::ui::theme::line_edit(&mut f.name).desired_width(220.0));
                     if let Some(l) = level_label {
                         ui.label(theme::muted(l));
                         ui.add(egui::DragValue::new(&mut f.level).range(1..=20));
                     }
                     ui.label(theme::muted("Uses"));
-                    ui.add(egui::TextEdit::singleline(&mut f.uses).desired_width(90.0).hint_text("formula"));
+                    ui.add(crate::ui::theme::line_edit(&mut f.uses).desired_width(90.0).hint_text("formula"));
                     ui.label(theme::muted("Recharge"));
                     egui::ComboBox::from_id_salt(("rech", label, i)).selected_text(if f.recharge.is_empty() { "—" } else { f.recharge.as_str() }).width(110.0).show_ui(ui, |ui| {
                         for r in ["", "short_rest", "long_rest", "dawn", "recharge 5-6", "recharge 6"] {
@@ -266,13 +266,13 @@ pub fn features(ui: &mut egui::Ui, label: &str, list: &mut Vec<Feature>, level_l
                         }
                     });
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.small_button("✖ remove").clicked() {
+                        if ui.button("✖ remove").clicked() {
                             remove = Some(i);
                         }
-                        if i + 1 < n && ui.small_button("▼").clicked() {
+                        if i + 1 < n && ui.button("▼").clicked() {
                             swap = Some((i, i + 1));
                         }
-                        if i > 0 && ui.small_button("▲").clicked() {
+                        if i > 0 && ui.button("▲").clicked() {
                             swap = Some((i, i - 1));
                         }
                     });
@@ -281,10 +281,10 @@ pub fn features(ui: &mut egui::Ui, label: &str, list: &mut Vec<Feature>, level_l
                 if !with_attack {
                     ui.horizontal(|ui| {
                         ui.label(theme::muted("Choice: options tag"));
-                        ui.add(egui::TextEdit::singleline(&mut f.options).desired_width(170.0).hint_text("e.g. fighting_style"))
+                        ui.add(crate::ui::theme::line_edit(&mut f.options).desired_width(170.0).hint_text("e.g. fighting_style"))
                             .on_hover_text("The character picks from the feats carrying this tag (and the tag `option`). Leave empty for no choice.");
                         ui.label(theme::muted("how many"));
-                        ui.add(egui::TextEdit::singleline(&mut f.choose).desired_width(120.0).hint_text("1 (formula)"));
+                        ui.add(crate::ui::theme::line_edit(&mut f.choose).desired_width(120.0).hint_text("1 (formula)"));
                     });
                     list_edit(ui, "Granted spells (ids; always prepared, unlock as the spell level becomes castable)", &mut f.spells);
                 }
@@ -330,20 +330,20 @@ fn spellcasting(ui: &mut egui::Ui, sc: &mut Option<Spellcasting>, class_hint: &s
     if let Some(s) = sc.as_mut() {
         row(ui, "Ability", |ui| {
             for k in ["int", "wis", "cha"] {
-                ui.selectable_value(&mut s.ability, k.to_string(), k.to_uppercase());
+                crate::ui::theme::choice(ui, &mut s.ability, k.to_string(), k.to_uppercase());
             }
         });
         choice(ui, "Progression", &mut s.progression, &["full", "half", "third", "pact", "none"]);
         text(ui, "Prepared formula", &mut s.prepared);
         row(ui, "Cantrips by level", |ui| {
             let mut t = s.cantrips_known.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",");
-            if ui.add(egui::TextEdit::singleline(&mut t).desired_width(f32::INFINITY).hint_text("3,3,3,4,4,…")).changed() {
+            if ui.add(crate::ui::theme::line_edit(&mut t).desired_width(f32::INFINITY).hint_text("3,3,3,4,4,…")).changed() {
                 s.cantrips_known = t.split(',').filter_map(|x| x.trim().parse().ok()).collect();
             }
         });
         row(ui, "Spells known by level", |ui| {
             let mut t = s.spells_known.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",");
-            if ui.add(egui::TextEdit::singleline(&mut t).desired_width(f32::INFINITY).hint_text("leave empty for prepared casters")).changed() {
+            if ui.add(crate::ui::theme::line_edit(&mut t).desired_width(f32::INFINITY).hint_text("leave empty for prepared casters")).changed() {
                 s.spells_known = t.split(',').filter_map(|x| x.trim().parse().ok()).collect();
             }
         });
@@ -378,7 +378,7 @@ pub fn class(ui: &mut egui::Ui, c: &mut Class, lib: &Library) {
     text_w(ui, "Name", &mut c.name, 300.0);
     row(ui, "Hit die", |ui| {
         for d in [6u32, 8, 10, 12] {
-            ui.selectable_value(&mut c.hit_die, d, format!("d{d}"));
+            crate::ui::theme::choice(ui, &mut c.hit_die, d, format!("d{d}"));
         }
     });
     ability_picker(ui, "Primary abilities", &mut c.primary_abilities);
@@ -397,7 +397,7 @@ pub fn class(ui: &mut egui::Ui, c: &mut Class, lib: &Library) {
     text_w(ui, "Subclass label", &mut c.subclass_label, 220.0);
     row(ui, "ASI levels", |ui| {
         let mut t = c.asi_levels.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(",");
-        if ui.add(egui::TextEdit::singleline(&mut t).desired_width(200.0)).changed() {
+        if ui.add(crate::ui::theme::line_edit(&mut t).desired_width(200.0)).changed() {
             c.asi_levels = t.split(',').filter_map(|x| x.trim().parse().ok()).collect();
         }
     });
@@ -478,27 +478,27 @@ pub fn item(ui: &mut egui::Ui, it: &mut Item, lib: &Library) {
     }
     if let Some(w) = it.weapon.as_mut() {
         row(ui, "Damage", |ui| {
-            ui.add(egui::TextEdit::singleline(&mut w.damage).desired_width(70.0));
+            ui.add(crate::ui::theme::line_edit(&mut w.damage).desired_width(70.0));
             egui::ComboBox::from_id_salt("dmgtype").selected_text(if w.damage_type.is_empty() { "type" } else { w.damage_type.as_str() }).width(120.0).show_ui(ui, |ui| {
                 for t in &lib.rules.damage_types {
                     ui.selectable_value(&mut w.damage_type, t.clone(), t);
                 }
             });
             ui.label(theme::muted("versatile"));
-            ui.add(egui::TextEdit::singleline(&mut w.versatile).desired_width(60.0).hint_text("1d10"));
+            ui.add(crate::ui::theme::line_edit(&mut w.versatile).desired_width(60.0).hint_text("1d10"));
             ui.label(theme::muted("magic bonus"));
             ui.add(egui::DragValue::new(&mut w.bonus).range(-3..=5));
         });
         row(ui, "Category", |ui| {
             for c in ["simple", "martial"] {
-                ui.selectable_value(&mut w.category, c.to_string(), c);
+                crate::ui::theme::choice(ui, &mut w.category, c.to_string(), c);
             }
             ui.separator();
             for k in ["melee", "ranged"] {
-                ui.selectable_value(&mut w.kind, k.to_string(), k);
+                crate::ui::theme::choice(ui, &mut w.kind, k.to_string(), k);
             }
             ui.label(theme::muted("range"));
-            ui.add(egui::TextEdit::singleline(&mut w.range).desired_width(80.0).hint_text("80/320"));
+            ui.add(crate::ui::theme::line_edit(&mut w.range).desired_width(80.0).hint_text("80/320"));
         });
         chips(ui, "Properties", &mut w.properties, &WEAPON_PROPS);
     }
@@ -519,7 +519,7 @@ pub fn item(ui: &mut egui::Ui, it: &mut Item, lib: &Library) {
         });
         row(ui, "Category", |ui| {
             for c in ["light", "medium", "heavy", "shield"] {
-                if ui.selectable_value(&mut a.category, c.to_string(), c).clicked() {
+                if crate::ui::theme::choice(ui, &mut a.category, c.to_string(), c).clicked() {
                     a.dex_cap = match c {
                         "light" => None,
                         "medium" => Some(2),
@@ -587,7 +587,7 @@ pub fn spell(ui: &mut egui::Ui, s: &mut Spell, lib: &Library) {
     chips(ui, "Classes", &mut s.classes, &classes);
     section(ui, "Effect");
     row(ui, "Damage / healing", |ui| {
-        ui.add(egui::TextEdit::singleline(&mut s.damage).desired_width(120.0).hint_text("8d6"));
+        ui.add(crate::ui::theme::line_edit(&mut s.damage).desired_width(120.0).hint_text("8d6"));
         egui::ComboBox::from_id_salt("sp_dmgtype").selected_text(if s.damage_type.is_empty() { "type" } else { s.damage_type.as_str() }).width(120.0).show_ui(ui, |ui| {
             ui.selectable_value(&mut s.damage_type, String::new(), "—");
             ui.selectable_value(&mut s.damage_type, "healing".to_string(), "healing");
@@ -597,9 +597,9 @@ pub fn spell(ui: &mut egui::Ui, s: &mut Spell, lib: &Library) {
         });
     });
     row(ui, "Saving throw", |ui| {
-        ui.selectable_value(&mut s.save, String::new(), "none");
+        crate::ui::theme::choice(ui, &mut s.save, String::new(), "none");
         for k in ABILITY_KEYS {
-            ui.selectable_value(&mut s.save, k.to_string(), k.to_uppercase());
+            crate::ui::theme::choice(ui, &mut s.save, k.to_string(), k.to_uppercase());
         }
     });
     row(ui, "Area", |ui| {
@@ -637,25 +637,25 @@ pub fn creature(ui: &mut egui::Ui, c: &mut Creature, lib: &Library) {
                 ui.selectable_value(&mut c.size, s.to_string(), s);
             }
         });
-        ui.add(egui::TextEdit::singleline(&mut c.kind).desired_width(180.0).hint_text("humanoid (goblinoid)"));
+        ui.add(crate::ui::theme::line_edit(&mut c.kind).desired_width(180.0).hint_text("humanoid (goblinoid)"));
         ui.label(theme::muted("alignment"));
-        ui.add(egui::TextEdit::singleline(&mut c.alignment).desired_width(140.0));
+        ui.add(crate::ui::theme::line_edit(&mut c.alignment).desired_width(140.0));
     });
     row(ui, "Armor class", |ui| {
         ui.add(egui::DragValue::new(&mut c.ac).range(0..=40));
-        ui.add(egui::TextEdit::singleline(&mut c.ac_note).desired_width(200.0).hint_text("natural armor"));
+        ui.add(crate::ui::theme::line_edit(&mut c.ac_note).desired_width(200.0).hint_text("natural armor"));
     });
     row(ui, "Hit points", |ui| {
         ui.add(egui::DragValue::new(&mut c.hp).range(0..=2000));
-        ui.add(egui::TextEdit::singleline(&mut c.hp_formula).desired_width(120.0).hint_text("2d8 + 2"));
-        if ui.small_button("average from formula").clicked() && !c.hp_formula.is_empty() {
+        ui.add(crate::ui::theme::line_edit(&mut c.hp_formula).desired_width(120.0).hint_text("2d8 + 2"));
+        if ui.button("average from formula").clicked() && !c.hp_formula.is_empty() {
             if let Ok(r) = dnd_core::expr::eval(&c.hp_formula, &dnd_core::expr::Env::new(), dnd_core::expr::Mode::Average, None) {
                 c.hp = r.value.floor() as i32;
             }
         }
     });
     row(ui, "Challenge", |ui| {
-        ui.add(egui::TextEdit::singleline(&mut c.cr).desired_width(50.0).hint_text("1/4"));
+        ui.add(crate::ui::theme::line_edit(&mut c.cr).desired_width(50.0).hint_text("1/4"));
         ui.label(theme::muted("XP"));
         ui.add(egui::DragValue::new(&mut c.xp).range(0..=200000).speed(10));
         ui.label(theme::muted(format!("PB {}", crate::ui::bonus(c.proficiency_bonus()))));

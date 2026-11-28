@@ -56,12 +56,12 @@ point, *reincarnate*, *resurrection* or *true resurrection* at full. The DM
 can also override it with *Bring back to life* on the character's Notes &
 State tab. A long rest needs at least 1 hit point even for the living.
 
-Dashboard → *Players' attacks change hit points*: turn this off and attacks
+Campaign tab → Rules for players → *Players' attacks change hit points*: turn this off and attacks
 and spells are only rolled and announced; the DM applies the numbers.
 
 ## Reach, range and movement
 
-With Dashboard → *Enforce reach, range and movement* on (the default), the
+With Campaign tab → Rules for players → *Enforce reach, range and movement* on (the default), the
 DM's PC checks every attack and spell against the map:
 
 - **Melee** reaches 5 ft, 10 ft with a reach weapon. **Thrown** weapons work
@@ -131,7 +131,7 @@ levels, and armor the character is proficient with and strong enough for.
 - **Players**: red-outlined options can't be picked; tapping one says what
   it needs. The server refuses a character or spell choice that breaks a
   rule.
-- **Allowing it**: Dashboard → *Players may break the rules* (everyone), or
+- **Allowing it**: Campaign tab → Rules for players → *Players may break the rules* (everyone), or
   *Let this character's player pick options they don't qualify for* on a
   character's Build tab. The picks still show in red, and the player's
   Spells tab gains *More spells your DM allows*.

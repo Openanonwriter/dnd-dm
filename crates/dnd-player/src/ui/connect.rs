@@ -22,7 +22,9 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                     let frame = if current { theme::card_hi() } else { theme::card() };
                     frame.show(ui, |ui| {
                         ui.horizontal(|ui| {
+                            let room = theme::Room::new(ui, ("game", g.key()));
                             ui.vertical(|ui| {
+                                room.limit(ui);
                                 ui.label(egui::RichText::new(&g.campaign).strong());
                                 let who = match (g.character_name.is_empty(), g.player_name.is_empty()) {
                                     (false, false) => format!("{} · as {}", g.character_name, g.player_name),
@@ -38,21 +40,22 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                                     app.forget_armed = None;
                                     app.join_game(g);
                                 }
+                                room.note(ui);
                             });
                         });
                         ui.horizontal_wrapped(|ui| {
                             let has_copy = app.store.load_cached_in(&g.key(), &g.character_id).is_some();
-                            if has_copy && ui.small_button("Open without the DM").clicked() {
+                            if has_copy && ui.button("Open without the DM").clicked() {
                                 app.forget_armed = None;
                                 app.open_game_offline(g);
                             }
                             let armed = app.forget_armed.as_ref().map(|(u, c)| u == &g.server_url && c == &g.campaign).unwrap_or(false);
                             if armed {
-                                if ui.small_button(egui::RichText::new("Really forget? Tap again").color(theme::BAD)).clicked() {
+                                if ui.button(egui::RichText::new("Really forget? Tap again").color(theme::BAD)).clicked() {
                                     app.forget_armed = None;
                                     app.forget_game(g);
                                 }
-                            } else if ui.small_button("Forget").clicked() {
+                            } else if ui.button("Forget").clicked() {
                                 app.forget_armed = Some((g.server_url.clone(), g.campaign.clone()));
                             }
                         });
@@ -64,7 +67,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
 
             theme::section(ui, "Who are you?");
             ui.label(theme::muted("Your name. The DM sees it and hands this device your character."));
-            ui.add(egui::TextEdit::singleline(&mut app.name_input).hint_text("e.g. Sam").char_limit(40).desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
+            ui.add(crate::theme::line_edit(&mut app.name_input).hint_text("e.g. Sam").char_limit(40).desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
 
             theme::section(ui, "Find the DM on this Wi-Fi");
             ui.horizontal(|ui| {
@@ -83,7 +86,9 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             for (url, campaign) in results {
                 theme::card_hi().show(ui, |ui| {
                     ui.horizontal(|ui| {
+                        let room = theme::Room::new(ui, ("scan", &url));
                         ui.vertical(|ui| {
+                            room.limit(ui);
                             ui.label(egui::RichText::new(&campaign).strong());
                             ui.label(theme::muted(&url).small());
                         });
@@ -92,6 +97,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                                 app.url_input = url.clone();
                                 app.connect();
                             }
+                            room.note(ui);
                         });
                     });
                 });
@@ -99,24 +105,24 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
 
             theme::section(ui, "Or type the address the DM shows");
             ui.label(theme::muted("Dashboard > “Players connect to”, e.g. 192.168.1.23:8420"));
-            ui.add(egui::TextEdit::singleline(&mut app.url_input).hint_text("192.168.1.23:8420").desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
+            ui.add(crate::theme::line_edit(&mut app.url_input).hint_text("192.168.1.23:8420").desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
             ui.horizontal(|ui| {
                 ui.label(theme::muted("Join code"));
-                ui.add(egui::TextEdit::singleline(&mut app.code_input).hint_text("if the DM set one").desired_width(160.0));
+                ui.add(crate::theme::line_edit(&mut app.code_input).hint_text("if the DM set one").desired_width(160.0));
             });
             if !app.config.recent_servers.is_empty() {
                 ui.horizontal_wrapped(|ui| {
                     ui.label(theme::muted("Recent:"));
                     let recent = app.config.recent_servers.clone();
                     for r in recent {
-                        if ui.small_button(r.trim_start_matches("http://")).clicked() {
+                        if ui.button(r.trim_start_matches("http://")).clicked() {
                             app.url_input = r;
                         }
                     }
                 });
             }
             ui.add_space(6.0);
-            if ui.add_enabled(!app.busy && !app.url_input.trim().is_empty() && !app.name_input.trim().is_empty(), theme::primary("Connect  ➜")).clicked() {
+            if ui.add_enabled(!app.busy && !app.url_input.trim().is_empty() && !app.name_input.trim().is_empty(), theme::primary("Connect")).clicked() {
                 app.connect();
             }
 

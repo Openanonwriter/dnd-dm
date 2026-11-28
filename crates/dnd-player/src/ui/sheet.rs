@@ -42,7 +42,17 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
                     ui.spacing_mut().item_spacing.y = 2.0;
                     ui.add(egui::Label::new(egui::RichText::new(name).strong().size(20.0).color(theme::ORANGE)).truncate());
-                    ui.add(egui::Label::new(theme::muted(sub).small()).truncate());
+                    // "Saved to DM", "Connected to ..." show here for a moment, in the line under the name
+                    let note = (!app.status_error && !app.status.is_empty() && app.status_at.elapsed().as_secs() < 3).then(|| app.status.clone());
+                    match note {
+                        Some(n) => {
+                            ui.add(egui::Label::new(egui::RichText::new(n).small().color(theme::GOOD)).truncate());
+                            ui.ctx().request_repaint_after(std::time::Duration::from_secs(1));
+                        }
+                        None => {
+                            ui.add(egui::Label::new(theme::muted(sub).small()).truncate());
+                        }
+                    }
                 });
             });
         });
@@ -59,7 +69,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         // whose turn it is: one place, on every tab but the map (which has its own bar)
         let fight = app.encounter.as_ref().filter(|e| e.active).map(|e| (e.round, e.combatants.iter().find(|c| c.is_current).map(|c| c.name.clone()).unwrap_or_default()));
         if app.my_turn() && app.tab != Tab::Party {
-            egui::Frame::new().fill(theme::ORANGE_FAINT).stroke(egui::Stroke::new(1.0, theme::ORANGE)).corner_radius(8.0).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
+            egui::Frame::new().fill(theme::ORANGE_FAINT).stroke(egui::Stroke::new(1.0, theme::ORANGE)).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
                     dnd_mapview::help::term(ui, "turn");
@@ -72,7 +82,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             });
         } else if let Some((round, who)) = fight.filter(|_| !app.my_turn()) {
             // the same height as the "Your turn" banner, so the page does not jump when turns change
-            egui::Frame::new().fill(theme::CARD).stroke(egui::Stroke::new(1.0, theme::LINE)).corner_radius(8.0).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
+            egui::Frame::new().fill(theme::CARD).stroke(egui::Stroke::new(1.0, theme::LINE)).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.set_min_height(40.0);
                 ui.horizontal_centered(|ui| {
@@ -105,7 +115,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 if ui.is_rect_visible(rect) {
                     let col = if sel { theme::ORANGE } else { theme::MUTED };
                     if sel {
-                        ui.painter().rect_filled(rect.shrink2(egui::vec2(3.0, 1.0)), 8.0, theme::ORANGE_FAINT);
+                        ui.painter().rect_filled(rect.shrink2(egui::vec2(3.0, 1.0)), theme::R_CTRL, theme::ORANGE_FAINT);
                     }
                     ui.painter().text(rect.center() + egui::vec2(0.0, -9.0), egui::Align2::CENTER_CENTER, icon, egui::FontId::proportional(21.0), col);
                     ui.painter().text(rect.center() + egui::vec2(0.0, 15.0), egui::Align2::CENTER_CENTER, label, egui::FontId::proportional(13.0), col);
@@ -142,21 +152,22 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         }
         if app.tab.in_more() {
             app.ui_state.more_tab = Some(app.tab);
+            let pages = [Tab::Dice, Tab::Notes, Tab::Settings];
+            let at = pages.iter().position(|t| *t == app.tab).unwrap_or(0);
             ui.horizontal(|ui| {
-                let pages = [(Tab::Dice, "Dice"), (Tab::Notes, "Features"), (Tab::Settings, "Settings")];
-                ui.spacing_mut().item_spacing.x = 6.0;
-                let w = (ui.available_width() - 12.0 - 6.0 * 2.0) / 3.0;
-                for (t, label) in pages {
-                    let sel = app.tab == t;
-                    let text = egui::RichText::new(label).color(if sel { egui::Color32::WHITE } else { theme::TEXT });
-                    if ui.add_sized([w, 40.0], egui::Button::new(text).fill(if sel { theme::SELECT } else { theme::CARD_HI })).clicked() {
-                        app.tab = t;
-                    }
+                ui.set_width(ui.available_width() - 12.0);
+                if let Some(i) = theme::segmented(ui, &["Dice", "Features", "Settings"], at) {
+                    app.tab = pages[i];
                 }
             });
             ui.add_space(2.0);
         }
-        theme::page_scroll(ui, egui::ScrollArea::vertical().auto_shrink([false, false]), 12, |ui| match app.tab {
+        // DND_PLAYER_SCROLL=<points> starts scrolled down (screenshots)
+        let mut area = egui::ScrollArea::vertical().auto_shrink([false, false]);
+        if let Some(y) = std::env::var("DND_PLAYER_SCROLL").ok().and_then(|v| v.parse::<f32>().ok()) {
+            area = area.vertical_scroll_offset(y);
+        }
+        theme::page_scroll(ui, area, 12, |ui| match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
             Tab::Spells => crate::ui::spells::tab(app, ui),
@@ -174,8 +185,9 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         app.ui_state.result = None;
     }
     // short messages ("Connected to ...", "it is not your turn") use the same card when no roll is showing
-    let message = if app.ui_state.result.is_none() && !app.status.is_empty() && app.status_at.elapsed().as_secs() < if app.status_error { 8 } else { 4 } {
-        Some((0, if app.status_error { Some(false) } else { None }, app.status.clone(), app.status_at))
+    // only refusals float ("it is not your turn"); everything else is in the header
+    let message = if app.ui_state.result.is_none() && app.status_error && !app.status.is_empty() && app.status_at.elapsed().as_secs() < 8 {
+        Some((0, Some(false), app.status.clone(), app.status_at))
     } else {
         None
     };
@@ -188,21 +200,29 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             None => theme::ORANGE,
         } };
         let width = ctx.screen_rect().width() - 24.0;
-        let area = egui::Area::new(egui::Id::new("roll_result")).order(egui::Order::Foreground).anchor(egui::Align2::CENTER_BOTTOM, egui::vec2(0.0, -(72.0 + inset_bottom))).show(ctx, |ui| {
-            egui::Frame::new().fill(theme::CARD_HI).stroke(egui::Stroke::new(2.0, edge)).corner_radius(10.0).inner_margin(egui::Margin::symmetric(12, 10)).show(ui, |ui| {
-                ui.set_width(width - 24.0);
-                ui.horizontal(|ui| {
-                    let big = match hit {
-                        Some(true) => "HIT".to_string(),
-                        Some(false) => "MISS".to_string(),
-                        None => total.to_string(),
-                    };
-                    if hit.is_some() || total != 0 {
-                        ui.label(egui::RichText::new(big).strong().size(28.0).color(edge));
-                    }
-                    ui.add(egui::Label::new(egui::RichText::new(text).size(14.0)).wrap());
+        let area = egui::Area::new(egui::Id::new(if is_message { "message" } else { "roll_result" })).order(egui::Order::Foreground).anchor(egui::Align2::CENTER_BOTTOM, egui::vec2(0.0, -(72.0 + inset_bottom))).show(ctx, |ui| {
+            if is_message {
+                // a short message: a small pill, just wide enough for its words
+                egui::Frame::new().fill(theme::CARD_HI).stroke(egui::Stroke::new(1.0, edge)).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(14, 9)).show(ui, |ui| {
+                    ui.set_max_width(width - 28.0);
+                    ui.add(egui::Label::new(egui::RichText::new(text).size(14.0).color(edge)).wrap());
                 });
-            });
+            } else {
+                egui::Frame::new().fill(theme::CARD_HI).stroke(egui::Stroke::new(2.0, edge)).corner_radius(theme::R_CARD).inner_margin(egui::Margin::symmetric(14, 12)).show(ui, |ui| {
+                    ui.set_width(width - 28.0);
+                    ui.horizontal(|ui| {
+                        let big = match hit {
+                            Some(true) => "HIT".to_string(),
+                            Some(false) => "MISS".to_string(),
+                            None => total.to_string(),
+                        };
+                        if hit.is_some() || total != 0 {
+                            ui.label(egui::RichText::new(big).size(28.0).color(edge));
+                        }
+                        ui.add(egui::Label::new(egui::RichText::new(text).size(14.0)).wrap());
+                    });
+                });
+            }
         });
         if area.response.interact(egui::Sense::click()).clicked() {
             app.ui_state.result = None;
@@ -219,7 +239,7 @@ fn sheet(app: &PlayerApp) -> Sheet {
 fn tiles_row(ui: &mut egui::Ui, items: &[(&str, String, String)]) {
     let n = items.len().max(1) as f32;
     // item spacing between tiles plus 1 px stroke on each side of every tile
-    let w = ((ui.available_width() - 8.0 * (n - 1.0)) / n - 3.0).max(60.0);
+    let w = ((ui.available_width() - ui.spacing().item_spacing.x * (n - 1.0)) / n).floor().max(60.0);
     ui.horizontal(|ui| {
         for (l, v, s) in items {
             tile(ui, w, l, v, s);
@@ -238,7 +258,7 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let ab: Vec<(String, i32, i32)> = s.abilities.iter().map(|(k, v)| (k.to_string(), dnd_core::ability_mod(v), v)).collect();
     for row in ab.chunks(3) {
         let n = row.len() as f32;
-        let w = ((ui.available_width() - 8.0 * (n - 1.0)) / n - 3.0).max(60.0);
+        let w = ((ui.available_width() - ui.spacing().item_spacing.x * (n - 1.0)) / n).floor().max(60.0);
         ui.horizontal(|ui| {
             for (k, m, v) in row {
                 if tile(ui, w, k, &bonus(*m), &v.to_string()).clicked() {
@@ -264,11 +284,11 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let saves: Vec<_> = s.saves.clone();
     for row in saves.chunks(3) {
         ui.horizontal(|ui| {
-            let w = (ui.available_width() - 8.0 * 2.0) / 3.0;
+            let w = ((ui.available_width() - ui.spacing().item_spacing.x * 2.0) / 3.0).floor();
             for sv in row {
                 let mark = if sv.proficient { "⏺ " } else { "" };
                 let text = egui::RichText::new(format!("{mark}{}  {}", &sv.name[..3].to_uppercase(), bonus(sv.bonus))).color(if sv.proficient { theme::ORANGE } else { theme::TEXT });
-                let mut r = ui.add_sized([w, 42.0], egui::Button::new(text));
+                let mut r = ui.add_sized([w, theme::H_CTRL], egui::Button::new(text));
                 if !sv.notes.is_empty() {
                     r = r.on_hover_text(sv.notes.join("; "));
                 }
@@ -283,16 +303,22 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let skills: Vec<_> = s.skills.clone();
     for sk in skills {
         ui.horizontal(|ui| {
-            ui.label(if sk.expertise { theme::accent("★") } else if sk.proficient { theme::accent("⏺") } else { theme::muted("○") });
-            let r = ui.add(egui::Label::new(format!("{}  {}", sk.name, theme_dim(&sk.ability))).sense(egui::Sense::click()));
-            dnd_mapview::help::term(ui, &sk.key);
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.add(egui::Button::new(egui::RichText::new(bonus(sk.bonus)).strong()).min_size(egui::vec2(56.0, 38.0))).clicked() || r.clicked() {
-                    app.roll(&format!("1d20 {}", signed(sk.bonus)), &sk.name);
-                }
+            let room = theme::Room::new(ui, ("skill", &sk.key));
+            let mut tapped = false;
+            ui.horizontal_wrapped(|ui| {
+                room.limit(ui);
+                ui.label(if sk.expertise { theme::accent("★") } else if sk.proficient { theme::accent("⏺") } else { theme::muted("○") });
+                tapped = ui.add(egui::Label::new(format!("{}  {}", sk.name, theme_dim(&sk.ability))).sense(egui::Sense::click())).clicked();
+                dnd_mapview::help::term(ui, &sk.key);
                 if !sk.notes.is_empty() {
                     ui.label(theme::muted(sk.notes.join("; ")).small());
                 }
+            });
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.add(egui::Button::new(egui::RichText::new(bonus(sk.bonus)).strong()).min_size(egui::vec2(56.0, theme::H_CTRL))).clicked() || tapped {
+                    app.roll(&format!("1d20 {}", signed(sk.bonus)), &sk.name);
+                }
+                room.note(ui);
             });
         });
     }
@@ -464,16 +490,20 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         theme::card().show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.horizontal(|ui| {
+                let room = theme::Room::new(ui, ("attack", i));
                 ui.vertical(|ui| {
-                    ui.set_max_width((ui.available_width() - 150.0).max(120.0));
+                    room.limit(ui);
                     ui.label(egui::RichText::new(&a.name).strong().size(17.0));
                     ui.label(theme::muted(format!("{} to hit · {} {} · {}{}", bonus(a.bonus), a.damage, a.damage_type, a.range, if a.notes.is_empty() { String::new() } else { format!(" · {}", a.notes.join("; ")) })).small());
                     // weapon properties, each with its (i)
+                    // weapon properties in one line, with one (i) that explains them all
+                    // (the icon comes first so it can never be left alone on a line)
                     if !a.properties.is_empty() {
-                        ui.horizontal_wrapped(|ui| {
-                            for p in &a.properties {
-                                dnd_mapview::help::label_term(ui, theme::muted(p.replace('_', "-")).small(), p);
-                            }
+                        let names: Vec<String> = a.properties.iter().map(|p| p.replace('_', "-")).collect();
+                        let help: Vec<String> = a.properties.iter().filter_map(|p| dnd_core::glossary::explain(p).map(|t| format!("{}: {t}", p.replace('_', "-")))).collect();
+                        ui.horizontal(|ui| {
+                            dnd_mapview::help::text(ui, &help.join("\n\n"));
+                            ui.add(egui::Label::new(theme::muted(names.join(" · ")).small()).wrap());
                         });
                     }
                 });
@@ -493,6 +523,7 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                             app.roll(&a.damage, &format!("{} damage", a.name));
                         }
                     }
+                    room.note(ui);
                 });
             });
         });
@@ -532,22 +563,43 @@ fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         "unconscious", "concentrating",
     ];
     if let Some(ch) = app.character.as_mut() {
-        ui.horizontal_wrapped(|ui| {
-            for c in known {
-                let mut on = ch.conditions.iter().any(|x| x == c);
-                let changed = ui.toggle_value(&mut on, c).changed();
-                dnd_mapview::help::term(ui, c);
-                if changed {
-                    if on {
-                        ch.conditions.push(c.to_string());
-                    } else {
-                        ch.conditions.retain(|x| x != c);
-                    }
+        // two even columns, each a chip with its (i) beside it
+        let gap = ui.spacing().item_spacing.x;
+        let col = ((ui.available_width() - gap) / 2.0).floor();
+        for pair in known.chunks(2) {
+            ui.horizontal(|ui| {
+                for c in pair {
+                    ui.allocate_ui_with_layout(egui::vec2(col, theme::H_CTRL), egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                        ui.set_width(col);
+                        let mut on = ch.conditions.iter().any(|x| x == c);
+                        let text = egui::RichText::new(*c).color(if on { egui::Color32::WHITE } else { theme::TEXT });
+                        let b = egui::Button::new(text);
+                        let b = if on { b.fill(theme::SELECT).stroke(egui::Stroke::NONE) } else { b };
+                        if ui.add_sized([col - 34.0, theme::H_CTRL], b).clicked() {
+                            on = !on;
+                            if on {
+                                ch.conditions.push(c.to_string());
+                            } else {
+                                ch.conditions.retain(|x| x != c);
+                            }
+                        }
+                        dnd_mapview::help::term(ui, c);
+                    });
                 }
-            }
-            ui.label(theme::muted("Exhaustion"));
+            });
+        }
+        ui.horizontal(|ui| {
+            ui.label("Exhaustion");
             dnd_mapview::help::term(ui, "exhaustion");
-            ui.add(egui::DragValue::new(&mut ch.exhaustion).range(0..=6));
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui.add(egui::Button::new("+").min_size(egui::vec2(theme::H_CTRL, theme::H_CTRL))).clicked() {
+                    ch.exhaustion = (ch.exhaustion + 1).min(6);
+                }
+                ui.label(egui::RichText::new(ch.exhaustion.to_string()).strong().size(17.0));
+                if ui.add(egui::Button::new("−").min_size(egui::vec2(theme::H_CTRL, theme::H_CTRL))).clicked() {
+                    ch.exhaustion = ch.exhaustion.saturating_sub(1);
+                }
+            });
         });
     }
 
@@ -599,7 +651,7 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ui,
         &[
             ("Weight", format!("{}", s.total_weight), format!("of {} lb", s.carrying_capacity)),
-            ("Gold", s.currency.gp.to_string(), format!("{} sp · {} cp", s.currency.sp, s.currency.cp)),
+            ("Coins", coins_total(&s.currency), coins_line(&s.currency)),
         ],
     );
     let lib = app.builder_lib.as_ref();
@@ -611,23 +663,26 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         let (name, kind) = names.get(&inv.item).cloned().unwrap_or((if inv.name.is_empty() { inv.item.clone() } else { inv.name.clone() }, "custom".into()));
         theme::card().show(ui, |ui| {
             ui.set_width(ui.available_width());
+            // the name has the whole line; the buttons sit on a line of their own
+            ui.horizontal_wrapped(|ui| {
+                ui.label(egui::RichText::new(&name).strong());
+                if let (Some(lib), false) = (lib, inv.custom) {
+                    dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Item, &inv.item);
+                }
+            });
             ui.horizontal(|ui| {
+                let room = theme::Room::new(ui, ("item", i));
                 ui.vertical(|ui| {
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(egui::RichText::new(&name).strong());
-                        if let (Some(lib), false) = (lib, inv.custom) {
-                            dnd_mapview::help::entry(ui, lib, dnd_core::Kind::Item, &inv.item);
-                        }
-                    });
+                    room.limit(ui);
                     ui.label(theme::muted(format!("{kind}{}", if inv.notes.is_empty() { String::new() } else { format!(" · {}", inv.notes) })).small());
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     // count with plus and minus; at zero the row offers to remove itself
-                    if ui.add(egui::Button::new("+").min_size(egui::vec2(40.0, 40.0))).clicked() {
+                    if ui.add(egui::Button::new("+").min_size(egui::vec2(theme::H_CTRL, theme::H_CTRL))).clicked() {
                         inv.qty = (inv.qty + 1).min(999);
                     }
                     ui.label(egui::RichText::new(inv.qty.to_string()).strong().size(17.0));
-                    if ui.add(egui::Button::new("−").min_size(egui::vec2(40.0, 40.0))).clicked() {
+                    if ui.add(egui::Button::new("−").min_size(egui::vec2(theme::H_CTRL, theme::H_CTRL))).clicked() {
                         inv.qty = inv.qty.saturating_sub(1);
                     }
                     if inv.qty == 0 && ui.add(egui::Button::new(egui::RichText::new("Remove").color(theme::BAD))).clicked() {
@@ -635,12 +690,13 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                     }
                     if inv.qty > 0 {
                         let label = if inv.equipped { "equipped" } else { "equip" };
-                        ui.toggle_value(&mut inv.equipped, label);
+                        theme::toggle(ui, &mut inv.equipped, label);
                     }
                     if inv.attuned || kind == "wondrous" {
+                        theme::toggle(ui, &mut inv.attuned, "attuned");
                         dnd_mapview::help::term(ui, "attuned");
-                        ui.toggle_value(&mut inv.attuned, "attuned");
                     }
+                    room.note(ui);
                 });
             });
         });
@@ -649,7 +705,7 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ch.inventory.remove(i);
     }
     ui.horizontal(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut app.ui_state.hp_input).hint_text("add a custom item (e.g. “goblin ear”)").desired_width(f32::INFINITY));
+        ui.add(crate::theme::line_edit(&mut app.ui_state.hp_input).hint_text("add a custom item (e.g. “goblin ear”)").desired_width(f32::INFINITY));
         if ui.button("Add").clicked() && !app.ui_state.hp_input.trim().is_empty() {
             ch.inventory.push(dnd_core::InventoryItem { item: app.ui_state.hp_input.trim().into(), name: app.ui_state.hp_input.trim().into(), qty: 1, custom: true, ..Default::default() });
             app.ui_state.hp_input.clear();
@@ -701,7 +757,7 @@ fn theme_sub(source: &str, uses: Option<i64>, recharge: &str) -> String {
 fn dice_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     section(ui, "Roll");
     ui.horizontal(|ui| {
-        let r = ui.add(egui::TextEdit::singleline(&mut app.dice_formula).desired_width(ui.available_width() - 116.0).font(egui::TextStyle::Heading));
+        let r = ui.add(crate::theme::line_edit(&mut app.dice_formula).desired_width(ui.available_width() - 150.0).font(egui::TextStyle::Heading));
         let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if ui.add(theme::primary("Roll")).clicked() || enter {
             let f = app.dice_formula.clone();
@@ -709,24 +765,30 @@ fn dice_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         }
         dnd_mapview::help::term(ui, "dice_notation");
     });
-    ui.horizontal_wrapped(|ui| {
-        for d in ["d20", "d12", "d10", "d8", "d6", "d4", "d100", "2d20kh1", "2d20kl1", "4d6kh3"] {
-            if ui.add(theme::big_button(d)).clicked() {
-                app.roll(d, "");
+    // an even grid: every die the same size
+    let gap = ui.spacing().item_spacing.x;
+    let full = ui.available_width();
+    for (row, n) in [(&["d20", "d12", "d10", "d8", "d6", "d4"][..], 6.0_f32), (&["d100", "2d20kh1", "2d20kl1", "4d6kh3"][..], 4.0)] {
+        ui.horizontal(|ui| {
+            let w = (full - gap * (n - 1.0)) / n;
+            for d in row {
+                if ui.add_sized([w, theme::H_CTRL], egui::Button::new(*d)).clicked() {
+                    app.roll(d, "");
+                }
             }
-        }
-    });
+        });
+    }
     ui.horizontal(|ui| {
-        dnd_mapview::help::term(ui, "advantage");
-        if ui.button("Advantage").clicked() {
+        let w = (full - gap * 2.0) / 3.0;
+        if ui.add_sized([w, theme::H_CTRL], egui::Button::new("Advantage")).clicked() {
             let f = app.dice_formula.replacen("1d20", "2d20kh1", 1).replacen("d20", "2d20kh1", 1);
             app.roll(&f, "advantage");
         }
-        if ui.button("Disadvantage").clicked() {
+        if ui.add_sized([w, theme::H_CTRL], egui::Button::new("Disadvantage")).clicked() {
             let f = app.dice_formula.replacen("1d20", "2d20kl1", 1).replacen("d20", "2d20kl1", 1);
             app.roll(&f, "disadvantage");
         }
-        if ui.button("Clear log").clicked() {
+        if ui.add_sized([w, theme::H_CTRL], egui::Button::new("Clear log")).clicked() {
             app.dice_log.clear();
         }
     });
@@ -834,7 +896,7 @@ fn vitals_button(ui: &mut egui::Ui, hp: i32, max: i32, temp: i32, ac: i32, open:
     let split = rect.right() - 54.0;
     let hp_rect = egui::Rect::from_min_max(rect.min, egui::pos2(split - 4.0, rect.bottom()));
     let ac_rect = egui::Rect::from_min_max(egui::pos2(split, rect.top()), rect.max);
-    p.rect(hp_rect, 8.0, theme::CARD_HI, egui::Stroke::new(1.0, if open || resp.hovered() { theme::ORANGE } else { theme::EDGE }), egui::StrokeKind::Inside);
+    p.rect(hp_rect, theme::R_CTRL, theme::CARD_HI, egui::Stroke::new(1.0, if open || resp.hovered() { theme::ORANGE } else { theme::EDGE }), egui::StrokeKind::Inside);
     p.text(hp_rect.left_center() + egui::vec2(9.0, -3.0), egui::Align2::LEFT_CENTER, "♥", egui::FontId::proportional(15.0), col);
     let label = if temp > 0 { format!("{hp}/{max} +{temp}") } else { format!("{hp} / {max}") };
     p.text(hp_rect.left_center() + egui::vec2(29.0, -3.0), egui::Align2::LEFT_CENTER, label, egui::FontId::proportional(17.0), col);
@@ -843,8 +905,43 @@ fn vitals_button(ui: &mut egui::Ui, hp: i32, max: i32, temp: i32, ac: i32, open:
     p.rect_filled(bar, 2.0, theme::LINE);
     let frac = if max > 0 { (hp as f32 / max as f32).clamp(0.0, 1.0) } else { 0.0 };
     p.rect_filled(egui::Rect::from_min_max(bar.min, egui::pos2(bar.left() + bar.width() * frac, bar.bottom())), 2.0, col);
-    p.rect(ac_rect, 8.0, theme::CARD, egui::Stroke::new(1.0, theme::LINE), egui::StrokeKind::Inside);
+    p.rect(ac_rect, theme::R_CTRL, theme::CARD, egui::Stroke::new(1.0, theme::LINE), egui::StrokeKind::Inside);
     p.text(ac_rect.center() + egui::vec2(0.0, -11.0), egui::Align2::CENTER_CENTER, "AC", egui::FontId::proportional(10.5), theme::MUTED);
     p.text(ac_rect.center() + egui::vec2(0.0, 6.0), egui::Align2::CENTER_CENTER, ac.to_string(), egui::FontId::proportional(18.0), theme::TEXT);
     resp
+}
+
+/// What all the coins are worth, in gold pieces (1 pp = 10 gp, 1 ep = 1/2 gp,
+/// 1 sp = 1/10 gp, 1 cp = 1/100 gp).
+fn coins_total(c: &dnd_core::Currency) -> String {
+    let cp = c.pp as i64 * 1000 + c.gp as i64 * 100 + c.ep as i64 * 50 + c.sp as i64 * 10 + c.cp as i64;
+    let text = format!("{}.{:02}", cp / 100, cp % 100);
+    format!("{} gp", text.trim_end_matches('0').trim_end_matches('.'))
+}
+
+/// The coins held, largest first, leaving out the kinds there are none of.
+fn coins_line(c: &dnd_core::Currency) -> String {
+    let parts: Vec<String> = [(c.pp, "pp"), (c.gp, "gp"), (c.ep, "ep"), (c.sp, "sp"), (c.cp, "cp")].iter().filter(|(n, _)| *n > 0).map(|(n, k)| format!("{n} {k}")).collect();
+    if parts.is_empty() {
+        "no coins".into()
+    } else {
+        parts.join(" · ")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn coins_add_up_in_gold() {
+        let c = dnd_core::Currency { cp: 7, sp: 4, ep: 3, gp: 12, pp: 2 };
+        // 20 + 12 + 1.5 + 0.4 + 0.07
+        assert_eq!(coins_total(&c), "33.97 gp");
+        assert_eq!(coins_line(&c), "2 pp · 12 gp · 3 ep · 4 sp · 7 cp");
+        assert_eq!(coins_total(&dnd_core::Currency { gp: 5, sp: 5, ..Default::default() }), "5.5 gp");
+        assert_eq!(coins_total(&dnd_core::Currency { gp: 10, ..Default::default() }), "10 gp");
+        assert_eq!(coins_total(&dnd_core::Currency::default()), "0 gp");
+        assert_eq!(coins_line(&dnd_core::Currency::default()), "no coins");
+    }
 }

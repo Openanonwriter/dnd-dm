@@ -78,7 +78,7 @@ fn chips(ui: &mut egui::Ui, current: &mut String, options: &[(String, String)]) 
     ui.horizontal_wrapped(|ui| {
         ui.spacing_mut().button_padding = egui::vec2(12.0, 8.0);
         for (id, name) in options {
-            if ui.selectable_label(current == id, egui::RichText::new(name).size(16.0)).clicked() && current != id {
+            if theme::chip(ui, current == id, egui::RichText::new(name).size(16.0)).clicked() && current != id {
                 *current = id.clone();
                 changed = true;
             }
@@ -122,7 +122,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
 
     // ------------------------------------------------------------ name
     theme::section(ui, "Name");
-    ui.add(egui::TextEdit::singleline(&mut app.draft.name).hint_text("Your character's name").char_limit(60).desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
+    ui.add(crate::theme::line_edit(&mut app.draft.name).hint_text("Your character's name").char_limit(60).desired_width(f32::INFINITY).font(egui::TextStyle::Heading));
 
     // ------------------------------------------------------------ species
     theme::section(ui, "Species");
@@ -282,11 +282,15 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 theme::card().show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.horizontal(|ui| {
-                        ui.label(theme::accent(&t.name).strong());
-                        let target = builder::suggestion_field_label(&t.fills);
-                        if !target.is_empty() {
-                            ui.label(theme::muted(format!("goes in {target}{}", if t.pick > 1 { format!(" · pick {}", t.pick) } else { String::new() })).small());
-                        }
+                        let room = theme::Room::new(ui, ("suggest", &t.name));
+                        ui.vertical(|ui| {
+                            room.limit(ui);
+                            ui.label(theme::accent(&t.name).strong());
+                            let target = builder::suggestion_field_label(&t.fills);
+                            if !target.is_empty() {
+                                ui.label(theme::muted(format!("goes in {target}{}", if t.pick > 1 { format!(" · pick {}", t.pick) } else { String::new() })).small());
+                            }
+                        });
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             if ui.button("🎲 Roll").clicked() && !t.options.is_empty() {
                                 let free: Vec<&String> = t.options.iter().filter(|o| !builder::has_suggestion(&app.draft, &t.fills, o)).collect();
@@ -300,7 +304,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                     for (n, o) in t.options.iter().enumerate() {
                         let on = builder::has_suggestion(&app.draft, &t.fills, o);
                         let text = egui::RichText::new(format!("{}. {o}", n + 1)).size(14.0);
-                        if ui.selectable_label(on, if on { text.color(theme::ORANGE) } else { text }).clicked() {
+                        if theme::chip(ui, on, text).clicked() {
                             builder::toggle_suggestion(&mut app.draft, &t.fills, o);
                         }
                     }
@@ -446,7 +450,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                     if let Some(pool) = &pool {
                         egui::ComboBox::from_id_salt(("abil", k)).selected_text(cur.to_string()).width(64.0).show_ui(ui, |ui| {
                             for (i, v) in pool.iter().enumerate() {
-                                if ui.selectable_label(*v == cur, v.to_string()).clicked() && *v != cur {
+                                if theme::chip(ui, *v == cur, v.to_string()).clicked() && *v != cur {
                                     if let Some(other) = ABILITY_KEYS.iter().find(|o| *o != k && app.draft.base_abilities.get(o) == Some(*v)) {
                                         app.draft.base_abilities.set(other, cur);
                                     }
@@ -488,11 +492,11 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new(format!("Level {l}")).strong().size(16.0));
                     let mut feat_mode = adv.feat.is_some();
-                    if ui.selectable_label(!feat_mode, "Abilities").clicked() {
+                    if theme::chip(ui, !feat_mode, "Abilities").clicked() {
                         feat_mode = false;
                         adv.feat = None;
                     }
-                    if let Some(first) = general_feats.first().filter(|_| ui.selectable_label(feat_mode, "Feat").clicked() && adv.feat.is_none()) {
+                    if let Some(first) = general_feats.first().filter(|_| theme::chip(ui, feat_mode, "Feat").clicked() && adv.feat.is_none()) {
                         adv.feat = Some(first.id.clone());
                         adv.ability_increases.clear();
                     }
@@ -504,7 +508,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
                         ui.spacing_mut().button_padding = egui::vec2(12.0, 8.0);
                         for f in &general_feats {
                             let why = dnd_core::requirements::feat_failure(&renv, f);
-                            let r = ui.selectable_label(id == f.id, egui::RichText::new(&f.name).size(16.0));
+                            let r = theme::chip(ui, id == f.id, egui::RichText::new(&f.name).size(16.0));
                             if why.is_some() {
                                 theme::red_outline(ui, r.rect);
                             }
@@ -666,7 +670,7 @@ fn form(app: &mut PlayerApp, ui: &mut egui::Ui, opts: &BuilderOptions, lib: &Lib
     // ------------------------------------------------------------ story
     theme::section(ui, "About (optional)");
     ui.label(theme::muted("Alignment"));
-    ui.add(egui::TextEdit::singleline(&mut app.draft.alignment).hint_text("e.g. chaotic good").char_limit(40).desired_width(f32::INFINITY));
+    ui.add(crate::theme::line_edit(&mut app.draft.alignment).hint_text("e.g. chaotic good").char_limit(40).desired_width(f32::INFINITY));
     ui.add_space(4.0);
     text_area(ui, "Appearance", "What do people see?", &mut app.draft.appearance);
     text_area(ui, "Personality", "How do you act? (ideas under Suggested characteristics)", &mut app.draft.personality);

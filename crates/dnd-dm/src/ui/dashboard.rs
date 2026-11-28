@@ -97,7 +97,7 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
         rolled: Vec<i32>,
         made: bool,
     }
-    let (rows, chars, can_choose, live, start_level) = {
+    let (rows, chars, live) = {
         let w = app.world.read().unwrap();
         let mut rows: Vec<Row> = w
             .campaign
@@ -116,7 +116,7 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
         // online first, waiting-for-a-character first within that
         rows.sort_by_key(|r| (!r.online, r.character.is_some(), r.name.to_lowercase()));
         let chars: Vec<(String, String)> = w.campaign.characters.iter().map(|c| (c.id.clone(), c.name.clone())).collect();
-        (rows, chars, w.campaign.settings.players_choose_character, w.campaign.settings.game_live, w.campaign.settings.player_start_level.clamp(1, 20))
+        (rows, chars, w.campaign.settings.game_live)
     };
 
     // between sessions players build their own characters; during one the DM hands them out
@@ -129,15 +129,6 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
                 ui.label(egui::RichText::new("○ Between sessions").strong().size(15.0));
             }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if !live {
-                    let mut lvl = start_level;
-                    if ui.add(egui::DragValue::new(&mut lvl).range(1..=20)).on_hover_text("Level that player-made characters start at").changed() {
-                        let mut w = app.world.write().unwrap();
-                        w.campaign.settings.player_start_level = lvl;
-                        w.touch();
-                    }
-                    ui.label(theme::muted("start level"));
-                }
                 let label = if live { "⏹ End game" } else { "▶ Start game" };
                 if ui.add(theme::primary(label)).clicked() {
                     let mut w = app.world.write().unwrap();
@@ -152,44 +143,6 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
     });
 
     ui.horizontal_wrapped(|ui| {
-        let mut choose = can_choose;
-        if ui
-            .checkbox(&mut choose, "Players may pick their own character")
-            .on_hover_text("Off: a player's app waits until you assign a character here, and can only open that one.")
-            .changed()
-        {
-            let mut w = app.world.write().unwrap();
-            w.campaign.settings.players_choose_character = choose;
-            w.touch();
-        }
-        let (mut walk, mut hurt) = {
-            let w = app.world.read().unwrap();
-            (w.campaign.settings.players_move_tokens, w.campaign.settings.players_apply_damage)
-        };
-        if ui.checkbox(&mut walk, "Players move their own token").on_hover_text("On their turn in a fight, freely while exploring. Walls and doors are checked here.").changed() {
-            let mut w = app.world.write().unwrap();
-            w.campaign.settings.players_move_tokens = walk;
-            w.touch();
-        }
-        if ui
-            .checkbox(&mut hurt, "Players' attacks change hit points")
-            .on_hover_text("On: an attack or spell from a player's app is rolled here against the target and the damage or healing is applied. Off: it is only rolled and you apply it.")
-            .changed()
-        {
-            let mut w = app.world.write().unwrap();
-            w.campaign.settings.players_apply_damage = hurt;
-            w.touch();
-        }
-        let mut ranges = app.world.read().unwrap().campaign.settings.enforce_range;
-        if ui
-            .checkbox(&mut ranges, "Enforce reach, range and movement")
-            .on_hover_text("On: an attack or spell must be within its reach or range with no wall in the way (long range and an enemy next to an archer give disadvantage), and a turn's walking is limited by speed. Off: you referee it.")
-            .changed()
-        {
-            let mut w = app.world.write().unwrap();
-            w.campaign.settings.enforce_range = ranges;
-            w.touch();
-        }
         for (label, long) in [("🌙 Long rest (party)", true), ("☕ Short rest (party)", false)] {
             if ui.button(label).on_hover_text("Every character: hit points, spell slots and features come back as the rules say").clicked() {
                 let mut w = app.world.write().unwrap();
@@ -244,14 +197,14 @@ fn players_section(app: &mut DmApp, ui: &mut egui::Ui) {
                     if !r.rolled.is_empty() {
                         ui.horizontal(|ui| {
                             ui.label(theme::muted(format!("rolled {}", r.rolled.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(", "))).small());
-                            if ui.small_button("↻").on_hover_text("Throw these rolls away so the player can roll again").clicked() {
+                            if ui.button("↻").on_hover_text("Throw these rolls away so the player can roll again").clicked() {
                                 reroll = Some(r.id.clone());
                             }
                         });
                     }
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.small_button("✖").on_hover_text("Forget this device (it can join again)").clicked() {
+                    if ui.button("✖").on_hover_text("Forget this device (it can join again)").clicked() {
                         forget = Some(r.id.clone());
                     }
                     let current = r.character.as_ref().and_then(|cid| chars.iter().find(|(id, _)| id == cid)).map(|(_, n)| n.clone()).unwrap_or_else(|| "— no character —".to_string());
@@ -379,7 +332,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                             } else if ui.add(theme::primary("Load")).clicked() {
                                 to_load = Some(dir.clone());
                             }
-                            if ui.small_button("folder").clicked() {
+                            if ui.button("folder").clicked() {
                                 let _ = open::that(dir);
                             }
                         });
@@ -391,7 +344,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
             ui.add_space(6.0);
             ui.horizontal_wrapped(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut app.campaign.new_name).hint_text("new campaign name").desired_width(200.0));
+                ui.add(crate::ui::theme::line_edit(&mut app.campaign.new_name).hint_text("new campaign name").desired_width(200.0));
                 if ui.button("➕ New campaign").clicked() && !app.campaign.new_name.trim().is_empty() {
                     crate::ui::content::flush(app);
                     let nm = app.campaign.new_name.trim().to_string();
@@ -423,31 +376,21 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
                 ui.label(theme::muted("Join code"));
                 let mut code = join.clone();
-                if ui.add(egui::TextEdit::singleline(&mut code).desired_width(90.0).hint_text("optional")).on_hover_text("Players need this to save changes").changed() {
+                if ui.add(crate::ui::theme::line_edit(&mut code).desired_width(90.0).hint_text("optional")).on_hover_text("Players need this to save changes").changed() {
                     let mut w = app.world.write().unwrap();
                     w.campaign.settings.join_code = code;
                     w.touch();
                 }
                 ui.label(theme::muted("DM code"));
                 let mut dm = app.world.read().unwrap().campaign.settings.dm_code.clone();
-                if ui.add(egui::TextEdit::singleline(&mut dm).desired_width(90.0).hint_text("off")).on_hover_text("Required for remote DM tools (/api/dm/*). Empty = disabled").changed() {
+                if ui.add(crate::ui::theme::line_edit(&mut dm).desired_width(90.0).hint_text("off")).on_hover_text("Required for remote DM tools (/api/dm/*). Empty = disabled").changed() {
                     let mut w = app.world.write().unwrap();
                     w.campaign.settings.dm_code = dm;
                     w.touch();
                 }
-                let mut show_hp = app.world.read().unwrap().campaign.settings.show_monster_hp_to_players;
-                if ui.checkbox(&mut show_hp, "Players see monster HP").changed() {
-                    let mut w = app.world.write().unwrap();
-                    w.campaign.settings.show_monster_hp_to_players = show_hp;
-                    w.touch();
+                if ui.button("Rules for players…").on_hover_text("What players may do in this campaign (pick their character, move their token, break the rules…) is on the Campaign tab").clicked() {
+                    app.view = crate::app::View::Campaign;
                 }
-                let mut free = app.world.read().unwrap().campaign.settings.allow_rule_breaks;
-                if ui.checkbox(&mut free, "Players may break the rules").changed() {
-                    let mut w = app.world.write().unwrap();
-                    w.campaign.settings.allow_rule_breaks = free;
-                    w.touch();
-                }
-                dnd_mapview::help::text(ui, "When ticked, every player may pick options their character doesn't qualify for (a feat above their level, a spell they can't cast yet). They still show in red. To allow it for just one character, use the checkbox on that character's Build tab.");
             });
             if app.server.is_some() {
                 for ip in &app.ips {
@@ -455,7 +398,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     ui.horizontal_wrapped(|ui| {
                         ui.label(egui::RichText::new(format!("http://{addr}:{port}")).monospace().color(theme::ORANGE));
                         ui.label(theme::muted(ip.split(' ').skip(1).collect::<Vec<_>>().join(" ")).small());
-                        if ui.small_button("copy").clicked() {
+                        if ui.button("copy").clicked() {
                             ui.ctx().copy_text(format!("http://{addr}:{port}"));
                         }
                     });
@@ -475,7 +418,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 ui.horizontal_wrapped(|ui| {
                     ui.label(egui::RichText::new(&p.name).strong());
                     ui.label(theme::muted(p.path.display().to_string()).small());
-                    if ui.small_button("folder").clicked() {
+                    if ui.button("folder").clicked() {
                         let _ = open::that(&p.path);
                     }
                 });
@@ -503,7 +446,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             section(ui, "All characters (every campaign)");
             ui.horizontal_wrapped(|ui| {
                 ui.label(theme::accent("🔍"));
-                ui.add(egui::TextEdit::singleline(&mut app.dashboard.filter).desired_width(200.0).hint_text("name, player, class, campaign"));
+                ui.add(crate::ui::theme::line_edit(&mut app.dashboard.filter).desired_width(200.0).hint_text("name, player, class, campaign"));
                 if ui.button("Open Characters tab").clicked() {
                     app.view = View::Characters;
                 }
@@ -539,7 +482,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                             if ui.add(theme::primary("Open")).clicked() {
                                 open_char = Some((dir.clone(), id.clone()));
                             }
-                            if !is_current && ui.small_button("Import here").clicked() {
+                            if !is_current && ui.button("Import here").clicked() {
                                 let p = dir.join("characters").join(format!("{id}.toml"));
                                 if let Ok(mut ch) = save::load_character(&p) {
                                     let mut w = app.world.write().unwrap();

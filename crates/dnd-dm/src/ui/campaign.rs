@@ -48,9 +48,9 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             let mut changed = false;
             ui.horizontal(|ui| {
                 ui.label("Name");
-                changed |= ui.add(egui::TextEdit::singleline(&mut w.campaign.name).desired_width(300.0)).changed();
+                changed |= ui.add(crate::ui::theme::line_edit(&mut w.campaign.name).desired_width(300.0)).changed();
                 ui.label("In-game date/time");
-                changed |= ui.add(egui::TextEdit::singleline(&mut w.campaign.game_time).desired_width(220.0)).changed();
+                changed |= ui.add(crate::ui::theme::line_edit(&mut w.campaign.game_time).desired_width(220.0)).changed();
             });
             ui.label("Description");
             changed |= ui.add(egui::TextEdit::multiline(&mut w.campaign.description).desired_rows(2).desired_width(f32::INFINITY)).changed();
@@ -66,7 +66,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 save_current(app);
             }
             ui.label("Save as:");
-            ui.add(egui::TextEdit::singleline(&mut app.campaign.save_as).desired_width(200.0).hint_text("folder name"));
+            ui.add(crate::ui::theme::line_edit(&mut app.campaign.save_as).desired_width(200.0).hint_text("folder name"));
             if ui.button("Save copy").clicked() && !app.campaign.save_as.trim().is_empty() {
                 let dir = app.paths.saves_dir.join(dnd_core::Character::slug(&app.campaign.save_as));
                 let res = {
@@ -83,9 +83,11 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
         });
 
+        player_rules(app, ui);
+
         heading(ui, "New campaign");
         ui.horizontal(|ui| {
-            ui.add(egui::TextEdit::singleline(&mut app.campaign.new_name).desired_width(240.0).hint_text("campaign name"));
+            ui.add(crate::ui::theme::line_edit(&mut app.campaign.new_name).desired_width(240.0).hint_text("campaign name"));
             if !app.campaign.confirm_new {
                 if ui.button("Start new campaign…").clicked() && !app.campaign.new_name.trim().is_empty() {
                     app.campaign.confirm_new = true;
@@ -134,7 +136,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                         Err(e) => app.set_status(format!("Load failed: {e:#}"), true),
                     }
                 }
-                if ui.small_button("folder").clicked() {
+                if ui.button("folder").clicked() {
                     let _ = open::that(&path);
                 }
                 ui.end_row();
@@ -147,7 +149,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             w.campaign.log.iter().rev().take(200).map(|l| format!("{}  {}", l.time, l.text)).collect()
         };
         ui.horizontal(|ui| {
-            if ui.small_button("Clear log").clicked() {
+            if ui.button("Clear log").clicked() {
                 let mut w = app.world.write().unwrap();
                 w.campaign.log.clear();
                 w.touch();
@@ -157,4 +159,36 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             ui.label(egui::RichText::new(l).monospace().small());
         }
     });
+}
+
+/// What players may do in this campaign. Saved with the campaign; set once,
+/// not something to reach for in the middle of a session.
+fn player_rules(app: &mut DmApp, ui: &mut egui::Ui) {
+    heading(ui, "Rules for players");
+    let mut w = app.world.write().unwrap();
+    let mut changed = false;
+    let st = &mut w.campaign.settings;
+    let mut rule = |ui: &mut egui::Ui, on: &mut bool, label: &str, what: &str| {
+        ui.horizontal(|ui| {
+            changed |= ui.checkbox(on, label).changed();
+            dnd_mapview::help::text(ui, what);
+        });
+    };
+    rule(ui, &mut st.players_choose_character, "Players may pick their own character", "Off: a player's app waits until you give them a character on the Dashboard, and can only open that one.");
+    rule(ui, &mut st.players_move_tokens, "Players move their own token", "On their turn in a fight, freely while exploring. Walls and doors are checked by the DM app.");
+    rule(ui, &mut st.players_apply_damage, "Players' attacks change hit points", "On: an attack or spell from a player's app is rolled by the DM app against the target and the damage or healing is applied. Off: it is only rolled and you apply it.");
+    rule(ui, &mut st.enforce_range, "Enforce reach, range and movement", "On: an attack or spell must be within its reach or range with no wall in the way (long range and an enemy next to an archer give disadvantage), and a turn's walking is limited by speed. Off: you referee distances yourself.");
+    rule(ui, &mut st.show_monster_hp_to_players, "Players see monster HP", "On: players' apps show creatures' hit points. Off: they only see that a creature is hurt or down.");
+    rule(ui, &mut st.allow_rule_breaks, "Players may break the rules", "When ticked, every player may pick options their character doesn't qualify for (a feat above their level, a spell they can't cast yet). They still show in red. To allow it for just one character, use the tick on that character's Build tab.");
+    ui.horizontal(|ui| {
+        let mut lvl = st.player_start_level.clamp(1, 20);
+        if ui.add(egui::DragValue::new(&mut lvl).range(1..=20)).changed() {
+            st.player_start_level = lvl;
+            changed = true;
+        }
+        ui.label("Level that player-made characters start at");
+    });
+    if changed {
+        w.touch();
+    }
 }

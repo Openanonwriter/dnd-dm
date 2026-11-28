@@ -286,7 +286,7 @@ isn't proficient with or strong enough for.
 The DM can give a character anything: rule breaks get a red outline and are
 listed under **Rules check** on the Build tab. Players can only pick what
 their character qualifies for — the server refuses the rest — unless the DM
-ticks **Players may break the rules** on the Dashboard (everyone) or **Let this
+ticks **Players may break the rules** on the Campaign tab, under Rules for players (everyone) or **Let this
 character's player pick options they don't qualify for** on a character's
 Build tab. Those picks still show in red.
 

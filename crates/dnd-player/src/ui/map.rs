@@ -66,7 +66,7 @@ fn turn_strip(app: &PlayerApp, ui: &mut egui::Ui) {
             for c in &enc.combatants {
                 let mut text = egui::RichText::new(if enc.active { format!("{} {}", c.initiative, c.name) } else { c.name.clone() }).small();
                 text = if c.is_current { text.color(egui::Color32::BLACK).strong() } else { text.color(if c.is_pc { theme::PC_BLUE } else { theme::TEXT }) };
-                let frame = egui::Frame::new().fill(if c.is_current { theme::ORANGE } else { theme::CARD }).corner_radius(6.0).inner_margin(egui::Margin::symmetric(8, 4));
+                let frame = egui::Frame::new().fill(if c.is_current { theme::ORANGE } else { theme::CARD }).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(8, 4));
                 frame.show(ui, |ui| {
                     ui.label(text);
                     if let (Some(hp), Some(max)) = (c.hp, c.hp_max) {

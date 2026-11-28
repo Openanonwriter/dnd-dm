@@ -153,6 +153,31 @@ on another machine has to be uninstalled first (or copy that machine's
 - **Contrast**: selected chips are white on dark orange (6:1); buttons and
   text boxes have an outline that shows against the panel (3:1).
 
+## The look: one system (`src/theme.rs`)
+
+Everything on screen is built from a few parts, so nothing is a one-off:
+
+| part | rule |
+|------|------|
+| controls (buttons, chips, text boxes, segments) | 44 points tall (`H_CTRL`), corner radius 12 (`R_CTRL`) |
+| cards and tiles | corner radius 16 (`R_CARD`), filled, no outline; tiles in a row are the same height |
+| the main action of a screen | `theme::primary`: filled orange, black text |
+| everything else you can tap | the default button: grey fill, hairline edge |
+| on/off choices | `theme::chip` / `theme::toggle`: a button that fills dark orange with white text when on |
+| one of a few | `theme::segmented`: one rounded bar, the chosen segment filled |
+| one-line text | `theme::line_edit` |
+| a row with words and buttons | `theme::Room`: the buttons are measured and the words wrap in the width they leave. A button may never sit on top of text; when a row has many buttons (an item's count and equip), the name gets a line of its own above them |
+| messages | "Saved to DM" and the like take the small line under the character's name for a few seconds; only refusals and roll results float above the bottom bar |
+| headings | small grey capitals, space above, no rule |
+| colours | black page, cards `#1C1C1E`, controls `#2C2C2E`; orange only for numbers that matter and for actions |
+| spacing | 10 points between things, 14 inside cards |
+
+The text face is Adwaita Sans (the Inter family, SIL Open Font License),
+kept in `crates/dnd-mapview/assets/fonts/` with its licence and compiled into both apps; egui's
+own fonts stay behind it for symbols and emoji. New screens should use
+these parts rather than `egui::Button::new(..).min_size(..)` with their own
+numbers.
+
 ## How it is put together
 
 | file | role |

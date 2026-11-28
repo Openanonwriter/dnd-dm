@@ -78,12 +78,15 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                     .show(ui, |ui| {
                         ui.set_width(ui.available_width());
                         ui.horizontal(|ui| {
+                            let room = theme::Room::new(ui, ("pick", &c.id));
                             ui.vertical(|ui| {
+                                room.limit(ui);
                                 ui.label(egui::RichText::new(&c.name).strong().size(20.0));
                                 ui.label(theme::muted(format!("{} · level {}{}", c.class_line, c.level, if c.player.is_empty() { String::new() } else { format!(" · {}", c.player) })));
                             });
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                                 ui.label(theme::accent("›").size(28.0));
+                                room.note(ui);
                             });
                         });
                     })

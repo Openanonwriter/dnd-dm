@@ -105,7 +105,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
             });
             ui.horizontal_wrapped(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut st.creature_filter).hint_text("filter").desired_width(90.0));
+                ui.add(crate::ui::theme::line_edit(&mut st.creature_filter).hint_text("filter").desired_width(90.0));
                 let f = st.creature_filter.to_lowercase();
                 let list: Vec<(String, String)> = w.library.list(Kind::Creature).into_iter().filter(|(id, n)| f.is_empty() || n.to_lowercase().contains(&f) || id.contains(&f)).collect();
                 crate::ui::entry_combo(ui, "crpick", &mut st.creature_pick, &list, "— creature —", &w.library, Kind::Creature);
@@ -122,7 +122,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 }
             });
             ui.horizontal_wrapped(|ui| {
-                ui.add(egui::TextEdit::singleline(&mut st.custom_name).hint_text("custom name").desired_width(110.0));
+                ui.add(crate::ui::theme::line_edit(&mut st.custom_name).hint_text("custom name").desired_width(110.0));
                 ui.label("HP");
                 ui.add(egui::DragValue::new(&mut st.custom_hp).range(0..=999));
                 ui.label("AC");
@@ -171,11 +171,14 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     if let Some(cm) = w.campaign.encounter.find_mut(&c.id) {
                         ui.horizontal_wrapped(|ui| {
                             ui.label("Concentrating on");
-                            ui.add(egui::TextEdit::singleline(&mut cm.concentrating_on).desired_width(140.0));
+                            ui.add(crate::ui::theme::line_edit(&mut cm.concentrating_on).desired_width(140.0));
                         });
                         ui.label("Conditions");
-                        ui.horizontal_wrapped(|ui| {
-                            for cond in &w.library.rules.conditions {
+                        // columns that line up, as many as fit
+                        let col = 124.0;
+                        let per_row = ((ui.available_width() / col).floor() as usize).clamp(1, 4);
+                        egui::Grid::new("combatant_conditions").num_columns(per_row).min_col_width(col - 8.0).spacing([8.0, 4.0]).show(ui, |ui| {
+                            for (i, cond) in w.library.rules.conditions.iter().enumerate() {
                                 let mut on = cm.conditions.contains(cond);
                                 if ui.checkbox(&mut on, cond).on_hover_text(dnd_core::glossary::explain(cond).unwrap_or("")).changed() {
                                     if on {
@@ -183,6 +186,9 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                                     } else {
                                         cm.conditions.retain(|x| x != cond);
                                     }
+                                }
+                                if (i + 1) % per_row == 0 {
+                                    ui.end_row();
                                 }
                             }
                         });
@@ -334,7 +340,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
     egui::CentralPanel::default().show_inside(ui, |ui| {
         ui.horizontal_wrapped(|ui| {
             ui.label("Encounter");
-            ui.add(egui::TextEdit::singleline(&mut w.campaign.encounter.name).desired_width(160.0).hint_text("name"));
+            ui.add(crate::ui::theme::line_edit(&mut w.campaign.encounter.name).desired_width(160.0).hint_text("name"));
             if ui.button("🎲 Roll initiative (all)").clicked() {
                 w.roll_initiative(false);
             }
@@ -431,7 +437,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                     ui.label(egui::RichText::new(c.conditions.join(", ")).small());
                     ui.horizontal(|ui| {
                         ui.checkbox(&mut c.visible, "").on_hover_text("visible to players");
-                        if ui.small_button("✖").clicked() {
+                        if ui.button("✖").clicked() {
                             remove = Some(c.id.clone());
                         }
                     });

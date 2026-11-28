@@ -92,8 +92,10 @@ pub fn mode_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
     ui.horizontal(|ui| {
         ui.label(theme::muted("Next d20"));
         dnd_mapview::help::term(ui, "roll_mode");
-        for (m, label) in [(Normal, "normal"), (Advantage, "advantage"), (Disadvantage, "disadvantage")] {
-            ui.selectable_value(&mut app.mode, m, label);
+        let modes = [Normal, Advantage, Disadvantage];
+        let at = modes.iter().position(|m| *m == app.mode).unwrap_or(0);
+        if let Some(i) = theme::segmented(ui, &["Normal", "Advantage", "Disadv."], at) {
+            app.mode = modes[i];
         }
     });
 }
@@ -139,8 +141,8 @@ pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui, with_self: bool) {
                 (false, None) if Some(id) == me.as_ref() => format!("{name} (you)"),
                 (false, None) => name.clone(),
             };
-            let text = egui::RichText::new(label).color(if on { egui::Color32::BLACK } else if *down { theme::MUTED } else if *pc { theme::PC_BLUE } else { theme::TEXT });
-            if ui.add(egui::Button::new(text).fill(if on { theme::ORANGE } else { theme::CARD })).clicked() {
+            let text = egui::RichText::new(label).color(if on { egui::Color32::WHITE } else if *down { theme::MUTED } else if *pc { theme::PC_BLUE } else { theme::TEXT });
+            if theme::chip(ui, on, text).clicked() {
                 if on {
                     app.targets.retain(|t| t != id);
                 } else {
@@ -278,7 +280,9 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
                         toggle = Some(sp.id.clone());
                     }
                 }
+                let room = theme::Room::new(ui, ("spell", &sp.id));
                 ui.vertical(|ui| {
+                    room.limit(ui);
                     let name = egui::RichText::new(&sp.name).size(16.0);
                     let r = ui.add(egui::Label::new(if ready { name.strong() } else { name.color(theme::MUTED) }).sense(egui::Sense::click()));
                     let e = effect(sp);
@@ -319,13 +323,14 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
                             }
                         }
                     }
+                    room.note(ui);
                 });
             });
             if open {
                 ui.separator();
                 details(ui, sp);
                 let chosen = ch.spells.known.contains(&sp.id);
-                if chosen && !live && ui.small_button("Forget this spell").on_hover_text("Between games you may swap the spells you chose").clicked() {
+                if chosen && !live && ui.button("Forget this spell").on_hover_text("Between games you may swap the spells you chose").clicked() {
                     forget = Some(sp.id.clone());
                 }
             }
@@ -407,7 +412,9 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
             theme::card().show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.horizontal(|ui| {
+                    let room = theme::Room::new(ui, ("learn", &sp.id));
                     ui.vertical(|ui| {
+                        room.limit(ui);
                         let r = ui.add(egui::Label::new(egui::RichText::new(&sp.name).size(16.0)).sense(egui::Sense::click()));
                         let e = effect(sp);
                         let r2 = ui.add(egui::Label::new(theme::muted(format!("{}{}", level_name(sp.level), if e.is_empty() { String::new() } else { format!(" · {e}") })).small()).sense(egui::Sense::click()));
@@ -419,6 +426,7 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
                         if ui.add(theme::big_button("Learn")).clicked() {
                             learn = Some(sp.id.clone());
                         }
+                        room.note(ui);
                     });
                 });
                 if open {

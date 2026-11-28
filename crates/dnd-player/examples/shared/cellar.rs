@@ -25,12 +25,14 @@ pub fn world() -> World {
         InventoryItem { item: "dagger".into(), qty: 2, equipped: true, ..Default::default() },
         InventoryItem { item: "spellbook".into(), qty: 1, ..Default::default() },
         InventoryItem { item: "potion_of_healing".into(), qty: 2, ..Default::default() },
+        // a long name and note: rows must wrap their words, never run them under the buttons
+        InventoryItem { item: "sending_stone".into(), name: "Sending stone carved with the sigil of the Lantern Guild".into(), notes: "paired with the one Borin carries".into(), qty: 1, custom: true, ..Default::default() },
     ];
-    thia.spells.known = ["fire_bolt", "light", "mage_hand", "ray_of_frost", "magic_missile", "shield", "mage_armor", "sleep", "burning_hands", "detect_magic", "scorching_ray", "misty_step", "web", "fireball", "counterspell", "fly"]
+    thia.spells.known = ["alarm", "fire_bolt", "light", "mage_hand", "ray_of_frost", "magic_missile", "shield", "mage_armor", "sleep", "burning_hands", "detect_magic", "scorching_ray", "misty_step", "web", "fireball", "counterspell", "fly"]
         .iter()
         .map(|s| s.to_string())
         .collect();
-    thia.spells.prepared = ["magic_missile", "shield", "burning_hands", "detect_magic", "scorching_ray", "misty_step", "fireball", "counterspell"].iter().map(|s| s.to_string()).collect();
+    thia.spells.prepared = ["alarm", "magic_missile", "shield", "burning_hands", "detect_magic", "scorching_ray", "misty_step", "fireball", "counterspell"].iter().map(|s| s.to_string()).collect();
     thia.spells.slots_used = vec![1, 0, 1];
 
     let mut borin = Character::new("borin", "Borin");

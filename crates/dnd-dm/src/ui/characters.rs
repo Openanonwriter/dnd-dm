@@ -50,7 +50,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical().max_height(ui.available_height() - 120.0).show(ui, |ui| {
             for (id, name, sub) in &list {
                 let sel = app.characters.selected.as_deref() == Some(id.as_str());
-                let r = ui.selectable_label(sel, format!("{name}\n{sub}"));
+                let r = crate::ui::theme::chip(ui, sel, format!("{name}\n{sub}"));
                 if r.clicked() {
                     app.characters.selected = Some(id.clone());
                     app.characters.confirm_delete = false;
@@ -58,7 +58,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
             }
         });
         ui.separator();
-        ui.add(egui::TextEdit::singleline(&mut app.characters.new_name).hint_text("New character name").desired_width(f32::INFINITY));
+        ui.add(crate::ui::theme::line_edit(&mut app.characters.new_name).hint_text("New character name").desired_width(f32::INFINITY));
         if ui.button("➕ Create").clicked() && !app.characters.new_name.trim().is_empty() {
             let name = app.characters.new_name.trim().to_string();
             let mut w = app.world.write().unwrap();
@@ -101,7 +101,7 @@ pub fn show(app: &mut DmApp, ui: &mut egui::Ui) {
                 (Tab::Modifiers, "Modifiers"),
                 (Tab::Notes, "Notes & State"),
             ] {
-                ui.selectable_value(&mut app.characters.tab, t, l);
+                crate::ui::theme::choice(ui, &mut app.characters.tab, t, l);
             }
             if narrow {
                 ui.end_row();
@@ -198,7 +198,7 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     if problems.is_empty() {
         ui.label(egui::RichText::new("Everything this character has meets the rules.").weak());
     } else {
-        egui::Frame::new().stroke(egui::Stroke::new(1.5, BAD)).corner_radius(4.0).inner_margin(8.0).show(ui, |ui| {
+        egui::Frame::new().stroke(egui::Stroke::new(1.5, BAD)).corner_radius(crate::ui::theme::R_CTRL).inner_margin(8.0).show(ui, |ui| {
             ui.set_width(ui.available_width());
             ui.label(egui::RichText::new(format!("{} thing(s) break the rules (allowed because you are the DM):", problems.len())).color(BAD).strong());
             for p in &problems {
@@ -212,15 +212,15 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
     let field = 170.0;
     egui::Grid::new("ident").num_columns(if narrow { 2 } else { 4 }).spacing([10.0, 6.0]).show(ui, |ui| {
         ui.label("Name");
-        ui.add(egui::TextEdit::singleline(&mut ch.name).desired_width(field));
+        ui.add(crate::ui::theme::line_edit(&mut ch.name).desired_width(field));
         if narrow {
             ui.end_row();
         }
         ui.label("Player");
-        ui.add(egui::TextEdit::singleline(&mut ch.player).desired_width(field));
+        ui.add(crate::ui::theme::line_edit(&mut ch.player).desired_width(field));
         ui.end_row();
         ui.label("Alignment");
-        ui.add(egui::TextEdit::singleline(&mut ch.alignment).desired_width(field));
+        ui.add(crate::ui::theme::line_edit(&mut ch.alignment).desired_width(field));
         if narrow {
             ui.end_row();
         }
@@ -268,7 +268,7 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
                     ui.label(egui::RichText::new(format!("rolls {:?}", cl.hp_rolls)).weak().small());
                 }
             }
-            if ui.small_button("✖").clicked() {
+            if ui.button("✖").clicked() {
                 remove = Some(i);
             }
         });
@@ -382,7 +382,7 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
             if checked_combo(ui, ("advfeat", i), &mut f, &feats, "— none —", lib, Kind::Feat, feat_bad) {
                 adv.feat = if f.is_empty() { None } else { Some(f) };
             }
-            if ui.small_button("✖").clicked() {
+            if ui.button("✖").clicked() {
                 remove = Some(i);
             }
         });
@@ -481,13 +481,17 @@ fn build_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
 fn stat_box(ui: &mut egui::Ui, label: &str, value: &str, sub: &str) {
     // a fixed-width tile, so a row of them wraps instead of each one
     // stretching across the panel; long breakdowns are cut with a tooltip
-    let r = egui::Frame::group(ui.style()).inner_margin(6.0).show(ui, |ui| {
+    let r = egui::Frame::new().fill(crate::ui::theme::CARD).corner_radius(crate::ui::theme::R_CARD).inner_margin(7.0).show(ui, |ui| {
         ui.set_width(96.0);
+        ui.spacing_mut().item_spacing.y = 2.0;
         ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-            ui.label(egui::RichText::new(label).weak().small());
-            ui.label(egui::RichText::new(value).strong().size(20.0));
+            ui.label(egui::RichText::new(label.to_uppercase()).color(crate::ui::theme::MUTED).size(10.5).extra_letter_spacing(0.4));
+            ui.label(egui::RichText::new(value).color(crate::ui::theme::ORANGE).size(20.0));
+            // every tile has the small line (blank when there is nothing to say), so a row is one height
+            let small = egui::RichText::new(if sub.is_empty() { " " } else { sub }).color(crate::ui::theme::MUTED).size(11.0);
+            let l = ui.add(egui::Label::new(small).truncate());
             if !sub.is_empty() {
-                ui.add(egui::Label::new(egui::RichText::new(sub).weak().small()).truncate()).on_hover_text(sub);
+                l.on_hover_text(sub);
             }
         });
     });
@@ -536,7 +540,7 @@ fn sheet_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Char
         ui.label(format!("/ {}", s.hp_max));
         ui.label("temp");
         ui.add(egui::DragValue::new(&mut ch.hp.temp).range(0..=999));
-        if ui.small_button("full heal").clicked() {
+        if ui.button("full heal").clicked() {
             ch.hp.current = s.hp_max;
             ch.hp.temp = 0;
         }
@@ -675,7 +679,7 @@ fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut 
     let problems = requirements::check_with(lib, ch, &s);
     heading(ui, "Add item");
     ui.horizontal_wrapped(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut st.item_filter).hint_text("filter").desired_width(120.0));
+        ui.add(crate::ui::theme::line_edit(&mut st.item_filter).hint_text("filter").desired_width(120.0));
         let f = st.item_filter.to_lowercase();
         let items: Vec<(String, String)> = lib.list(Kind::Item).into_iter().filter(|(id, n)| f.is_empty() || n.to_lowercase().contains(&f) || id.contains(&f)).collect();
         entry_combo(ui, "itempick", &mut st.item_pick, &items, "— item —", lib, Kind::Item);
@@ -691,7 +695,7 @@ fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut 
             }
         }
         ui.separator();
-        ui.add(egui::TextEdit::singleline(&mut st.custom_item).hint_text("custom item name").desired_width(160.0));
+        ui.add(crate::ui::theme::line_edit(&mut st.custom_item).hint_text("custom item name").desired_width(160.0));
         if ui.button("Add custom").clicked() && !st.custom_item.trim().is_empty() {
             ch.inventory.push(InventoryItem { item: st.custom_item.trim().to_string(), name: st.custom_item.trim().to_string(), qty: 1, custom: true, ..Default::default() });
             st.custom_item.clear();
@@ -731,9 +735,9 @@ fn inventory_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut 
             ui.add_enabled(attunable, egui::Checkbox::new(&mut inv.attuned, ""));
             ui.checkbox(&mut inv.hidden, "").on_hover_text("Hidden from the player app");
             ui.label(format!("{}", item.map(|x| x.weight).unwrap_or(0.0) * inv.qty as f64));
-            ui.add(egui::TextEdit::singleline(&mut inv.notes).desired_width(160.0));
-            ui.add(egui::TextEdit::singleline(&mut inv.dm_notes).desired_width(160.0).hint_text("secret"));
-            if ui.small_button("✖").clicked() {
+            ui.add(crate::ui::theme::line_edit(&mut inv.notes).desired_width(160.0));
+            ui.add(crate::ui::theme::line_edit(&mut inv.dm_notes).desired_width(160.0).hint_text("secret"));
+            if ui.button("✖").clicked() {
                 remove = Some(i);
             }
             ui.end_row();
@@ -783,7 +787,7 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
     });
     heading(ui, "Spell list");
     ui.horizontal_wrapped(|ui| {
-        ui.add(egui::TextEdit::singleline(&mut st.spell_filter).hint_text("filter").desired_width(160.0));
+        ui.add(crate::ui::theme::line_edit(&mut st.spell_filter).hint_text("filter").desired_width(160.0));
         ui.label(egui::RichText::new(format!("known {} · prepared {}{}", ch.spells.known.len(), ch.spells.prepared.len(), s.spellcasting.iter().filter_map(|c| c.prepared_max).map(|m| format!(" (max {m})")).collect::<String>())).weak());
     });
     let f = st.spell_filter.to_lowercase();
@@ -802,6 +806,8 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
         .filter(|sp| f.is_empty() || sp.name.to_lowercase().contains(&f))
         .collect();
     spells.sort_by(|a, b| a.level.cmp(&b.level).then_with(|| a.name.cmp(&b.name)));
+    // where the panel ends: the last column is cut short there instead of running past it
+    let right_edge = ui.max_rect().right();
     egui::Grid::new("spells").striped(true).num_columns(6).spacing([10.0, 3.0]).show(ui, |ui| {
         ui.label(egui::RichText::new("Known").weak());
         ui.label(egui::RichText::new("Prep").weak());
@@ -854,7 +860,11 @@ fn spells_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library, st: &mut Cha
             if sp.concentration {
                 eff.push_str(" · conc.");
             }
-            ui.label(eff.trim());
+            // cut short with … rather than running off the edge of the window
+            ui.scope(|ui| {
+                ui.set_max_width((right_edge - ui.cursor().left() - 12.0).max(60.0));
+                ui.add(egui::Label::new(eff.trim()).truncate()).on_hover_text(eff.trim());
+            });
             ui.end_row();
         }
     });
@@ -871,17 +881,17 @@ fn modifiers_tab(ui: &mut egui::Ui, ch: &mut Character) {
         }
         ui.end_row();
         for (i, m) in ch.modifiers.iter_mut().enumerate() {
-            ui.add(egui::TextEdit::singleline(&mut m.target).desired_width(140.0));
+            ui.add(crate::ui::theme::line_edit(&mut m.target).desired_width(140.0));
             egui::ComboBox::from_id_salt(("op", i)).selected_text(format!("{:?}", m.op).to_lowercase()).width(90.0).show_ui(ui, |ui| {
                 for op in [ModOp::Add, ModOp::Set, ModOp::Max, ModOp::Min, ModOp::Mul, ModOp::Grant, ModOp::Expertise, ModOp::Advantage, ModOp::Disadvantage, ModOp::Note] {
                     ui.selectable_value(&mut m.op, op, format!("{op:?}").to_lowercase());
                 }
             });
-            ui.add(egui::TextEdit::singleline(&mut m.value).desired_width(110.0));
-            ui.add(egui::TextEdit::singleline(&mut m.condition).desired_width(120.0));
-            ui.add(egui::TextEdit::singleline(&mut m.source).desired_width(120.0));
-            ui.add(egui::TextEdit::singleline(&mut m.note).desired_width(140.0));
-            if ui.small_button("✖").clicked() {
+            ui.add(crate::ui::theme::line_edit(&mut m.value).desired_width(110.0));
+            ui.add(crate::ui::theme::line_edit(&mut m.condition).desired_width(120.0));
+            ui.add(crate::ui::theme::line_edit(&mut m.source).desired_width(120.0));
+            ui.add(crate::ui::theme::line_edit(&mut m.note).desired_width(140.0));
+            if ui.button("✖").clicked() {
                 remove = Some(i);
             }
             ui.end_row();
@@ -903,7 +913,7 @@ fn modifiers_tab(ui: &mut egui::Ui, ch: &mut Character) {
             if let Some(v) = ch.custom.get_mut(&k) {
                 ui.text_edit_singleline(v);
             }
-            if ui.small_button("✖").clicked() {
+            if ui.button("✖").clicked() {
                 remove_key = Some(k.clone());
             }
         });
@@ -919,8 +929,11 @@ fn modifiers_tab(ui: &mut egui::Ui, ch: &mut Character) {
 
 fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
     heading(ui, "Conditions");
-    ui.horizontal_wrapped(|ui| {
-        for c in &lib.rules.conditions {
+    // columns that line up, as many as fit
+    let col = 150.0;
+    let per_row = ((ui.available_width() / col).floor() as usize).clamp(1, 6);
+    egui::Grid::new("conditions").num_columns(per_row).min_col_width(col - 8.0).spacing([8.0, 4.0]).show(ui, |ui| {
+        for (i, c) in lib.rules.conditions.iter().enumerate() {
             let mut on = ch.conditions.contains(c);
             if ui.checkbox(&mut on, c).on_hover_text(dnd_core::glossary::explain(c).unwrap_or("")).changed() {
                 if on {
@@ -929,7 +942,12 @@ fn notes_tab(ui: &mut egui::Ui, ch: &mut Character, lib: &Library) {
                     ch.conditions.retain(|x| x != c);
                 }
             }
+            if (i + 1) % per_row == 0 {
+                ui.end_row();
+            }
         }
+    });
+    ui.horizontal_wrapped(|ui| {
         ui.label("Exhaustion");
         dnd_mapview::help::term(ui, "exhaustion");
         ui.add(egui::DragValue::new(&mut ch.exhaustion).range(0..=6));

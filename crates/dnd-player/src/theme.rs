@@ -5,6 +5,10 @@ use egui::{Color32, Stroke};
 pub const ORANGE: Color32 = Color32::from_rgb(255, 138, 0);
 pub const ORANGE_DIM: Color32 = Color32::from_rgb(176, 92, 0);
 pub const ORANGE_FAINT: Color32 = Color32::from_rgb(64, 40, 16);
+/// Fill of a selected chip: dark enough for white text (6:1).
+pub const SELECT: Color32 = Color32::from_rgb(150, 78, 0);
+/// Outline of buttons and text boxes: visible against the panel (3:1).
+pub const EDGE: Color32 = Color32::from_rgb(104, 104, 104);
 pub const BG: Color32 = Color32::from_rgb(12, 12, 12);
 pub const PANEL: Color32 = Color32::from_rgb(20, 20, 20);
 pub const CARD: Color32 = Color32::from_rgb(30, 30, 30);
@@ -26,8 +30,8 @@ pub fn apply(ctx: &egui::Context) {
     v.hyperlink_color = ORANGE;
     v.warn_fg_color = ORANGE;
     v.error_fg_color = BAD;
-    v.selection.bg_fill = ORANGE_DIM;
-    v.selection.stroke = Stroke::new(1.0, ORANGE);
+    v.selection.bg_fill = SELECT;
+    v.selection.stroke = Stroke::new(1.0, Color32::WHITE);
     v.window_stroke = Stroke::new(1.0, ORANGE_DIM);
     v.widgets.noninteractive.bg_fill = CARD;
     v.widgets.noninteractive.weak_bg_fill = CARD;
@@ -35,7 +39,7 @@ pub fn apply(ctx: &egui::Context) {
     v.widgets.noninteractive.fg_stroke = Stroke::new(1.0, TEXT);
     v.widgets.inactive.bg_fill = CARD_HI;
     v.widgets.inactive.weak_bg_fill = CARD_HI;
-    v.widgets.inactive.bg_stroke = Stroke::new(1.0, LINE);
+    v.widgets.inactive.bg_stroke = Stroke::new(1.0, EDGE);
     v.widgets.inactive.fg_stroke = Stroke::new(1.0, TEXT);
     v.widgets.hovered.bg_fill = ORANGE_FAINT;
     v.widgets.hovered.weak_bg_fill = ORANGE_FAINT;
@@ -54,7 +58,11 @@ pub fn apply(ctx: &egui::Context) {
     let mut style = (*ctx.style()).clone();
     style.spacing.item_spacing = egui::vec2(8.0, 8.0);
     style.spacing.button_padding = egui::vec2(12.0, 8.0);
-    style.spacing.interact_size = egui::vec2(44.0, 36.0);
+    style.spacing.interact_size = egui::vec2(44.0, 40.0);
+    // check boxes a finger can hit
+    style.spacing.icon_width = 24.0;
+    style.spacing.icon_width_inner = 13.0;
+    style.spacing.icon_spacing = 8.0;
     style.spacing.scroll = egui::style::ScrollStyle::solid();
     use egui::{FontFamily, FontId, TextStyle};
     style.text_styles.insert(TextStyle::Heading, FontId::new(24.0, FontFamily::Proportional));

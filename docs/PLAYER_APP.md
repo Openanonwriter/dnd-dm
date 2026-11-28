@@ -126,6 +126,33 @@ phone refuses to update an app signed with a different key, so an APK built
 on another machine has to be uninstalled first (or copy that machine's
 `debug.keystore` here, or set `ANDROID_KEYSTORE`).
 
+## How the sheet is laid out (and why)
+
+- **Hit points and armor class are in the header**, on every tab, as one
+  button with a bar. Tapping it opens the hit point panel (damage, heal,
+  temporary hit points, inspiration); death saves appear there only at 0 hit
+  points, when the panel opens by itself.
+- **Whose turn it is** is one line under the header: a banner with "End
+  turn" on your turn, "Round 2 · Goblin's turn" otherwise. The map keeps its
+  own bar with the movement left.
+- **The bottom bar has at most six places**: Stats, Combat, Spells (only for
+  characters that cast), Items, Map and More. More holds Dice, Features
+  (and notes) and Settings behind a switcher at the top.
+- **Nothing on the page moves by itself**: what the dice said (a large
+  number, or HIT / MISS in green or red) and short messages float in a card
+  above the bottom bar for a few seconds; the turn strip keeps one height
+  whoever's turn it is. A page that shifts as a finger comes down makes the
+  tap land on the wrong thing.
+- **Numbers roll when tapped**: ability scores, saves and skills on the
+  Stats tab.
+- **Targets** list foes first and nearest first, then friends, then anyone
+  who is down; the Combat tab leaves yourself out.
+- **Fingers**: check boxes are 24 points, buttons at least 40 high, and the
+  (i) icons answer to a 34-point area. Settings can hide the (i) icons for
+  players who know the rules.
+- **Contrast**: selected chips are white on dark orange (6:1); buttons and
+  text boxes have an outline that shows against the panel (3:1).
+
 ## How it is put together
 
 | file | role |

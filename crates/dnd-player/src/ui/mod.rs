@@ -14,6 +14,14 @@ pub struct UiState {
     pub hp_input: String,
     /// Spell whose description is open.
     pub spell_open: String,
+    /// The latest roll or action, shown large under the header for a few seconds: total, hit or miss, the words.
+    pub result: Option<(i64, Option<bool>, String, std::time::Instant)>,
+    /// Tab the hit point panel was opened on; it closes when the player moves to another.
+    pub hp_open_on: Option<crate::app::Tab>,
+    /// The hit point panel under the header is open.
+    pub hp_open: bool,
+    /// Which page the "More" button opened last (dice, features and notes, settings).
+    pub more_tab: Option<crate::app::Tab>,
 }
 
 pub fn bonus(v: i32) -> String {

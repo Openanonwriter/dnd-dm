@@ -45,6 +45,11 @@ impl Tab {
             Tab::Settings => "⚙",
         }
     }
+    /// Pages reached through the "More" button of the bottom bar.
+    pub fn in_more(self) -> bool {
+        matches!(self, Tab::Dice | Tab::Notes | Tab::Settings)
+    }
+
     pub fn label(self) -> &'static str {
         match self {
             Tab::Stats => "Stats",
@@ -54,7 +59,7 @@ impl Tab {
             Tab::Notes => "Notes",
             Tab::Party => "Map",
             Tab::Dice => "Dice",
-            Tab::Settings => "More",
+            Tab::Settings => "Settings",
         }
     }
 }
@@ -138,6 +143,8 @@ impl PlayerApp {
             store.save_config(&config);
         }
         cc.egui_ctx.set_zoom_factor(config.zoom.clamp(0.7, 1.8));
+        dnd_mapview::help::set_touch(true);
+        dnd_mapview::help::set_enabled(config.show_help);
         let client = Client::spawn(cc.egui_ctx.clone());
         let mut app = Self {
             url_input: config.server_url.clone(),
@@ -631,7 +638,8 @@ impl PlayerApp {
                 Evt::Action(Ok(r)) => {
                     self.dice_log.insert(0, r.text.clone());
                     self.dice_log.truncate(30);
-                    self.set_status(r.text, false);
+                    self.ui_state.result = Some((r.total, r.hit, r.text, Instant::now()));
+                    self.status.clear();
                     self.mode = Default::default();
                 }
                 Evt::Action(Err(e)) => {
@@ -738,6 +746,7 @@ impl PlayerApp {
                 let detail: Vec<String> = r.rolls.iter().map(|d| d.to_string()).collect();
                 let line = if label.is_empty() { format!("{formula} = {}", r.int()) } else { format!("{label}: {formula} = {}", r.int()) };
                 let line = if detail.is_empty() { line } else { format!("{line}  [{}]", detail.join(", ")) };
+                self.ui_state.result = Some((r.int(), None, line.clone(), Instant::now()));
                 self.dice_log.insert(0, line);
                 self.dice_log.truncate(30);
             }

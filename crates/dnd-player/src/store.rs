@@ -23,6 +23,9 @@ pub struct Config {
     /// Made up on first run; identifies this install to the DM's server.
     #[serde(default)]
     pub device_id: String,
+    /// Show the (i) explanations next to game terms.
+    #[serde(default = "yes")]
+    pub show_help: bool,
     /// Campaign the server at `server_url` was running when last connected
     /// (empty until the first answer from a server).
     #[serde(default)]
@@ -91,6 +94,10 @@ fn one() -> f32 {
     1.0
 }
 
+fn yes() -> bool {
+    true
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -101,6 +108,7 @@ impl Default for Config {
             recent_servers: Vec::new(),
             player_name: String::new(),
             device_id: String::new(),
+            show_help: true,
             campaign: String::new(),
             games: Vec::new(),
         }

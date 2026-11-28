@@ -98,15 +98,16 @@ pub fn mode_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
     });
 }
 
-/// Pick who an attack or spell is aimed at, from the combatants in view.
-pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
+/// Pick who an attack or spell is aimed at, from the combatants in view:
+/// foes first and nearest first, then friends, then whoever is down.
+/// `with_self` adds the character itself (spells can be cast on yourself).
+pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui, with_self: bool) {
     let Some(enc) = &app.encounter else { return };
     if enc.combatants.is_empty() {
         return;
     }
-    let list: Vec<(String, String, bool)> = enc.combatants.iter().map(|c| (c.id.clone(), c.name.clone(), c.is_pc)).collect();
-    app.targets.retain(|t| list.iter().any(|c| &c.0 == t));
     let me = app.my_token();
+    let down_ids: Vec<String> = app.map.as_ref().map(|m| m.tokens.iter().filter(|t| t.down).map(|t| t.id.clone()).collect()).unwrap_or_default();
     let feet = |id: &String| -> Option<u32> {
         let m = me.as_ref()?;
         if m == id {
@@ -114,22 +115,31 @@ pub fn target_row(app: &mut PlayerApp, ui: &mut egui::Ui) {
         }
         app.map.as_ref()?.distance_ft(m, id)
     };
-    let list: Vec<(String, String, bool)> = list
-        .into_iter()
-        .map(|(id, name, pc)| {
-            let label = match feet(&id) {
-                Some(d) => format!("{name} · {d} ft"),
-                None => name,
-            };
-            (id, label, pc)
+    // (id, name, is a player character, feet away, down)
+    let mut list: Vec<(String, String, bool, Option<u32>, bool)> = enc
+        .combatants
+        .iter()
+        .filter(|c| with_self || Some(&c.id) != me.as_ref())
+        .map(|c| {
+            let down = c.hp.map(|h| h <= 0).unwrap_or(false) || c.conditions.iter().any(|x| x == "dead" || x == "unconscious") || down_ids.contains(&c.id);
+            (c.id.clone(), c.name.clone(), c.is_pc, feet(&c.id), down)
         })
         .collect();
+    list.sort_by_key(|(id, _, pc, d, down)| (*down, *pc && Some(id) != me.as_ref(), Some(id) == me.as_ref(), d.unwrap_or(u32::MAX)));
+    // a target that left or went down is no longer aimed at
+    app.targets.retain(|t| list.iter().any(|c| &c.0 == t && !c.4));
     ui.horizontal_wrapped(|ui| {
         ui.label(theme::muted("Target"));
         dnd_mapview::help::term(ui, "target");
-        for (id, name, pc) in &list {
+        for (id, name, pc, d, down) in &list {
             let on = app.targets.contains(id);
-            let text = egui::RichText::new(name).color(if on { egui::Color32::BLACK } else if *pc { theme::PC_BLUE } else { theme::TEXT });
+            let label = match (down, d) {
+                (true, _) => format!("{name} · down"),
+                (false, Some(d)) => format!("{name} · {d} ft"),
+                (false, None) if Some(id) == me.as_ref() => format!("{name} (you)"),
+                (false, None) => name.clone(),
+            };
+            let text = egui::RichText::new(label).color(if on { egui::Color32::BLACK } else if *down { theme::MUTED } else if *pc { theme::PC_BLUE } else { theme::TEXT });
             if ui.add(egui::Button::new(text).fill(if on { theme::ORANGE } else { theme::CARD })).clicked() {
                 if on {
                     app.targets.retain(|t| t != id);
@@ -149,13 +159,22 @@ pub fn tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ui.label(theme::muted("No spellcasting on this character."));
         return;
     }
+    // the casting numbers in a line: the room goes to the spells
     for sc in &s.spellcasting {
-        let w = ((ui.available_width() - 8.0 * 3.0) / 4.0 - 3.0).max(60.0);
-        ui.horizontal(|ui| {
-            theme::tile(ui, w, &sc.class_name, &sc.ability.to_uppercase(), "ability");
-            theme::tile(ui, w, "Attack", &bonus(sc.attack_bonus), "");
-            theme::tile(ui, w, "Save DC", &sc.save_dc.to_string(), "");
-            theme::tile(ui, w, "Prepare", &sc.prepared_max.map(|p| p.to_string()).unwrap_or("—".into()), "");
+        ui.horizontal_wrapped(|ui| {
+            ui.spacing_mut().item_spacing.x = 5.0;
+            ui.label(theme::muted(format!("{} ({})", sc.class_name, sc.ability.to_uppercase())).small());
+            ui.label(theme::muted("· attack").small());
+            ui.label(egui::RichText::new(bonus(sc.attack_bonus)).strong().color(theme::ORANGE));
+            dnd_mapview::help::term(ui, "Attack");
+            ui.label(theme::muted("· save DC").small());
+            ui.label(egui::RichText::new(sc.save_dc.to_string()).strong().color(theme::ORANGE));
+            dnd_mapview::help::term(ui, "Save DC");
+            if let Some(p) = sc.prepared_max {
+                ui.label(theme::muted("· prepare").small());
+                ui.label(egui::RichText::new(p.to_string()).strong().color(theme::ORANGE));
+                dnd_mapview::help::term(ui, "Prepare");
+            }
         });
     }
     slots(app, ui, &s);
@@ -210,7 +229,7 @@ fn book(app: &mut PlayerApp, ui: &mut egui::Ui, s: &Sheet, lib: &Library) {
     let Some(ch) = app.character.clone() else { return };
     let live = app.game_live();
     mode_row(app, ui);
-    target_row(app, ui);
+    target_row(app, ui, true);
 
     let prepares = s.spellcasting.iter().any(|b| b.prepared_max.is_some());
     let prepared_max: i32 = s.spellcasting.iter().filter_map(|b| b.prepared_max).sum();

@@ -56,6 +56,21 @@ Add-Type -AssemblyName System.Drawing
 $b = [System.Drawing.Bitmap]::FromFile("C:\path\shot.bmp"); $b.Save("C:\path\shot.png", [System.Drawing.Imaging.ImageFormat]::Png); $b.Dispose()
 ```
 
+## A practice table (playing a fight without a DM)
+
+```text
+cargo run --release -p dnd-player --example table            # port 8421, this machine only
+cargo run --release -p dnd-player --example table -- --lan   # reachable from the Wi-Fi
+```
+
+A real server with the cellar fight on it. The first device to connect
+plays Thia the wizard; the goblins and Borin take their own turns, and two
+more goblins come when the first two are beaten. Over USB:
+`adb reverse tcp:8421 tcp:8421`, then connect the phone to `127.0.0.1:8421`.
+Everything a player does is also reachable with `curl` (see
+`docs/API.md`, "Playing"), which is how a session can be scripted while
+taking pictures with `DND_PLAYER_SHOT`.
+
 ## Fonts
 
 egui's built-in font has no arrows (→ ↓ ▾), check marks (✓ ✗) or many

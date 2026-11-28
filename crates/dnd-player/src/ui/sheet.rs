@@ -8,18 +8,28 @@ use dnd_core::{Character, Sheet};
 
 pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
     let (inset_top, inset_bottom) = crate::system_insets(ctx);
-    // ---- header
+    // ---- header: who you are, hit points and armor class on every tab
+    let down = app.character.as_ref().map(|c| c.hp.current <= 0 && !c.is_dead()).unwrap_or(false);
+    if down {
+        // the death save button lives in the hit point panel
+        app.ui_state.hp_open = true;
+    }
     egui::TopBottomPanel::top("sheet_top").frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin { left: 12, right: 12, top: 8 + inset_top as i8, bottom: 8 })).show(ctx, |ui| {
+        let (name, sub) = match &app.sheet {
+            Some(s) => (s.name.clone(), format!("{} · {} · L{}", s.species, s.class_line, s.level)),
+            None => (app.config.character_id.clone(), "loading…".into()),
+        };
+        let vitals = match (&app.sheet, &app.character) {
+            (Some(s), Some(c)) => Some((c.hp.current, s.hp_max, c.hp.temp, s.ac)),
+            _ => None,
+        };
         ui.horizontal(|ui| {
-            let (name, sub) = match &app.sheet {
-                Some(s) => (s.name.clone(), format!("{} · {} · L{}", s.species, s.class_line, s.level)),
-                None => (app.config.character_id.clone(), "loading…".into()),
-            };
-            ui.vertical(|ui| {
-                ui.label(egui::RichText::new(name).strong().size(20.0).color(theme::ORANGE));
-                ui.label(theme::muted(sub).small());
-            });
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if let Some((hp, max, temp, ac)) = vitals {
+                    if vitals_button(ui, hp, max, temp, ac, app.ui_state.hp_open).clicked() && !down {
+                        app.ui_state.hp_open = !app.ui_state.hp_open;
+                    }
+                }
                 let dot = if app.online { ("⏺", theme::GOOD, "connected") } else { ("○", theme::MUTED, "offline (cached)") };
                 ui.label(egui::RichText::new(dot.0).color(dot.1)).on_hover_text(dot.2);
                 if app.busy {
@@ -28,33 +38,80 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 if app.last_edit.is_some() {
                     ui.label(theme::accent("⏺").small());
                 }
+                // the name takes what is left and is cut short rather than pushing the numbers off
+                ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                    ui.spacing_mut().item_spacing.y = 2.0;
+                    ui.add(egui::Label::new(egui::RichText::new(name).strong().size(20.0).color(theme::ORANGE)).truncate());
+                    ui.add(egui::Label::new(theme::muted(sub).small()).truncate());
+                });
             });
         });
-        if !app.status.is_empty() && app.status_at.elapsed().as_secs() < 12 {
-            ui.colored_label(if app.status_error { theme::BAD } else { theme::GOOD }, egui::RichText::new(&app.status).small());
+        // the hit point panel belongs to the tab it was opened on
+        if app.ui_state.hp_open && !down && app.ui_state.hp_open_on != Some(app.tab) {
+            if app.ui_state.hp_open_on.is_some() {
+                app.ui_state.hp_open = false;
+            }
+            app.ui_state.hp_open_on = if app.ui_state.hp_open { Some(app.tab) } else { None };
         }
-        if app.my_turn() && app.tab != Tab::Combat {
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("▶ Your turn").strong().color(theme::ORANGE));
-                if ui.small_button("End turn").clicked() {
-                    app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
-                }
+        if !app.ui_state.hp_open {
+            app.ui_state.hp_open_on = None;
+        }
+        // whose turn it is: one place, on every tab but the map (which has its own bar)
+        let fight = app.encounter.as_ref().filter(|e| e.active).map(|e| (e.round, e.combatants.iter().find(|c| c.is_current).map(|c| c.name.clone()).unwrap_or_default()));
+        if app.my_turn() && app.tab != Tab::Party {
+            egui::Frame::new().fill(theme::ORANGE_FAINT).stroke(egui::Stroke::new(1.0, theme::ORANGE)).corner_radius(8.0).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
+                    dnd_mapview::help::term(ui, "turn");
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if ui.add(theme::primary("End turn")).clicked() {
+                            app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
+                        }
+                    });
+                });
             });
+        } else if let Some((round, who)) = fight.filter(|_| !app.my_turn()) {
+            // the same height as the "Your turn" banner, so the page does not jump when turns change
+            egui::Frame::new().fill(theme::CARD).stroke(egui::Stroke::new(1.0, theme::LINE)).corner_radius(8.0).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(40.0);
+                ui.horizontal_centered(|ui| {
+                    ui.label(theme::muted(if who.is_empty() { format!("Round {round}") } else { format!("Round {round} · {who}'s turn") }));
+                });
+            });
+        }
+        if app.ui_state.hp_open {
+            hp_block(app, ui);
         }
     });
 
-    // ---- bottom tab bar
-    egui::TopBottomPanel::bottom("tabs").frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin { left: 4, right: 4, top: 6, bottom: 6 + inset_bottom as i8 })).show(ctx, |ui| {
-        let w = ui.available_width() / Tab::ALL.len() as f32;
+    // ---- bottom bar: at most six places, the rest behind "More"
+    egui::TopBottomPanel::bottom("tabs").frame(egui::Frame::new().fill(theme::BG).inner_margin(egui::Margin { left: 4, right: 4, top: 4, bottom: 4 + inset_bottom as i8 })).show(ctx, |ui| {
+        let caster = app.sheet.as_ref().map(|s| !s.spellcasting.is_empty()).unwrap_or(true);
+        let mut nav: Vec<(Tab, &str, &str)> = vec![(Tab::Stats, Tab::Stats.icon(), "Stats"), (Tab::Combat, Tab::Combat.icon(), "Combat")];
+        if caster {
+            nav.push((Tab::Spells, Tab::Spells.icon(), "Spells"));
+        }
+        nav.push((Tab::Items, Tab::Items.icon(), "Items"));
+        nav.push((Tab::Party, Tab::Party.icon(), "Map"));
+        nav.push((Tab::Settings, "☰", "More"));
+        let w = ui.available_width() / nav.len() as f32;
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 0.0;
-            for t in Tab::ALL {
-                let sel = app.tab == t;
-                let col = if sel { theme::ORANGE } else { theme::MUTED };
-                let text = egui::RichText::new(format!("{}\n{}", t.icon(), t.label())).color(col).size(if sel { 13.0 } else { 12.0 });
-                let b = egui::Button::new(text).fill(if sel { theme::ORANGE_FAINT } else { egui::Color32::TRANSPARENT }).min_size(egui::vec2(w, 50.0)).frame(sel);
-                if ui.add_sized([w, 50.0], b).clicked() {
-                    app.tab = t;
+            for (t, icon, label) in nav {
+                let more = t == Tab::Settings;
+                let sel = if more { app.tab.in_more() } else { app.tab == t };
+                let (rect, resp) = ui.allocate_exact_size(egui::vec2(w, 56.0), egui::Sense::click());
+                if ui.is_rect_visible(rect) {
+                    let col = if sel { theme::ORANGE } else { theme::MUTED };
+                    if sel {
+                        ui.painter().rect_filled(rect.shrink2(egui::vec2(3.0, 1.0)), 8.0, theme::ORANGE_FAINT);
+                    }
+                    ui.painter().text(rect.center() + egui::vec2(0.0, -9.0), egui::Align2::CENTER_CENTER, icon, egui::FontId::proportional(21.0), col);
+                    ui.painter().text(rect.center() + egui::vec2(0.0, 15.0), egui::Align2::CENTER_CENTER, label, egui::FontId::proportional(13.0), col);
+                }
+                if resp.clicked() {
+                    app.tab = if more { app.ui_state.more_tab.unwrap_or(Tab::Dice) } else { t };
                 }
             }
         });
@@ -83,6 +140,22 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             crate::ui::map::show(app, ui);
             return;
         }
+        if app.tab.in_more() {
+            app.ui_state.more_tab = Some(app.tab);
+            ui.horizontal(|ui| {
+                let pages = [(Tab::Dice, "Dice"), (Tab::Notes, "Features"), (Tab::Settings, "Settings")];
+                ui.spacing_mut().item_spacing.x = 6.0;
+                let w = (ui.available_width() - 12.0 - 6.0 * 2.0) / 3.0;
+                for (t, label) in pages {
+                    let sel = app.tab == t;
+                    let text = egui::RichText::new(label).color(if sel { egui::Color32::WHITE } else { theme::TEXT });
+                    if ui.add_sized([w, 40.0], egui::Button::new(text).fill(if sel { theme::SELECT } else { theme::CARD_HI })).clicked() {
+                        app.tab = t;
+                    }
+                }
+            });
+            ui.add_space(2.0);
+        }
         theme::page_scroll(ui, egui::ScrollArea::vertical().auto_shrink([false, false]), 12, |ui| match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
@@ -94,6 +167,49 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             Tab::Settings => settings_tab(app, ui),
         });
     });
+
+    // what the dice just said: a card floating above the bottom bar, so nothing
+    // on the page moves under the player's finger when it comes and goes
+    if app.ui_state.result.as_ref().map(|r| r.3.elapsed().as_secs() >= 8).unwrap_or(false) {
+        app.ui_state.result = None;
+    }
+    // short messages ("Connected to ...", "it is not your turn") use the same card when no roll is showing
+    let message = if app.ui_state.result.is_none() && !app.status.is_empty() && app.status_at.elapsed().as_secs() < if app.status_error { 8 } else { 4 } {
+        Some((0, if app.status_error { Some(false) } else { None }, app.status.clone(), app.status_at))
+    } else {
+        None
+    };
+    let is_message = message.is_some();
+    if let Some((total, hit, text, _)) = app.ui_state.result.clone().or(message) {
+        let hit = if is_message { None } else { hit };
+        let edge = if is_message && app.status_error { theme::BAD } else if is_message { theme::GOOD } else { match hit {
+            Some(true) => theme::GOOD,
+            Some(false) => theme::BAD,
+            None => theme::ORANGE,
+        } };
+        let width = ctx.screen_rect().width() - 24.0;
+        let area = egui::Area::new(egui::Id::new("roll_result")).order(egui::Order::Foreground).anchor(egui::Align2::CENTER_BOTTOM, egui::vec2(0.0, -(72.0 + inset_bottom))).show(ctx, |ui| {
+            egui::Frame::new().fill(theme::CARD_HI).stroke(egui::Stroke::new(2.0, edge)).corner_radius(10.0).inner_margin(egui::Margin::symmetric(12, 10)).show(ui, |ui| {
+                ui.set_width(width - 24.0);
+                ui.horizontal(|ui| {
+                    let big = match hit {
+                        Some(true) => "HIT".to_string(),
+                        Some(false) => "MISS".to_string(),
+                        None => total.to_string(),
+                    };
+                    if hit.is_some() || total != 0 {
+                        ui.label(egui::RichText::new(big).strong().size(28.0).color(edge));
+                    }
+                    ui.add(egui::Label::new(egui::RichText::new(text).size(14.0)).wrap());
+                });
+            });
+        });
+        if area.response.interact(egui::Sense::click()).clicked() {
+            app.ui_state.result = None;
+            app.status.clear();
+        }
+        ctx.request_repaint_after(std::time::Duration::from_secs(1));
+    }
 }
 
 fn sheet(app: &PlayerApp) -> Sheet {
@@ -118,11 +234,19 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     for w in &s.warnings {
         ui.colored_label(theme::ORANGE, format!("⚠ {w}"));
     }
-    let ab: Vec<(&str, String, String)> = s.abilities.iter().map(|(k, v)| (k, bonus(dnd_core::ability_mod(v)), v.to_string())).collect();
-    let a: Vec<(&str, String, String)> = ab[..3].iter().map(|(k, m, v)| (*k, m.clone(), v.clone())).collect();
-    let b: Vec<(&str, String, String)> = ab[3..].iter().map(|(k, m, v)| (*k, m.clone(), v.clone())).collect();
-    tiles_row(ui, &a);
-    tiles_row(ui, &b);
+    // tap a score to roll a check with it
+    let ab: Vec<(String, i32, i32)> = s.abilities.iter().map(|(k, v)| (k.to_string(), dnd_core::ability_mod(v), v)).collect();
+    for row in ab.chunks(3) {
+        let n = row.len() as f32;
+        let w = ((ui.available_width() - 8.0 * (n - 1.0)) / n - 3.0).max(60.0);
+        ui.horizontal(|ui| {
+            for (k, m, v) in row {
+                if tile(ui, w, k, &bonus(*m), &v.to_string()).clicked() {
+                    app.roll(&format!("1d20 {}", signed(*m)), &format!("{} check", dnd_core::sheet::ability_name(k)));
+                }
+            }
+        });
+    }
     tiles_row(
         ui,
         &[
@@ -132,33 +256,28 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ("Prof", bonus(s.proficiency_bonus), String::new()),
         ],
     );
-    hp_block(app, ui);
+    ui.label(theme::muted("Tap a score, a save or a skill to roll it.").small());
 
     let s = sheet(app);
     section(ui, "Saving throws");
-    egui::Grid::new("saves").num_columns(3).spacing([12.0, 6.0]).show(ui, |ui| {
-        for (i, sv) in s.saves.iter().enumerate() {
-            ui.horizontal(|ui| {
-                ui.label(if sv.proficient { theme::accent("⏺") } else { theme::muted("○") });
-                ui.label(&sv.name[..3].to_uppercase());
-                ui.label(egui::RichText::new(bonus(sv.bonus)).strong());
+    // one button per save: the number is the roll
+    let saves: Vec<_> = s.saves.clone();
+    for row in saves.chunks(3) {
+        ui.horizontal(|ui| {
+            let w = (ui.available_width() - 8.0 * 2.0) / 3.0;
+            for sv in row {
+                let mark = if sv.proficient { "⏺ " } else { "" };
+                let text = egui::RichText::new(format!("{mark}{}  {}", &sv.name[..3].to_uppercase(), bonus(sv.bonus))).color(if sv.proficient { theme::ORANGE } else { theme::TEXT });
+                let mut r = ui.add_sized([w, 42.0], egui::Button::new(text));
                 if !sv.notes.is_empty() {
-                    ui.label(theme::muted("*").small()).on_hover_text(sv.notes.join("; "));
+                    r = r.on_hover_text(sv.notes.join("; "));
                 }
-            });
-            if i % 3 == 2 {
-                ui.end_row();
+                if r.clicked() {
+                    app.roll(&format!("1d20 {}", signed(sv.bonus)), &format!("{} save", sv.name));
+                }
             }
-        }
-    });
-    let save_rolls: Vec<(String, i32)> = s.saves.iter().map(|x| (x.name.clone(), x.bonus)).collect();
-    ui.horizontal_wrapped(|ui| {
-        for (name, b) in save_rolls {
-            if ui.small_button(format!("🎲 {}", &name[..3])).clicked() {
-                app.roll(&format!("1d20 {}", signed(b)), &format!("{name} save"));
-            }
-        }
-    });
+        });
+    }
 
     section(ui, "Skills");
     let skills: Vec<_> = s.skills.clone();
@@ -168,7 +287,7 @@ fn stats_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             let r = ui.add(egui::Label::new(format!("{}  {}", sk.name, theme_dim(&sk.ability))).sense(egui::Sense::click()));
             dnd_mapview::help::term(ui, &sk.key);
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.small_button(egui::RichText::new(bonus(sk.bonus)).strong()).clicked() || r.clicked() {
+                if ui.add(egui::Button::new(egui::RichText::new(bonus(sk.bonus)).strong()).min_size(egui::vec2(56.0, 38.0))).clicked() || r.clicked() {
                     app.roll(&format!("1d20 {}", signed(sk.bonus)), &sk.name);
                 }
                 if !sk.notes.is_empty() {
@@ -220,6 +339,10 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 ui.horizontal(|ui| {
                     ui.label(theme::muted("HIT POINTS").small());
                     dnd_mapview::help::term(ui, "hit_points");
+                    if ch.hp.temp == 0 {
+                        ui.label(theme::muted("· temp").small());
+                        dnd_mapview::help::term(ui, "temp_hp");
+                    }
                 });
                 let col = if ch.hp.current <= hp_max / 4 { theme::BAD } else if ch.hp.current <= hp_max / 2 { theme::ORANGE } else { theme::GOOD };
                 ui.label(egui::RichText::new(format!("{} / {}", ch.hp.current, hp_max)).color(col).strong().size(30.0));
@@ -263,8 +386,9 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
             if ui.button("Temp").clicked() {
                 ch.hp.temp = ch.hp.temp.max(app.ui_state.damage_amount);
             }
-            dnd_mapview::help::term(ui, "temp_hp");
         });
+        let dying = ch.hp.current <= 0 || ch.death_saves.successes > 0 || ch.death_saves.failures > 0;
+        if dying {
         ui.horizontal_wrapped(|ui| {
             ui.spacing_mut().item_spacing.x = 3.0;
             ui.label(theme::muted("Death saves"));
@@ -285,9 +409,17 @@ fn hp_block(app: &mut PlayerApp, ui: &mut egui::Ui) {
                 }
             }
         });
-        ui.horizontal_wrapped(|ui| {
+        }
+        ui.horizontal(|ui| {
             ui.checkbox(&mut ch.inspiration, "Inspiration");
             dnd_mapview::help::term(ui, "inspiration");
+            if ch.hp.current > 0 {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button("Close").clicked() {
+                        app.ui_state.hp_open = false;
+                    }
+                });
+            }
         });
         if ch.is_dead() {
             ui.horizontal_wrapped(|ui| {
@@ -320,24 +452,9 @@ fn apply_damage(ch: &mut Character, amt: i32) {
 
 fn combat_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     let s = sheet(app);
-    hp_block(app, ui);
-    if app.my_turn() {
-        theme::card_hi().show(ui, |ui| {
-            ui.set_width(ui.available_width());
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
-                dnd_mapview::help::term(ui, "turn");
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.add(theme::primary("End turn")).clicked() {
-                        app.act(Cmd::Do { action: "end_turn".into(), arg: String::new() });
-                    }
-                });
-            });
-        });
-    }
     section(ui, "Attacks");
     crate::ui::spells::mode_row(app, ui);
-    crate::ui::spells::target_row(app, ui);
+    crate::ui::spells::target_row(app, ui, false);
     let target = app.targets.first().cloned();
     if target.is_none() && app.encounter.as_ref().map(|e| !e.combatants.is_empty()).unwrap_or(false) {
         ui.label(theme::muted("Pick a target and the attack is rolled against it. Without one you just roll the dice.").small());
@@ -505,13 +622,21 @@ fn items_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
                     ui.label(theme::muted(format!("{kind}{}", if inv.notes.is_empty() { String::new() } else { format!(" · {}", inv.notes) })).small());
                 });
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.small_button("✖").clicked() {
+                    // count with plus and minus; at zero the row offers to remove itself
+                    if ui.add(egui::Button::new("+").min_size(egui::vec2(40.0, 40.0))).clicked() {
+                        inv.qty = (inv.qty + 1).min(999);
+                    }
+                    ui.label(egui::RichText::new(inv.qty.to_string()).strong().size(17.0));
+                    if ui.add(egui::Button::new("−").min_size(egui::vec2(40.0, 40.0))).clicked() {
+                        inv.qty = inv.qty.saturating_sub(1);
+                    }
+                    if inv.qty == 0 && ui.add(egui::Button::new(egui::RichText::new("Remove").color(theme::BAD))).clicked() {
                         remove = Some(i);
                     }
-                    ui.add(egui::DragValue::new(&mut inv.qty).range(0..=999));
-                    ui.label(theme::muted("×"));
-                    dnd_mapview::help::term(ui, "equipped");
-                    ui.toggle_value(&mut inv.equipped, "equipped");
+                    if inv.qty > 0 {
+                        let label = if inv.equipped { "equipped" } else { "equip" };
+                        ui.toggle_value(&mut inv.equipped, label);
+                    }
                     if inv.attuned || kind == "wondrous" {
                         dnd_mapview::help::term(ui, "attuned");
                         ui.toggle_value(&mut inv.attuned, "attuned");
@@ -664,6 +789,10 @@ fn settings_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         ui.label(theme::muted("You made this character, so until the game starts you can change its build. Rebuilding starts it fresh: starting gear again, full health.").small());
     }
     section(ui, "Display");
+    if ui.checkbox(&mut app.config.show_help, "Show the (i) explanations of game terms").changed() {
+        dnd_mapview::help::set_enabled(app.config.show_help);
+        app.store.save_config(&app.config);
+    }
     ui.horizontal(|ui| {
         ui.label("Text size");
         let mut z = app.config.zoom;
@@ -691,4 +820,31 @@ fn settings_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
     }
     ui.label(theme::muted(format!("Data folder: {}", app.store.dir.display())).small());
     ui.label(theme::muted(format!("dnd-player v{}", env!("CARGO_PKG_VERSION"))).small());
+}
+
+/// Hit points and armor class in the header: visible on every tab, and the
+/// way into the hit point panel.
+fn vitals_button(ui: &mut egui::Ui, hp: i32, max: i32, temp: i32, ac: i32, open: bool) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(egui::vec2(168.0, 44.0), egui::Sense::click());
+    if !ui.is_rect_visible(rect) {
+        return resp;
+    }
+    let p = ui.painter();
+    let col = if hp <= max / 4 { theme::BAD } else if hp <= max / 2 { theme::ORANGE } else { theme::GOOD };
+    let split = rect.right() - 54.0;
+    let hp_rect = egui::Rect::from_min_max(rect.min, egui::pos2(split - 4.0, rect.bottom()));
+    let ac_rect = egui::Rect::from_min_max(egui::pos2(split, rect.top()), rect.max);
+    p.rect(hp_rect, 8.0, theme::CARD_HI, egui::Stroke::new(1.0, if open || resp.hovered() { theme::ORANGE } else { theme::EDGE }), egui::StrokeKind::Inside);
+    p.text(hp_rect.left_center() + egui::vec2(9.0, -3.0), egui::Align2::LEFT_CENTER, "♥", egui::FontId::proportional(15.0), col);
+    let label = if temp > 0 { format!("{hp}/{max} +{temp}") } else { format!("{hp} / {max}") };
+    p.text(hp_rect.left_center() + egui::vec2(29.0, -3.0), egui::Align2::LEFT_CENTER, label, egui::FontId::proportional(17.0), col);
+    // how full, as a bar along the bottom
+    let bar = egui::Rect::from_min_max(egui::pos2(hp_rect.left() + 8.0, hp_rect.bottom() - 8.0), egui::pos2(hp_rect.right() - 8.0, hp_rect.bottom() - 4.0));
+    p.rect_filled(bar, 2.0, theme::LINE);
+    let frac = if max > 0 { (hp as f32 / max as f32).clamp(0.0, 1.0) } else { 0.0 };
+    p.rect_filled(egui::Rect::from_min_max(bar.min, egui::pos2(bar.left() + bar.width() * frac, bar.bottom())), 2.0, col);
+    p.rect(ac_rect, 8.0, theme::CARD, egui::Stroke::new(1.0, theme::LINE), egui::StrokeKind::Inside);
+    p.text(ac_rect.center() + egui::vec2(0.0, -11.0), egui::Align2::CENTER_CENTER, "AC", egui::FontId::proportional(10.5), theme::MUTED);
+    p.text(ac_rect.center() + egui::vec2(0.0, 6.0), egui::Align2::CENTER_CENTER, ac.to_string(), egui::FontId::proportional(18.0), theme::TEXT);
+    resp
 }

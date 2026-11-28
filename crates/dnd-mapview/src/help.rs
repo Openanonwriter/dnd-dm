@@ -4,9 +4,31 @@
 //! hover). The icon is drawn from shapes, so it works with any font.
 
 use egui::{vec2, Rect, Sense, Stroke};
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static ENABLED: AtomicBool = AtomicBool::new(true);
+static TOUCH: AtomicBool = AtomicBool::new(false);
+
+/// Show or hide every (i) icon (a setting for players who know the rules).
+pub fn set_enabled(on: bool) {
+    ENABLED.store(on, Ordering::Relaxed);
+}
+
+pub fn enabled() -> bool {
+    ENABLED.load(Ordering::Relaxed)
+}
+
+/// On touch screens the icon keeps its size but answers to a finger-sized
+/// area around it (the icon alone is about 2.5 mm across).
+pub fn set_touch(on: bool) {
+    TOUCH.store(on, Ordering::Relaxed);
+}
 
 /// A circled "i" in the flow of the layout, explaining `text`.
 pub fn info(ui: &mut egui::Ui, text: &str) -> egui::Response {
+    if !enabled() {
+        return ui.allocate_response(egui::Vec2::ZERO, Sense::hover());
+    }
     let size = ui.text_style_height(&egui::TextStyle::Body).clamp(14.0, 18.0);
     let (rect, _) = ui.allocate_exact_size(vec2(size, size), Sense::hover());
     info_in_rect(ui, rect, ("info", rect.min.x as i32, rect.min.y as i32), text)
@@ -30,7 +52,8 @@ pub fn label_term(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, key: &st
 /// An (i) icon painted inside `rect` (for corners of tiles and cards).
 pub fn info_in_rect(ui: &mut egui::Ui, rect: Rect, salt: impl std::hash::Hash, text: &str) -> egui::Response {
     let id = ui.id().with(("help_icon", salt));
-    let resp = ui.interact(rect, id, Sense::click()).on_hover_cursor(egui::CursorIcon::Help);
+    let hit = if TOUCH.load(Ordering::Relaxed) { Rect::from_center_size(rect.center(), rect.size().max(vec2(34.0, 34.0))) } else { rect };
+    let resp = ui.interact(hit, id, Sense::click()).on_hover_cursor(egui::CursorIcon::Help);
     let popup = id.with("popup");
     if resp.clicked() {
         ui.memory_mut(|m| m.toggle_popup(popup));
@@ -98,6 +121,9 @@ pub fn text(ui: &mut egui::Ui, t: &str) {
 
 /// Put the (i) for a glossary term in the top-right corner of `card`.
 pub fn term_in_corner(ui: &mut egui::Ui, card: Rect, key: &str) {
+    if !enabled() {
+        return;
+    }
     if let Some(t) = dnd_core::glossary::explain(key) {
         let s = 14.0;
         let rect = Rect::from_min_size(card.right_top() + vec2(-s - 4.0, 4.0), vec2(s, s));

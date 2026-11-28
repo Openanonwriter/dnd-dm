@@ -28,8 +28,8 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         let campaign = app.info.as_ref().map(|i| i.campaign.clone()).unwrap_or_default();
         ui.label(theme::muted(format!("{my_name} · {campaign}")));
     });
-    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(egui::Margin { left: 14, right: 14, top: 14, bottom: 14 + inset_bottom as i8 })).show(ctx, |ui| {
-        egui::ScrollArea::vertical().show(ui, |ui| {
+    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(egui::Margin { left: 14, right: 0, top: 14, bottom: 14 + inset_bottom as i8 })).show(ctx, |ui| {
+        theme::page_scroll(ui, egui::ScrollArea::vertical(), 14, |ui| {
             if !app.status.is_empty() && app.status_at.elapsed().as_secs() < 8 {
                 ui.colored_label(if app.status_error { theme::BAD } else { theme::GOOD }, &app.status);
             }

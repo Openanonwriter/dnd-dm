@@ -49,7 +49,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         });
         ui.label(theme::muted(format!("Level {level} · saved on this device as you go")));
     });
-    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(egui::Margin { left: 14, right: 14, top: 10, bottom: 14 + inset_bottom as i8 })).show(ctx, |ui| {
+    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(egui::Margin { left: 14, right: 0, top: 10, bottom: 14 + inset_bottom as i8 })).show(ctx, |ui| {
         // borrow the options out of the app while the form edits the draft
         match (app.builder.take(), app.builder_lib.take()) {
             (Some(opts), Some(lib)) => {
@@ -58,7 +58,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 if let Some(y) = std::env::var("DND_PLAYER_SCROLL").ok().and_then(|v| v.parse::<f32>().ok()) {
                     area = area.vertical_scroll_offset(y);
                 }
-                area.show(ui, |ui| form(app, ui, &opts, &lib, level));
+                theme::page_scroll(ui, area, 14, |ui| form(app, ui, &opts, &lib, level));
                 app.builder = Some(opts);
                 app.builder_lib = Some(lib);
             }

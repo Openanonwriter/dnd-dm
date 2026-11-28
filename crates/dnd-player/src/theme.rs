@@ -96,6 +96,28 @@ pub fn red_outline(ui: &egui::Ui, rect: egui::Rect) {
     ui.painter().rect_stroke(rect.expand(2.0), 6.0, Stroke::new(1.6, BAD), egui::StrokeKind::Outside);
 }
 
+/// A page that scrolls up and down, with its scroll bar on the edge of the
+/// screen. The panel around it must have no right margin: `right_pad` is the
+/// gap kept between the content and the screen edge, and the bar is drawn
+/// inside that gap instead of taking width of its own.
+pub fn page_scroll<R>(ui: &mut egui::Ui, area: egui::ScrollArea, right_pad: i8, add: impl FnOnce(&mut egui::Ui) -> R) -> R {
+    let normal = ui.spacing().scroll;
+    ui.spacing_mut().scroll = egui::style::ScrollStyle {
+        floating: true,
+        floating_width: normal.bar_width,
+        floating_allocated_width: 0.0,
+        dormant_background_opacity: normal.active_background_opacity,
+        dormant_handle_opacity: normal.active_handle_opacity,
+        ..normal
+    };
+    let out = area.show(ui, |ui| {
+        ui.spacing_mut().scroll = normal; // scroll areas inside the page keep the usual bars
+        egui::Frame::new().inner_margin(egui::Margin { left: 0, right: right_pad, top: 0, bottom: 0 }).show(ui, add).inner
+    });
+    ui.spacing_mut().scroll = normal;
+    out.inner
+}
+
 pub fn card() -> egui::Frame {
     egui::Frame::new().fill(CARD).stroke(Stroke::new(1.0, LINE)).corner_radius(8.0).inner_margin(10.0)
 }

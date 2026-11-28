@@ -60,7 +60,10 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         });
     });
 
-    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(12.0)).show(ctx, |ui| {
+    // scrolling tabs put their scroll bar on the screen edge, so they keep the right margin inside the scroll area
+    let scrolls = app.sheet.is_some() && app.character.is_some() && app.tab != Tab::Party;
+    let margin = egui::Margin { left: 12, right: if scrolls { 0 } else { 12 }, top: 12, bottom: 12 };
+    egui::CentralPanel::default().frame(egui::Frame::new().fill(theme::PANEL).inner_margin(margin)).show(ctx, |ui| {
         if app.sheet.is_none() || app.character.is_none() {
             ui.vertical_centered(|ui| {
                 ui.add_space(40.0);
@@ -69,7 +72,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
                 if app.can_choose() && ui.button("Pick a different character").clicked() {
                     app.screen = Screen::Pick;
                 }
-                if ui.button("Change server / name").clicked() {
+                if ui.button("Switch game / change name").clicked() {
                     app.screen = Screen::Connect;
                 }
             });
@@ -80,7 +83,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             crate::ui::map::show(app, ui);
             return;
         }
-        egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| match app.tab {
+        theme::page_scroll(ui, egui::ScrollArea::vertical().auto_shrink([false, false]), 12, |ui| match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
             Tab::Spells => crate::ui::spells::tab(app, ui),
@@ -642,7 +645,7 @@ fn settings_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
         if can_choose { "you picked this character" } else { "character assigned by the DM" }
     )));
     ui.horizontal(|ui| {
-        if ui.button("Change server / name").clicked() {
+        if ui.button("Switch game / change name").clicked() {
             app.screen = Screen::Connect;
         }
         if can_choose && ui.button("Switch character").clicked() {

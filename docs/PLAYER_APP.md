@@ -12,6 +12,15 @@ testing). It talks to the DM's `dnd-dm` server over Wi-Fi and shares
 - **Say who you are** — the app asks for your name; the DM sees it on the
   Dashboard and gives you your character. (The DM can instead let players
   pick from the list.)
+- **Several games**: the app remembers every game it has joined, one per
+  DM's server and campaign, under "Your games" on the connect screen. Each
+  keeps its own character, player name, join code and offline copy, so a
+  player can be in different campaigns with different DMs (or two campaigns
+  the same DM runs from one address). "Join" reconnects, "Open without the
+  DM" shows the copy kept on the device, "Forget" removes the game from the
+  device only. Files are kept per game in `games/<key>/` of the data folder
+  (`store.rs`); the character draft is one per device and can be sent to
+  whichever game is joined next.
 - **Make your own character** between sessions: species, class, subclass,
   background, ability scores (standard array, point buy or server-rolled),
   skills, class choices (fighting style, invocations…), feats, starting gear,
@@ -19,6 +28,13 @@ testing). It talks to the DM's `dnd-dm` server over Wi-Fi and shares
   background (tap one to use it, or roll). Every pick has an (i) that
   explains it. Options your character doesn't qualify for have a red
   outline and say what they need; the DM can unlock them.
+  The builder works before the app has ever reached a DM: the standard
+  content (`content/`) is packed into the app when it is built
+  (`crates/dnd-player/build.rs`), so "Create a character" is on the connect
+  screen from the first start. The draft is kept on the device and uploaded
+  after connecting, before the game starts; once connected, the campaign's
+  own list replaces the built-in one. Server-rolled ability scores still
+  need the DM.
 - **Live sheet** — abilities, saves, skills (tap to roll), AC, initiative,
   speed, HP with damage/heal buttons, death saves, inspiration, attacks with
   roll buttons, spell slots (tap pips), prepared spells, inventory and coins,
@@ -66,6 +82,49 @@ SDK with NDK r28, JDK 17 and Gradle 8 — by default the portable toolchain
 under `C:\dev\xiao-keyboard\tools`; point `ANDROID_HOME`, `JAVA_HOME` and
 `GRADLE_BIN` elsewhere if needed. Enable "Install unknown apps" on the phone
 and open the APK, or use `-Install` with USB debugging on.
+
+Android, built on Linux (x86_64 or ARM64, no Gradle):
+
+```
+./build-android.sh              # debug build -> dist/dnd-player.apk
+./build-android.sh --release    # optimized build (use this one on a phone)
+./build-android.sh --install    # also adb install on the attached phone
+```
+
+The app has no Java code, so the script compiles `libdnd_player.so` with the
+system `clang` and `lld` against the NDK's sysroot, then packs and signs the
+APK with `aapt2`, `zipalign` and `apksigner` from the SDK's build-tools.
+Package name, SDK levels, version and NDK version are read from
+`android/app/build.gradle.kts`. One-time setup:
+
+```
+rustup target add aarch64-linux-android
+# clang, lld, llvm, zip, a JDK and adb from the distribution, e.g. Fedora:
+sudo dnf install clang lld llvm zip cpio java-25-openjdk-headless android-tools
+
+# SDK pieces from https://dl.google.com/android/repository/ (checksums are in
+# repository2-3.xml there), unpacked under ~/Android/Sdk (or $ANDROID_HOME):
+#   android-ndk-r28c-linux.zip   -> ndk/28.2.13676358/
+#   platform-34-ext7_r03.zip     -> platforms/android-34/
+#   build-tools_r34-linux.zip    -> build-tools/34.0.0/
+```
+
+Google ships `aapt2` and `zipalign` for x86_64 only. On an ARM64 machine the
+script runs them through `qemu-x86_64-static` with an x86_64 glibc unpacked
+in `~/Android/x86_64-root` (or `$X86_ROOT`):
+
+```
+sudo dnf install qemu-user-static-x86
+mkdir -p ~/Android/x86_64-root && cd ~/Android/x86_64-root
+dnf download --forcearch x86_64 --arch x86_64 glibc libgcc
+for f in *.rpm; do rpm2cpio "$f" | cpio -idm; done
+mv lib64/* usr/lib64/ && rmdir lib64 && ln -s usr/lib64 lib64 && rm *.rpm
+```
+
+The APK is signed with `~/.android/debug.keystore`, created on first use. A
+phone refuses to update an app signed with a different key, so an APK built
+on another machine has to be uninstalled first (or copy that machine's
+`debug.keystore` here, or set `ANDROID_KEYSTORE`).
 
 ## How it is put together
 

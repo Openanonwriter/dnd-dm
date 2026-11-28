@@ -38,5 +38,9 @@ eframe = { version = "0.31", default-features = false, features = ["default_font
 winit = { version = "0.30", features = ["android-native-activity"] }
 android_logger = "0.14"
 
+[build-dependencies]
+dnd-core = { path = "../dnd-core" }
+serde_json.workspace = true
+
 [dev-dependencies]
 dnd-server = { path = "../dnd-server" }

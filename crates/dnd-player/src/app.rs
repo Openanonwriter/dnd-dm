@@ -59,6 +59,9 @@ impl Tab {
     }
 }
 
+/// Standard content for the character builder, made by `build.rs`.
+const BUNDLED_BUILDER: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/builder.json"));
+
 pub struct PlayerApp {
     pub store: Store,
     pub config: Config,
@@ -90,6 +93,8 @@ pub struct PlayerApp {
     pub builder: Option<BuilderOptions>,
     /// The same, as a library, so the builder can show real numbers.
     pub builder_lib: Option<dnd_core::Library>,
+    /// the builder is still on the content packed into the app, not a DM's list
+    pub builder_bundled: bool,
     /// The character being built, and the copy last written to disk.
     pub draft: Character,
     pub draft_saved: Character,
@@ -106,6 +111,10 @@ pub struct PlayerApp {
     pub targets: Vec<String>,
     /// Development aid: save a picture of the window and exit.
     pub shot: crate::shot::Shot,
+    /// a finger left the screen last frame; see `raw_input_hook`
+    pointer_gone_pending: bool,
+    /// Saved game the player tapped "Forget" on once (server address, campaign); a second tap deletes it.
+    pub forget_armed: Option<(String, String)>,
     /// Tab to open on once the sheet is there (development aid).
     pub start_tab: Option<Tab>,
     /// Development aid: `DND_PLAYER_CREATE="species,class,background"`
@@ -118,8 +127,12 @@ const EDIT_DEBOUNCE: Duration = Duration::from_millis(700);
 impl PlayerApp {
     pub fn new(cc: &eframe::CreationContext<'_>, data_dir: PathBuf) -> Self {
         theme::apply(&cc.egui_ctx);
-        let store = Store::new(data_dir);
+        let mut store = Store::new(data_dir);
         let mut config = store.load_config();
+        // carry on in the game this device was last in
+        if config.games.iter().any(|g| g.server_url == config.server_url && g.campaign == config.campaign) {
+            store.set_scope(&crate::store::game_key(&config.server_url, &config.campaign));
+        }
         if config.device_id.is_empty() {
             config.device_id = crate::store::new_device_id();
             store.save_config(&config);
@@ -133,6 +146,7 @@ impl PlayerApp {
             seat: None,
             builder: None,
             builder_lib: None,
+            builder_bundled: false,
             draft: Character::default(),
             draft_saved: Character::default(),
             draft_saved_at: Instant::now(),
@@ -165,11 +179,21 @@ impl PlayerApp {
             mode: Default::default(),
             targets: std::env::var("DND_PLAYER_TARGET").ok().into_iter().collect(),
             shot: crate::shot::Shot::from_env(),
+            pointer_gone_pending: false,
+            forget_armed: None,
             dev_create: std::env::var("DND_PLAYER_CREATE").ok(),
             start_tab: std::env::var("DND_PLAYER_TAB").ok().and_then(|t| Tab::ALL.into_iter().find(|x| x.label().eq_ignore_ascii_case(&t))),
         };
-        if let Some(o) = app.store.load_builder() {
-            app.set_builder(o);
+        // the list a DM sent last time, or else the standard content packed into the app
+        match app.store.load_builder() {
+            Some(o) => app.set_builder(o),
+            None => match serde_json::from_slice::<BuilderOptions>(BUNDLED_BUILDER) {
+                Ok(o) => {
+                    app.set_builder(o);
+                    app.builder_bundled = true;
+                }
+                Err(e) => log::error!("built-in content does not load: {e}"),
+            },
         }
         if let Some(d) = app.store.load_draft() {
             app.draft = d.clone();
@@ -215,14 +239,160 @@ impl PlayerApp {
         self.config.player_name = name;
         let url = crate::client::normalize_url(&self.url_input);
         self.url_input = url.clone();
+        if url != self.config.server_url {
+            // another server: which campaign it runs is not known until it answers
+            self.config.campaign.clear();
+        }
         self.config.server_url = url.clone();
         self.config.join_code = self.code_input.clone();
         if !self.config.recent_servers.contains(&url) {
             self.config.recent_servers.insert(0, url.clone());
             self.config.recent_servers.truncate(5);
         }
-        self.store.save_config(&self.config);
+        self.persist();
         let _ = self.client.tx.send(self.connect_cmd());
+    }
+
+    /// Write the config, first noting the current character, name and join
+    /// code in the saved game this device is in.
+    pub fn persist(&mut self) {
+        let (url, campaign) = (self.config.server_url.clone(), self.config.campaign.clone());
+        if !campaign.is_empty() {
+            let seat_name = self.seat.as_ref().filter(|s| s.character.as_deref() == Some(self.config.character_id.as_str())).map(|s| s.character_name.clone());
+            let sheet_name = self.character.as_ref().filter(|c| c.id == self.config.character_id).map(|c| c.name.clone());
+            if let Some(g) = self.config.games.iter_mut().find(|g| g.server_url == url && g.campaign == campaign) {
+                g.join_code = self.config.join_code.clone();
+                g.player_name = self.config.player_name.clone();
+                if g.character_id != self.config.character_id {
+                    g.character_id = self.config.character_id.clone();
+                    g.character_name.clear();
+                }
+                if let Some(n) = seat_name.or(sheet_name).filter(|n| !n.is_empty()) {
+                    g.character_name = n;
+                }
+            }
+        }
+        self.store.save_config(&self.config);
+    }
+
+    /// The server answered and runs `campaign`: switch to the saved game for
+    /// this server and campaign, making one the first time.
+    fn enter_game(&mut self, campaign: &str) {
+        let url = self.config.server_url.clone();
+        let key = crate::store::game_key(&url, campaign);
+        let known = self.config.games.iter().position(|g| g.server_url == url && g.campaign == campaign);
+        let idx = match known {
+            Some(i) => i,
+            None => {
+                // the one game of a version that kept no list keeps its character
+                let inherited = if self.config.games.is_empty() { self.config.character_id.clone() } else { String::new() };
+                self.config.games.push(crate::store::Game { server_url: url.clone(), campaign: campaign.to_string(), character_id: inherited, ..Default::default() });
+                self.config.games.len() - 1
+            }
+        };
+        self.config.games[idx].last_used = crate::store::now_secs();
+        let switched = self.store.scope != key || self.config.campaign != campaign;
+        self.config.campaign = campaign.to_string();
+        if switched {
+            self.store.set_scope(&key);
+            self.config.character_id = self.config.games[idx].character_id.clone();
+            self.show_cached_character();
+            if let Some(o) = self.store.load_builder() {
+                self.set_builder(o);
+                self.builder_bundled = false;
+            }
+        }
+        self.persist();
+    }
+
+    /// Show the offline copy of `config.character_id` in the current game,
+    /// or nothing when there is none; never another game's character.
+    fn show_cached_character(&mut self) {
+        let id = self.config.character_id.clone();
+        if self.character.as_ref().map(|c| c.id == id).unwrap_or(false) && !id.is_empty() && self.sheet.is_some() {
+            return;
+        }
+        self.last_edit = None;
+        self.encounter = None;
+        self.map = None;
+        self.targets.clear();
+        match self.store.load_cached(&id) {
+            Some((c, s)) => {
+                self.character = Some(c.clone());
+                self.synced = Some(c);
+                self.sheet = Some(s);
+            }
+            None => {
+                self.character = None;
+                self.synced = None;
+                self.sheet = None;
+            }
+        }
+    }
+
+    /// Saved games, most recently used first.
+    pub fn games_sorted(&self) -> Vec<crate::store::Game> {
+        let mut g = self.config.games.clone();
+        g.sort_by(|a, b| b.last_used.cmp(&a.last_used));
+        g
+    }
+
+    /// Make a saved game the current one (address, name, join code, character).
+    fn select_game(&mut self, game: &crate::store::Game) {
+        self.flush_edits(true);
+        self.seat = None;
+        self.online = false;
+        self.info = None;
+        self.config.server_url = game.server_url.clone();
+        self.config.campaign = game.campaign.clone();
+        self.config.join_code = game.join_code.clone();
+        self.config.character_id = game.character_id.clone();
+        self.url_input = game.server_url.clone();
+        self.code_input = game.join_code.clone();
+        if !game.player_name.is_empty() {
+            self.name_input = game.player_name.clone();
+        }
+        self.store.set_scope(&game.key());
+        self.show_cached_character();
+        if let Some(o) = self.store.load_builder() {
+            self.set_builder(o);
+            self.builder_bundled = false;
+        }
+    }
+
+    /// Connect to a saved game.
+    pub fn join_game(&mut self, game: &crate::store::Game) {
+        self.select_game(game);
+        self.connect();
+    }
+
+    /// Open a saved game's character from the copy on this device, without the server.
+    pub fn open_game_offline(&mut self, game: &crate::store::Game) {
+        self.select_game(game);
+        self.config.player_name = self.name_input.trim().to_string();
+        self.persist();
+        if self.character.is_some() {
+            self.screen = Screen::Sheet;
+            self.tab = Tab::Stats;
+        } else {
+            self.set_status("No copy of that character on this device yet", true);
+        }
+    }
+
+    /// Remove a saved game and its offline files from this device.
+    pub fn forget_game(&mut self, game: &crate::store::Game) {
+        self.config.games.retain(|g| !(g.server_url == game.server_url && g.campaign == game.campaign));
+        self.store.forget_game(&game.key());
+        if self.config.server_url == game.server_url && self.config.campaign == game.campaign {
+            self.config.campaign.clear();
+            self.config.character_id.clear();
+            self.store.scope.clear();
+            self.character = None;
+            self.synced = None;
+            self.sheet = None;
+            self.seat = None;
+        }
+        self.store.save_config(&self.config);
     }
 
     /// Ask the server for a character (pick screen, when the DM allows it).
@@ -324,7 +494,7 @@ impl PlayerApp {
 
     fn drop_character(&mut self) {
         self.config.character_id.clear();
-        self.store.save_config(&self.config);
+        self.persist();
         self.character = None;
         self.synced = None;
         self.sheet = None;
@@ -361,7 +531,7 @@ impl PlayerApp {
 
     pub fn open_character(&mut self, id: &str) {
         self.config.character_id = id.to_string();
-        self.store.save_config(&self.config);
+        self.persist();
         if let Some((c, s)) = self.store.load_cached(id) {
             self.character = Some(c.clone());
             self.synced = Some(c);
@@ -405,6 +575,7 @@ impl PlayerApp {
                 Evt::Connected(info) => {
                     self.online = true;
                     self.set_status(format!("Connected to '{}'", info.campaign), false);
+                    self.enter_game(&info.campaign);
                     self.info = Some(info);
                     // which screen comes next is decided by the Seat that follows
                     if self.screen == Screen::Sheet && !self.config.character_id.is_empty() {
@@ -423,6 +594,7 @@ impl PlayerApp {
                 Evt::Builder(o) => {
                     self.store.save_builder(&o);
                     self.set_builder(*o);
+                    self.builder_bundled = false;
                 }
                 Evt::Created(seat) => {
                     self.discard_draft();
@@ -575,6 +747,35 @@ impl PlayerApp {
 }
 
 impl eframe::App for PlayerApp {
+    /// Keeps flick scrolling alive on touch screens. When a finger lifts,
+    /// egui-winit sends "button released" and "pointer gone" in the same
+    /// frame; egui 0.31 forgets the pointer's speed on "pointer gone", so the
+    /// scroll area sees speed zero at the moment of release and the page
+    /// stops dead. Holding "pointer gone" back by one frame lets the scroll
+    /// area read the speed first.
+    fn raw_input_hook(&mut self, ctx: &egui::Context, raw_input: &mut egui::RawInput) {
+        use egui::Event;
+        if std::mem::take(&mut self.pointer_gone_pending) {
+            let touching_again = raw_input.events.iter().any(|e| matches!(e, Event::PointerButton { pressed: true, .. } | Event::PointerMoved(_)));
+            if !touching_again {
+                raw_input.events.insert(0, Event::PointerGone);
+            }
+        }
+        let released = raw_input.events.iter().rposition(|e| matches!(e, Event::PointerButton { pressed: false, .. }));
+        if let Some(released) = released {
+            let before = raw_input.events.len();
+            let mut i = 0;
+            raw_input.events.retain(|e| {
+                i += 1;
+                !(i - 1 > released && matches!(e, Event::PointerGone))
+            });
+            if raw_input.events.len() != before {
+                self.pointer_gone_pending = true;
+                ctx.request_repaint();
+            }
+        }
+    }
+
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.request_repaint_after(Duration::from_millis(500));
         self.pump_events();
@@ -605,7 +806,8 @@ impl eframe::App for PlayerApp {
             }
         }
 
-        if self.builder.is_some() && self.screen != Screen::Connect {
+        // DND_PLAYER_CREATE: once past the connect screen, or straight away on a device that has never had a server
+        if self.builder.is_some() && (self.screen != Screen::Connect || self.config.server_url.is_empty()) {
             if let Some(v) = self.dev_create.take() {
                 self.open_builder();
                 let p: Vec<&str> = v.split(',').map(|s| s.trim()).collect();
@@ -632,7 +834,22 @@ impl eframe::App for PlayerApp {
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
         self.flush_edits(true);
         self.save_draft();
-        self.store.save_config(&self.config);
+        self.persist();
         let _ = self.client.tx.send(Cmd::Shutdown);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A device that has never reached a DM builds characters from this.
+    #[test]
+    fn built_in_content_loads() {
+        let o: BuilderOptions = serde_json::from_slice(BUNDLED_BUILDER).expect("built-in builder content parses");
+        assert!(!o.species.is_empty() && !o.classes.is_empty() && !o.backgrounds.is_empty());
+        assert!(!o.rules.standard_array.is_empty());
+        let lib = dnd_core::builder::library_from_options(&o);
+        assert_eq!(lib.classes.len(), o.classes.len());
     }
 }

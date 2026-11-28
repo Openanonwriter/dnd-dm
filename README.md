@@ -183,7 +183,8 @@ opens it against a little game running inside the same program.
 - **Desktop** (a phone-sized window, handy for testing): `cargo run --release -p dnd-player`
 - **Android**: `.\build-android.ps1` builds `dist\dnd-player.apk`. It needs
   the Android SDK and NDK, JDK 17, Gradle 8 and `cargo-ndk`; see
-  [docs/PLAYER_APP.md](docs/PLAYER_APP.md).
+  [docs/PLAYER_APP.md](docs/PLAYER_APP.md). On Linux, `./build-android.sh`
+  builds the same APK without Gradle (same doc).
 
 ### Linux
 
@@ -229,6 +230,7 @@ crates/dnd-dm       egui desktop app (the DM)
 crates/dnd-mapview  map renderer and help icons shared by both apps
 crates/dnd-player   egui player app: Android (NativeActivity) + desktop
 build-android.ps1   cargo-ndk + Gradle -> dist/dnd-player.apk
+build-android.sh    the same APK on Linux, without Gradle
 build-linux.sh      Linux build of both apps
 ```
 

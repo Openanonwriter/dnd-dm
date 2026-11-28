@@ -735,6 +735,11 @@ impl PlayerApp {
     }
 
     pub fn roll(&mut self, formula: &str, label: &str) {
+        // no dice without the table: offline the sheet is read-only
+        if !self.online && self.screen == Screen::Sheet {
+            self.set_status("Not connected to the DM", true);
+            return;
+        }
         // at the table the DM's machine rolls, so everyone sees the same dice
         if self.online && self.character.is_some() && self.seat.as_ref().map(|s| s.character.is_some()).unwrap_or(false) {
             let mode = self.mode;
@@ -826,7 +831,7 @@ impl eframe::App for PlayerApp {
                 self.draft.background = p.get(2).map(|s| s.to_string()).unwrap_or_default();
             }
         }
-        if self.screen == Screen::Sheet && self.sheet.is_some() && self.online {
+        if self.screen == Screen::Sheet && self.sheet.is_some() && (self.online || self.config.server_url.is_empty() || self.status_error) {
             if let Some(t) = self.start_tab.take() {
                 self.tab = t;
             }

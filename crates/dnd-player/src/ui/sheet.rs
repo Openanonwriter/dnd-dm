@@ -10,7 +10,12 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
     let (inset_top, inset_bottom) = crate::system_insets(ctx);
     // ---- header: who you are, hit points and armor class on every tab
     let down = app.character.as_ref().map(|c| c.hp.current <= 0 && !c.is_dead()).unwrap_or(false);
-    if down {
+    // Without the DM's server the sheet is something to read, nothing more:
+    // no rolls, no hit point changes, no conditions, no spending of anything.
+    let offline = !app.online;
+    if offline {
+        app.ui_state.hp_open = false;
+    } else if down {
         // the death save button lives in the hit point panel
         app.ui_state.hp_open = true;
     }
@@ -26,7 +31,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         ui.horizontal(|ui| {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if let Some((hp, max, temp, ac)) = vitals {
-                    if vitals_button(ui, hp, max, temp, ac, app.ui_state.hp_open).clicked() && !down {
+                    if vitals_button(ui, hp, max, temp, ac, app.ui_state.hp_open).clicked() && !down && !offline {
                         app.ui_state.hp_open = !app.ui_state.hp_open;
                     }
                 }
@@ -68,7 +73,14 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         }
         // whose turn it is: one place, on every tab but the map (which has its own bar)
         let fight = app.encounter.as_ref().filter(|e| e.active).map(|e| (e.round, e.combatants.iter().find(|c| c.is_current).map(|c| c.name.clone()).unwrap_or_default()));
-        if app.my_turn() && app.tab != Tab::Party {
+        if offline {
+            egui::Frame::new().fill(theme::CARD).stroke(egui::Stroke::new(1.0, theme::BAD)).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
+                ui.set_width(ui.available_width());
+                ui.set_min_height(40.0);
+                ui.label(egui::RichText::new("Not connected to the DM").color(theme::BAD));
+                ui.label(theme::muted("This is the copy of your sheet kept on this device, to read. Rolls and changes come back when the DM's server does.").small());
+            });
+        } else if app.my_turn() && app.tab != Tab::Party {
             egui::Frame::new().fill(theme::ORANGE_FAINT).stroke(egui::Stroke::new(1.0, theme::ORANGE)).corner_radius(theme::R_CTRL).inner_margin(egui::Margin::symmetric(10, 6)).show(ui, |ui| {
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new("Your turn").strong().size(18.0).color(theme::ORANGE));
@@ -146,6 +158,11 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             return;
         }
         if app.tab == Tab::Party {
+            if offline {
+                ui.add_space(30.0);
+                ui.vertical_centered(|ui| ui.label(theme::muted("The map comes from the DM's server. It is back when you are connected.")));
+                return;
+            }
             // the map pans and zooms by itself, so it does not sit in a scroll area
             crate::ui::map::show(app, ui);
             return;
@@ -167,7 +184,13 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
         if let Some(y) = std::env::var("DND_PLAYER_SCROLL").ok().and_then(|v| v.parse::<f32>().ok()) {
             area = area.vertical_scroll_offset(y);
         }
-        theme::page_scroll(ui, area, 12, |ui| match app.tab {
+        theme::page_scroll(ui, area, 12, |ui| {
+            // offline: everything on the page can be read and scrolled, nothing can be pressed.
+            // Settings stay usable (switch game, text size); the Features page handles its own text boxes.
+            if offline && !matches!(app.tab, Tab::Settings | Tab::Notes) {
+                ui.disable();
+            }
+            match app.tab {
             Tab::Stats => stats_tab(app, ui),
             Tab::Combat => combat_tab(app, ui),
             Tab::Spells => crate::ui::spells::tab(app, ui),
@@ -176,6 +199,7 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
             Tab::Party => {}
             Tab::Dice => dice_tab(app, ui),
             Tab::Settings => settings_tab(app, ui),
+            }
         });
     });
 
@@ -186,7 +210,8 @@ pub fn show(app: &mut PlayerApp, ctx: &egui::Context) {
     }
     // short messages ("Connected to ...", "it is not your turn") use the same card when no roll is showing
     // only refusals float ("it is not your turn"); everything else is in the header
-    let message = if app.ui_state.result.is_none() && app.status_error && !app.status.is_empty() && app.status_at.elapsed().as_secs() < 8 {
+    // (not while offline: the strip under the name already says so, and each failed reconnect would pop up again)
+    let message = if !offline && app.ui_state.result.is_none() && app.status_error && !app.status.is_empty() && app.status_at.elapsed().as_secs() < 8 {
         Some((0, Some(false), app.status.clone(), app.status_at))
     } else {
         None
@@ -731,7 +756,12 @@ fn notes_tab(app: &mut PlayerApp, ui: &mut egui::Ui) {
             ui.label(&f.description);
         });
     }
+    let online = app.online;
     let Some(ch) = app.character.as_mut() else { return };
+    if !online {
+        // features above can still be opened and read; the text below can be read, not changed
+        ui.disable();
+    }
     section(ui, "Notes");
     ui.add(egui::TextEdit::multiline(&mut ch.notes).desired_rows(5).desired_width(f32::INFINITY).hint_text("Session notes, loot to split, NPC names…"));
     section(ui, "Roleplay");

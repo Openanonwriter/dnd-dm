@@ -143,6 +143,13 @@ on another machine has to be uninstalled first (or copy that machine's
   above the bottom bar for a few seconds; the turn strip keeps one height
   whoever's turn it is. A page that shifts as a finger comes down makes the
   tap land on the wrong thing.
+- **Offline is read-only.** When the DM's server can't be reached the app
+  shows the copy of the sheet kept on the device, with a strip under the
+  name saying so. Every page can be scrolled and read, and features can be
+  opened, but nothing can be pressed: no rolls, no hit point or condition
+  changes, no casting, no item or note edits; the map is hidden. Settings
+  (switch game, text size) stay usable. Everything comes back by itself
+  when the server answers.
 - **Numbers roll when tapped**: ability scores, saves and skills on the
   Stats tab.
 - **Targets** list foes first and nearest first, then friends, then anyone
